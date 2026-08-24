@@ -1,0 +1,89 @@
+package com.anto426.antoui.glass.runtime
+
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
+
+/** Rendering quality selected for the current device and operating conditions. */
+enum class AntoGlassQualityTier {
+    MINIMAL,
+    BALANCED,
+    HIGH,
+    ULTRA
+}
+
+/** Platform-independent view of Android's thermal status. */
+enum class AntoGlassThermalStatus {
+    UNKNOWN,
+    NONE,
+    LIGHT,
+    MODERATE,
+    SEVERE,
+    CRITICAL,
+    EMERGENCY,
+    SHUTDOWN
+}
+
+/** Stable hardware capabilities which do not normally change during a process lifetime. */
+@Immutable
+data class AntoGlassDeviceProfile(
+    val sdkInt: Int,
+    val supportsRenderEffect: Boolean,
+    val supportsRuntimeShader: Boolean,
+    val isLowRamDevice: Boolean,
+    val totalMemoryBytes: Long,
+    val appMemoryClassMb: Int,
+    val cpuCoreCount: Int,
+    val is64Bit: Boolean
+)
+
+/**
+ * Adaptive values consumed by liquid-glass components.
+ *
+ * Every scale is normalized to `0f..1f`. A zero refraction or chromatic-aberration
+ * scale is also the explicit signal that the device cannot run the required AGSL shader.
+ */
+@Immutable
+data class AntoGlassPerformanceState(
+    val device: AntoGlassDeviceProfile,
+    val qualityTier: AntoGlassQualityTier,
+    val thermalStatus: AntoGlassThermalStatus,
+    val isPowerSaveMode: Boolean,
+    val isMemoryPressureHigh: Boolean,
+    val availableMemoryBytes: Long,
+    val liquidIntensity: Float,
+    val blurScale: Float,
+    val refractionScale: Float,
+    val motionScale: Float,
+    val chromaticAberrationScale: Float
+) {
+    companion object {
+        /** Safe degradation used when a component is rendered outside [com.anto426.antoui.theme.AntoUITheme]. */
+        val Fallback = AntoGlassPerformanceState(
+            device = AntoGlassDeviceProfile(
+                sdkInt = 24,
+                supportsRenderEffect = false,
+                supportsRuntimeShader = false,
+                isLowRamDevice = true,
+                totalMemoryBytes = 0L,
+                appMemoryClassMb = 0,
+                cpuCoreCount = 1,
+                is64Bit = false
+            ),
+            qualityTier = AntoGlassQualityTier.MINIMAL,
+            thermalStatus = AntoGlassThermalStatus.UNKNOWN,
+            isPowerSaveMode = false,
+            isMemoryPressureHigh = false,
+            availableMemoryBytes = 0L,
+            liquidIntensity = 0f,
+            blurScale = 0f,
+            refractionScale = 0f,
+            motionScale = 0f,
+            chromaticAberrationScale = 0f
+        )
+    }
+}
+
+/** Current adaptive liquid-glass state, installed automatically by `AntoUITheme`. */
+val LocalAntoGlassPerformance = staticCompositionLocalOf {
+    AntoGlassPerformanceState.Fallback
+}
