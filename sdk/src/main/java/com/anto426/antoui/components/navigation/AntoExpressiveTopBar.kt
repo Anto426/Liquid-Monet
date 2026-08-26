@@ -57,6 +57,7 @@ import com.anto426.antoui.components.internal.antoControlLayerBlock
 import com.anto426.antoui.components.internal.antoControlPressFeedback
 import com.anto426.antoui.components.internal.rememberAntoControlHighlight
 import com.anto426.antoui.glass.AntoGlassRole
+import com.anto426.antoui.glass.LocalAntoGlassTopBarScrollBehavior
 import com.anto426.antoui.glass.antoLiquidGlass
 import com.anto426.antoui.icons.AntoIcons
 import com.anto426.antoui.components.menu.AntoGlassMorphingAction
@@ -119,9 +120,10 @@ fun AntoExpressiveTopBar(
         hostContentBackdrop != null && hostContentBackdrop != emptyBackdrop() -> hostContentBackdrop
         else -> emptyBackdrop()
     }
+    val effectiveScrollBehavior = scrollBehavior ?: LocalAntoGlassTopBarScrollBehavior.current
 
-    val collapsedFraction = scrollBehavior?.state?.collapsedFraction ?: 0f
-    val isScrolled = (scrollBehavior?.state?.contentOffset ?: 0f) < -1f || collapsedFraction > 0.01f
+    val collapsedFraction = effectiveScrollBehavior?.state?.collapsedFraction ?: 0f
+    val isScrolled = (effectiveScrollBehavior?.state?.contentOffset ?: 0f) < -1f || collapsedFraction > 0.01f
     val animatedScrolledAlpha by animateFloatAsState(
         targetValue = if (isScrolled) 1f else 0f,
         animationSpec = tween(durationMillis = 260),
@@ -132,51 +134,17 @@ fun AntoExpressiveTopBar(
     val surfaceColor = if (effectiveBackdrop == emptyBackdrop()) {
         colorScheme.surfaceContainerHigh.copy(alpha = if (isLightSurface) 0.88f else 0.82f)
     } else {
-        colorScheme.surface.copy(alpha = defaultAlpha * animatedScrolledAlpha)
+        colorScheme.surface.copy(alpha = defaultAlpha)
     }
     val subtleMonetTint = colorScheme.primary.copy(
-        alpha = (if (isLightSurface) 0.07f else 0.05f) * (0.4f + 0.6f * liquidStrength) * animatedScrolledAlpha
+        alpha = if (isLightSurface) 0.07f * (0.4f + 0.6f * liquidStrength)
+        else 0.05f * (0.4f + 0.6f * liquidStrength)
     )
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .then(
-                if (effectiveBackdrop != emptyBackdrop() && animatedScrolledAlpha > 0.001f) {
-                    Modifier.drawBackdrop(
-                        backdrop = effectiveBackdrop,
-                        shape = { RectangleShape },
-                        effects = {
-                            val alpha = animatedScrolledAlpha
-                            colorControls(
-                                brightness = if (isLightSurface) 0.12f * liquidStrength * alpha else 0f,
-                                saturation = 1f + 0.45f * liquidStrength * alpha
-                            )
-                            blur((14f * alpha).dp.toPx())
-                            lens(
-                                refractionHeight = (18f * alpha).dp.toPx(),
-                                refractionAmount = (32f * alpha).dp.toPx(),
-                                depthEffect = true,
-                                chromaticAberration = true
-                            )
-                        },
-                        shadow = {
-                            Shadow(
-                                radius = (8f * animatedScrolledAlpha).dp,
-                                color = Color.Black.copy(alpha = 0.06f * animatedScrolledAlpha)
-                            )
-                        },
-                        onDrawSurface = {
-                            if (surfaceColor.alpha > 0f) {
-                                drawRect(surfaceColor)
-                            }
-                            if (subtleMonetTint.alpha > 0f) {
-                                drawRect(subtleMonetTint)
-                            }
-                        }
-                    )
-                } else Modifier
-            )
+            .background(surfaceColor)
     ) {
         LargeTopAppBar(
             modifier = Modifier.fillMaxWidth(),
@@ -227,7 +195,7 @@ fun AntoExpressiveTopBar(
                 containerColor = Color.Transparent,
                 scrolledContainerColor = Color.Transparent
             ),
-            scrollBehavior = scrollBehavior
+            scrollBehavior = effectiveScrollBehavior
         )
 
         // Expandable Liquid Glass Search Bar (Appears below the TopBar smoothly without hiding the TopBar!)
@@ -394,4 +362,3 @@ fun AntoTopBarIconButton(
         )
     }
 }
-

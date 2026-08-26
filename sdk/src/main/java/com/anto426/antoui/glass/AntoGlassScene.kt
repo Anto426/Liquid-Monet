@@ -3,8 +3,13 @@ package com.anto426.antoui.glass
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import com.anto426.antoui.glass.overlay.AntoGlassModalOverlayHost
 import com.anto426.antoui.glass.overlay.AntoGlassOverlayHost
@@ -18,6 +23,10 @@ import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
+internal val LocalAntoGlassTopBarScrollBehavior =
+    compositionLocalOf<TopAppBarScrollBehavior?> { null }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AntoGlassScene(
     modifier: Modifier = Modifier,
@@ -29,13 +38,19 @@ fun AntoGlassScene(
     val contentBackdrop = rememberLayerBackdrop()
     val overlayState = rememberAntoGlassOverlayState()
     val modalOverlayState = rememberAntoGlassModalOverlayState()
+    val topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     CompositionLocalProvider(
         LocalAntoGlassOverlayState provides overlayState,
         LocalAntoGlassModalOverlayState provides modalOverlayState,
-        LocalAntoGlassContentBackdrop provides contentBackdrop
+        LocalAntoGlassContentBackdrop provides backgroundBackdrop,
+        LocalAntoGlassTopBarScrollBehavior provides topBarScrollBehavior
     ) {
-        Box(modifier = modifier.fillMaxSize()) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+        ) {
             Box(modifier = Modifier.fillMaxSize().layerBackdrop(contentBackdrop)) {
                 Box(modifier = Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
                     background()
