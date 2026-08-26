@@ -30,16 +30,12 @@ import com.anto426.liquidmonet.components.pickers.LiquidColorPicker
 import com.anto426.liquidmonet.components.pickers.LiquidDatePickerDialog
 import com.anto426.liquidmonet.components.pickers.LiquidDatePickerField
 import com.anto426.liquidmonet.components.selection.LiquidSelect
-import com.anto426.liquidmonet.components.inputs.LiquidEmailTextField
 import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
-import com.anto426.liquidmonet.components.inputs.LiquidNumberTextField
 import com.anto426.liquidmonet.components.inputs.LiquidOtpInput
-import com.anto426.liquidmonet.components.inputs.LiquidPasswordTextField
-import com.anto426.liquidmonet.components.inputs.LiquidPhoneTextField
 import com.anto426.liquidmonet.components.selection.LiquidRadioButton
 import com.anto426.liquidmonet.components.selection.LiquidRangeSlider
 import com.anto426.liquidmonet.components.selection.LiquidRatingBar
@@ -49,8 +45,8 @@ import com.anto426.liquidmonet.motion.LiquidNavTransition
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.selection.LiquidStepper
 import com.anto426.liquidmonet.components.selection.LiquidSwitch
-import com.anto426.liquidmonet.components.inputs.LiquidTextArea
 import com.anto426.liquidmonet.components.inputs.LiquidTextField
+import com.anto426.liquidmonet.components.inputs.LiquidTextFieldType
 import com.anto426.liquidmonet.components.pickers.LiquidTimePickerDialog
 import com.anto426.liquidmonet.components.pickers.LiquidTimePickerField
 import com.anto426.liquidmonet.icons.LiquidIcons
@@ -188,21 +184,22 @@ fun ControlsInputHubScreen(
                                     backdropState = backdropState
                                 )
 
-                                LiquidPasswordTextField(
+                                LiquidTextField(
                                     value = passwordVal,
                                     onValueChange = { passwordVal = it },
+                                    type = LiquidTextFieldType.Password,
                                     label = "Password Sicura",
                                     backdropState = backdropState
                                 )
 
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                                    LiquidEmailTextField(value = emailVal, onValueChange = { emailVal = it }, label = "Email", backdropState = backdropState, modifier = Modifier.weight(1f))
-                                    LiquidPhoneTextField(value = phoneVal, onValueChange = { phoneVal = it }, label = "Telefono", backdropState = backdropState, modifier = Modifier.weight(1f))
+                                    LiquidTextField(value = emailVal, onValueChange = { emailVal = it }, type = LiquidTextFieldType.Email, label = "Email", backdropState = backdropState, modifier = Modifier.weight(1f))
+                                    LiquidTextField(value = phoneVal, onValueChange = { phoneVal = it }, type = LiquidTextFieldType.Phone, label = "Telefono", backdropState = backdropState, modifier = Modifier.weight(1f))
                                 }
 
-                                LiquidNumberTextField(value = numberVal, onValueChange = { numberVal = it }, label = "Importo Numerico", backdropState = backdropState)
+                                LiquidTextField(value = numberVal, onValueChange = { numberVal = it }, type = LiquidTextFieldType.Number, label = "Importo Numerico", backdropState = backdropState)
 
-                                LiquidTextArea(value = notesVal, onValueChange = { notesVal = it }, placeholder = "Inserisci note o descrizioni...", maxLength = 200, backdropState = backdropState)
+                                LiquidTextField(value = notesVal, onValueChange = { notesVal = it }, type = LiquidTextFieldType.TextArea, placeholder = "Inserisci note o descrizioni...", maxLength = 200, backdropState = backdropState)
                             }
                         }
                     }

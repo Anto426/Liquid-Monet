@@ -3,10 +3,8 @@ package com.anto426.liquidmonet.components.inputs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -32,8 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -169,41 +165,4 @@ fun LiquidSearchBar(
             }
         }
     )
-}
-
-/**
- * LiquidAnimatedSearchField - Animated expandable liquid glass search bar with smooth vertical transitions.
- */
-@Composable
-fun LiquidAnimatedSearchField(
-    visible: Boolean,
-    query: String,
-    onQueryChange: (String) -> Unit,
-    placeholderText: String = "Cerca...",
-    modifier: Modifier = Modifier,
-    backdrop: Backdrop = emptyBackdrop(),
-    backdropState: Backdrop = backdrop,
-    onSearch: ((String) -> Unit)? = null
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            LiquidSearchBar(
-                query = query,
-                onQueryChange = onQueryChange,
-                placeholderText = placeholderText,
-                modifier = modifier,
-                backdropState = backdropState,
-                onSearch = onSearch
-            )
-        }
-    }
 }

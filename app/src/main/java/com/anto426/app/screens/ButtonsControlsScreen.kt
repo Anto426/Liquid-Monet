@@ -24,7 +24,6 @@ import com.anto426.liquidmonet.components.buttons.LiquidButton
 import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.selection.LiquidChip
-import com.anto426.liquidmonet.components.selection.LiquidFilterChip
 import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
@@ -196,9 +195,9 @@ fun ButtonsControlsScreen(
                 Triple("Recenti", LiquidIcons.Refresh, "12"),
                 Triple("Audio", LiquidIcons.Settings, "5")
             ).forEach { (label, icon, count) ->
-                LiquidFilterChip(
+                LiquidChip(
                     selected = selectedChip == label,
-                    onSelectedChange = { selectedChip = label },
+                    onClick = { selectedChip = label },
                     label = label,
                     leadingIcon = icon,
                     badge = count,

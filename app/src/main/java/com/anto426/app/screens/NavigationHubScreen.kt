@@ -1,16 +1,18 @@
 package com.anto426.app.screens
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,12 +31,17 @@ import com.anto426.liquidmonet.components.cards.LiquidAccordionItem
 import com.anto426.liquidmonet.components.display.LiquidAvatar
 import com.anto426.liquidmonet.components.display.LiquidAvatarGroup
 import com.anto426.liquidmonet.components.display.LiquidAvatarPresence
+import com.anto426.liquidmonet.components.layout.LiquidAnimatedSwitcher
+import com.anto426.liquidmonet.components.layout.LiquidLazyFooter
+import com.anto426.liquidmonet.components.layout.LiquidLazyFooterOrientation
+import com.anto426.liquidmonet.components.layout.LiquidLazyFooterState
+import com.anto426.liquidmonet.components.layout.LiquidSwitcherTransition
 import com.anto426.liquidmonet.components.navigation.LiquidBreadcrumbItem
 import com.anto426.liquidmonet.components.navigation.LiquidBreadcrumbs
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.selection.LiquidChip
+import com.anto426.liquidmonet.components.selection.LiquidChipSelectionGroup
 import com.anto426.liquidmonet.components.display.LiquidEmptyState
-import com.anto426.liquidmonet.components.selection.LiquidFilterChip
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
@@ -66,9 +73,15 @@ fun NavigationHubScreen(
     )
 
     // Pager & chip states
-    var selectedChip by remember { mutableStateOf("Tutti") }
+    var selectedChips by remember { mutableStateOf(setOf("Monet M3", "AGSL Shaders")) }
     var paginationPage by remember { mutableIntStateOf(2) }
     var pagerIndicatorPage by remember { mutableIntStateOf(1) }
+    var switcherPage by remember { mutableIntStateOf(0) }
+    var switcherForward by remember { mutableStateOf(true) }
+    var switcherTransition by remember {
+        mutableStateOf(LiquidSwitcherTransition.DirectionalHorizontal)
+    }
+    var footerState by remember { mutableStateOf(LiquidLazyFooterState.Loading) }
 
     // Accordion
     var accordion1Open by remember { mutableStateOf(false) }
@@ -140,39 +153,112 @@ fun NavigationHubScreen(
                             }
                         }
 
-                        SectionTitle("Filtri & Chip Interattivi")
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                        ) {
-                            listOf(
-                                Triple("Tutti", LiquidIcons.Home, "24"),
-                                Triple("Preferiti", LiquidIcons.Star, "8"),
-                                Triple("Recenti", LiquidIcons.Refresh, "12"),
-                                Triple("Audio", LiquidIcons.Settings, "5")
-                            ).forEach { (label, icon, count) ->
-                                LiquidFilterChip(
-                                    selected = selectedChip == label,
-                                    onSelectedChange = { selectedChip = label },
-                                    label = label,
-                                    leadingIcon = icon,
-                                    badge = count,
-                                    backdropState = backdropState
-                                )
-                            }
-                        }
-
+                        SectionTitle("Cambio Contenuto Animato")
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .horizontalScroll(rememberScrollState())
                         ) {
-                            LiquidChip(label = "Monet M3", onClick = { }, selected = true, backdropState = backdropState)
-                            LiquidChip(label = "Vetro Snell", onClick = { }, onCloseClick = { }, backdropState = backdropState)
-                            LiquidChip(label = "Liquid 2.0", onClick = { }, onCloseClick = { }, backdropState = backdropState)
-                            LiquidChip(label = "AGSL Shaders", onClick = { }, backdropState = backdropState)
+                            listOf(
+                                "Orizzontale" to LiquidSwitcherTransition.DirectionalHorizontal,
+                                "Verticale" to LiquidSwitcherTransition.DirectionalVertical,
+                                "Scale + fade" to LiquidSwitcherTransition.ScaleFade
+                            ).forEach { (label, transition) ->
+                                LiquidChip(
+                                    label = label,
+                                    selected = switcherTransition == transition,
+                                    onClick = { switcherTransition = transition }
+                                )
+                            }
                         }
+
+                        LiquidCard(backdropState = backdropState) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                LiquidAnimatedSwitcher(
+                                    targetState = switcherPage,
+                                    transition = switcherTransition,
+                                    isForward = { _, _ -> switcherForward },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 92.dp),
+                                    label = "switcherDemo"
+                                ) { page ->
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = when (page) {
+                                                0 -> LiquidIcons.Home
+                                                1 -> LiquidIcons.Star
+                                                else -> LiquidIcons.Settings
+                                            },
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = when (page) {
+                                                0 -> "Panoramica Monet"
+                                                1 -> "Preferiti in vetro"
+                                                else -> "Impostazioni ottiche"
+                                            },
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    LiquidChip(
+                                        label = "Indietro",
+                                        leadingIcon = LiquidIcons.ArrowBack,
+                                        onClick = {
+                                            switcherForward = false
+                                            switcherPage = (switcherPage + 2) % 3
+                                        }
+                                    )
+                                    LiquidChip(
+                                        label = "Avanti",
+                                        trailingIcon = LiquidIcons.ChevronRight,
+                                        onClick = {
+                                            switcherForward = true
+                                            switcherPage = (switcherPage + 1) % 3
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        SectionTitle("Selezione Multipla Chip")
+                        LiquidChipSelectionGroup(
+                            items = listOf("Monet M3", "Vetro Snell", "Liquid 2.0", "AGSL Shaders"),
+                            selectedItems = selectedChips,
+                            onSelectionChange = { selectedChips = it },
+                            label = { it },
+                            leadingIcon = {
+                                when (it) {
+                                    "Monet M3" -> LiquidIcons.Home
+                                    "Vetro Snell" -> LiquidIcons.Star
+                                    "Liquid 2.0" -> LiquidIcons.Refresh
+                                    else -> LiquidIcons.Settings
+                                }
+                            },
+                            badge = {
+                                when (it) {
+                                    "Monet M3" -> "24"
+                                    "Vetro Snell" -> "8"
+                                    "Liquid 2.0" -> "12"
+                                    else -> "5"
+                                }
+                            },
+                            allLabel = "Tutti",
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
@@ -252,6 +338,99 @@ fun NavigationHubScreen(
                             onActionClick = { toastState.show("Dati aggiornati!", type = LiquidToastType.Success) },
                             backdropState = backdropState
                         )
+
+                        SectionTitle("Footer Lazy Verticale & Orizzontale")
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                        ) {
+                            listOf(
+                                "Nascosto" to LiquidLazyFooterState.Hidden,
+                                "Caricamento" to LiquidLazyFooterState.Loading,
+                                "Fine" to LiquidLazyFooterState.End,
+                                "Errore" to LiquidLazyFooterState.Error
+                            ).forEach { (label, state) ->
+                                LiquidChip(
+                                    label = label,
+                                    selected = footerState == state,
+                                    onClick = { footerState = state }
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "LazyColumn: scorri il riquadro fino al footer",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
+                        )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(3) { index ->
+                                LiquidCard(
+                                    backdropState = backdropState,
+                                    contentPadding = 12.dp
+                                ) {
+                                    Text(
+                                        text = "Elemento verticale ${index + 1}",
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                            item {
+                                LiquidLazyFooter(
+                                    state = footerState,
+                                    orientation = LiquidLazyFooterOrientation.Vertical,
+                                    loadingLabel = "Caricamento elementi…",
+                                    endLabel = "Hai raggiunto la fine",
+                                    errorLabel = "Caricamento non riuscito",
+                                    retryLabel = "Riprova",
+                                    onRetry = { footerState = LiquidLazyFooterState.Loading }
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "LazyRow: scorri orizzontalmente fino al footer",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
+                        )
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(112.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(3) { index ->
+                                LiquidCard(
+                                    modifier = Modifier.width(164.dp),
+                                    backdropState = backdropState,
+                                    contentPadding = 12.dp
+                                ) {
+                                    Text(
+                                        text = "Elemento orizzontale ${index + 1}",
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                            item {
+                                LiquidLazyFooter(
+                                    state = footerState,
+                                    orientation = LiquidLazyFooterOrientation.Horizontal,
+                                    loadingLabel = "Caricamento…",
+                                    endLabel = "Fine elenco",
+                                    errorLabel = "Errore",
+                                    retryLabel = "Riprova",
+                                    onRetry = { footerState = LiquidLazyFooterState.Loading },
+                                    modifier = Modifier.height(112.dp)
+                                )
+                            }
+                        }
                     }
                 }
 

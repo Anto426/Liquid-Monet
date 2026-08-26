@@ -1,9 +1,12 @@
 package com.anto426.liquidmonet.components.feedback
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
@@ -13,33 +16,35 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.BasicText
 import com.anto426.liquidmonet.icons.LiquidIcons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
+import com.kyant.shapes.RoundedRectangle
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 enum class LiquidSnackbarType {
@@ -61,7 +66,10 @@ fun LiquidSnackbar(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
-    var offsetX by remember { mutableFloatStateOf(0f) }
+    val offsetX = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val dismissThresholdPx = with(density) { 96.dp.toPx() }
 
     val colorScheme = MaterialTheme.colorScheme
     val contentColor = colorScheme.onSurface
@@ -69,7 +77,7 @@ fun LiquidSnackbar(
         LiquidSnackbarType.Info -> LiquidIcons.Info
         LiquidSnackbarType.Success -> LiquidIcons.Check
         LiquidSnackbarType.Warning -> LiquidIcons.Warning
-        LiquidSnackbarType.Error -> LiquidIcons.Info
+        LiquidSnackbarType.Error -> LiquidIcons.Close
     }
     val accentColor = when (type) {
         LiquidSnackbarType.Info -> colorScheme.primary
@@ -78,27 +86,49 @@ fun LiquidSnackbar(
         LiquidSnackbarType.Error -> colorScheme.error
     }
 
-    val shape = Capsule()
+    val shape = RoundedRectangle(16.dp)
 
     AnimatedVisibility(
         visible = visible,
-        enter = slideInVertically(spring(dampingRatio = 0.78f, stiffness = 380f), initialOffsetY = { it * 2 }) + fadeIn(),
-        exit = slideOutVertically(spring(dampingRatio = 0.9f, stiffness = 450f), targetOffsetY = { it * 2 }) + fadeOut(),
+        enter = slideInVertically(
+            spring(dampingRatio = 0.84f, stiffness = 420f),
+            initialOffsetY = { it / 2 }
+        ) + scaleIn(
+            spring(dampingRatio = 0.86f, stiffness = 440f),
+            initialScale = 0.96f
+        ) + fadeIn(),
+        exit = slideOutVertically(
+            spring(dampingRatio = 0.92f, stiffness = 500f),
+            targetOffsetY = { it / 3 }
+        ) + scaleOut(
+            spring(dampingRatio = 0.92f, stiffness = 500f),
+            targetScale = 0.98f
+        ) + fadeOut(),
         modifier = modifier
     ) {
         Box(
             modifier = Modifier
-                .offset { IntOffset(offsetX.roundToInt(), 0) }
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .graphicsLayer {
+                    rotationZ = (offsetX.value / with(density) { 40.dp.toPx() }).coerceIn(-2.5f, 2.5f)
+                    alpha = 1f - (abs(offsetX.value) / with(density) { 320.dp.toPx() }).coerceIn(0f, 0.45f)
+                }
                 .draggable(
                     orientation = Orientation.Horizontal,
                     state = rememberDraggableState { delta ->
-                        offsetX += delta
+                        coroutineScope.launch {
+                            offsetX.snapTo(offsetX.value + delta)
+                        }
                     },
+                    enabled = onDismiss != null,
                     onDragStopped = {
-                        if (kotlin.math.abs(offsetX) > 200f) {
+                        if (abs(offsetX.value) > dismissThresholdPx) {
                             onDismiss?.invoke()
                         }
-                        offsetX = 0f
+                        offsetX.animateTo(
+                            targetValue = 0f,
+                            animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f)
+                        )
                     }
                 )
                 .fillMaxWidth()
@@ -106,29 +136,40 @@ fun LiquidSnackbar(
                 .liquidGlass(
                     backdrop = backdropState,
                     shape = shape,
-                    role = LiquidGlassRole.Surface
+                    role = LiquidGlassRole.Surface,
+                    containerColor = accentColor.copy(alpha = 0.07f)
                 )
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .defaultMinSize(minHeight = 56.dp)
+                .padding(start = 12.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = accentColor,
-                    modifier = Modifier.size(22.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .liquidGlass(
+                            backdrop = backdropState,
+                            shape = Capsule(),
+                            role = LiquidGlassRole.Control,
+                            containerColor = accentColor.copy(alpha = 0.10f)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
 
-                BasicText(
+                Text(
                     text = message,
-                    style = TextStyle(
-                        color = contentColor,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = contentColor,
                     modifier = Modifier.weight(1f),
                     maxLines = 2
                 )
@@ -136,17 +177,18 @@ fun LiquidSnackbar(
                 if (actionLabel != null && onActionClick != null) {
                     Box(
                         modifier = Modifier
-                            .clip(Capsule())
-                            .clickable(onClick = onActionClick)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        BasicText(
-                            text = actionLabel,
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
+                            .defaultMinSize(minHeight = 40.dp)
+                            .clickable(
+                                role = Role.Button,
+                                onClick = onActionClick
                             )
+                            .padding(horizontal = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = actionLabel,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = accentColor
                         )
                     }
                 }
@@ -154,16 +196,18 @@ fun LiquidSnackbar(
                 if (onDismiss != null) {
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
-                            .clip(Capsule())
-                            .clickable(onClick = onDismiss),
+                            .size(40.dp)
+                            .clickable(
+                                role = Role.Button,
+                                onClick = onDismiss
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = LiquidIcons.Close,
-                            contentDescription = "Dismiss",
-                            tint = contentColor.copy(alpha = 0.6f),
-                            modifier = Modifier.size(16.dp)
+                            contentDescription = "Chiudi",
+                            tint = contentColor.copy(alpha = 0.64f),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }

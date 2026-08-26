@@ -16,8 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
@@ -129,6 +127,14 @@ internal fun LiquidGlassToggle(
     }
 
     val trackBackdrop = rememberLayerBackdrop()
+    val resolvedTrackColor = lerp(
+        trackColor,
+        accentColor.copy(alpha = 0.48f),
+        dampedDragAnimation.value
+    )
+    // Material-like checked state keeps a white thumb; the optical renderer below still lets
+    // the refracted track come through while pressed, so it does not become a flat white disk.
+    val thumbColor = Color.White.copy(alpha = if (isLightTheme) 0.94f else 0.88f)
 
     Box(
         modifier = modifier
@@ -147,24 +153,20 @@ internal fun LiquidGlassToggle(
         Box(
             modifier = Modifier
                 .layerBackdrop(trackBackdrop)
-                .size(64.dp, 28.dp)
+                .size(52.dp, 32.dp)
                 .liquidGlass(
                     backdrop = effectiveBackdrop,
                     shape = Capsule(),
                     role = LiquidGlassRole.Control,
-                    containerColor = Color.Transparent,
+                    containerColor = resolvedTrackColor,
                     preset = LiquidGlassPresets.Subtle
                 )
-                .clip(Capsule())
-                .drawBehind {
-                    drawRect(lerp(trackColor, accentColor, dampedDragAnimation.value))
-                }
         )
 
         Box(
             modifier = Modifier
                 .graphicsLayer {
-                    val padding = 2.dp.toPx()
+                    val padding = 4.dp.toPx()
                     alpha = if (enabled) 1f else 0.5f
                     translationX = if (isLtr) {
                         lerp(padding, padding + dragWidth, dampedDragAnimation.value)
@@ -227,10 +229,15 @@ internal fun LiquidGlassToggle(
                         scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
                     },
                     onDrawSurface = {
-                        drawRect(Color.White.copy(alpha = 1f - dampedDragAnimation.pressProgress))
+                        drawRect(
+                            thumbColor.copy(
+                                alpha = thumbColor.alpha *
+                                    (1f - 0.65f * dampedDragAnimation.pressProgress)
+                            )
+                        )
                     }
                 )
-                .size(40.dp, 24.dp)
+                .size(24.dp)
         )
     }
 }

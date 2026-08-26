@@ -25,7 +25,6 @@ import com.anto426.liquidmonet.components.buttons.LiquidButtonSize
 import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.feedback.LiquidDialog
-import com.anto426.liquidmonet.components.feedback.LiquidDialogActionButton
 import com.anto426.liquidmonet.components.menu.LiquidDropdownMenu
 import com.anto426.liquidmonet.components.menu.LiquidMenuItem
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
@@ -338,19 +337,22 @@ fun ModalsFeedbackScreen(
             text = "Vuoi applicare e salvare le nuove impostazioni di sistema?",
             backdropState = backdropState,
             confirmButton = {
-                LiquidDialogActionButton(
+                LiquidButton(
                     text = "Conferma",
                     onClick = {
                         isDialogOpen = false
                         toastState.show("Impostazioni salvate!", type = LiquidToastType.Success)
                     },
-                    isPrimary = true
+                    variant = LiquidButtonVariant.Primary,
+                    modifier = Modifier.fillMaxWidth()
                 )
             },
             dismissButton = {
-                LiquidDialogActionButton(
+                LiquidButton(
                     text = "Annulla",
-                    onClick = { isDialogOpen = false }
+                    onClick = { isDialogOpen = false },
+                    variant = LiquidButtonVariant.Secondary,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         )

@@ -10,10 +10,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +30,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
+import com.anto426.liquidmonet.glass.LiquidGlassRole
+import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
+import com.kyant.shapes.Capsule
+import com.kyant.shapes.RoundedRectangle
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -43,7 +48,7 @@ import kotlin.math.sin
 fun LiquidLinearProgressIndicator(
     progress: Float? = null,
     modifier: Modifier = Modifier,
-    height: Dp = 16.dp,
+    height: Dp = 8.dp,
     trackColor: Color? = null,
     progressColor: Color? = null,
     backdrop: Backdrop = emptyBackdrop(),
@@ -52,8 +57,22 @@ fun LiquidLinearProgressIndicator(
     val colorScheme = MaterialTheme.colorScheme
     val activePrimary = progressColor ?: colorScheme.primary
     val activeSecondary = colorScheme.tertiary
-    val isDark = isSystemInDarkTheme()
-    val defaultTrack = trackColor ?: if (isDark) Color.White.copy(alpha = 0.22f) else Color.Black.copy(alpha = 0.15f)
+    val highlightColor = colorScheme.onSurface
+    val defaultTrack = trackColor ?: colorScheme.onSurface.copy(alpha = 0.18f)
+    val normalizedProgress = progress?.coerceIn(0f, 1f)
+    val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else backdrop
+    val semanticsModifier = if (normalizedProgress != null) {
+        modifier.progressSemantics(normalizedProgress)
+    } else {
+        modifier.progressSemantics()
+    }
+    val trackModifier = semanticsModifier.liquidGlass(
+        backdrop = effectiveBackdrop,
+        shape = RoundedRectangle(height / 2f),
+        role = LiquidGlassRole.Control,
+        preset = LiquidGlassPresets.Subtle,
+        containerColor = Color.Transparent
+    )
 
     val infiniteTransition = rememberInfiniteTransition(label = "LinearWavyProgressAnimation")
     val wavePhase by infiniteTransition.animateFloat(
@@ -86,25 +105,25 @@ fun LiquidLinearProgressIndicator(
         label = "IndeterminatePulse"
     )
 
-    if (progress != null) {
+    if (normalizedProgress != null) {
         // Determinate Wavy Liquid Progress
         val animatedProgress by animateFloatAsState(
-            targetValue = progress.coerceIn(0f, 1f),
+            targetValue = normalizedProgress,
             animationSpec = spring(dampingRatio = 0.78f, stiffness = 380f),
             label = "determinateProgressAnim"
         )
 
         Canvas(
-            modifier = modifier
+            modifier = trackModifier
                 .fillMaxWidth()
                 .height(height)
         ) {
             val canvasWidth = this.size.width
             val canvasHeight = this.size.height
             val centerY = canvasHeight / 2f
-            val strokePx = 4.2.dp.toPx()
-            val amplitude = 3.6.dp.toPx()
-            val wavelength = 32.dp.toPx()
+            val strokePx = (canvasHeight * 0.45f).coerceIn(2.dp.toPx(), 4.dp.toPx())
+            val amplitude = ((canvasHeight - strokePx) * 0.36f).coerceAtLeast(0f)
+            val wavelength = (canvasHeight * 5f).coerceAtLeast(28.dp.toPx())
 
             // 1. Draw Full Wavy Background Track
             val trackPath = Path()
@@ -166,7 +185,7 @@ fun LiquidLinearProgressIndicator(
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.95f),
+                            highlightColor.copy(alpha = 0.90f),
                             activePrimary.copy(alpha = 0.45f),
                             Color.Transparent
                         ),
@@ -181,16 +200,16 @@ fun LiquidLinearProgressIndicator(
     } else {
         // Indeterminate Wavy Traveling Liquid Wave
         Canvas(
-            modifier = modifier
+            modifier = trackModifier
                 .fillMaxWidth()
                 .height(height)
         ) {
             val canvasWidth = this.size.width
             val canvasHeight = this.size.height
             val centerY = canvasHeight / 2f
-            val strokePx = 4.2.dp.toPx()
-            val amplitude = 3.6.dp.toPx()
-            val wavelength = 32.dp.toPx()
+            val strokePx = (canvasHeight * 0.45f).coerceIn(2.dp.toPx(), 4.dp.toPx())
+            val amplitude = ((canvasHeight - strokePx) * 0.36f).coerceAtLeast(0f)
+            val wavelength = (canvasHeight * 5f).coerceAtLeast(28.dp.toPx())
 
             // Background Wavy Track
             val trackPath = Path()
@@ -257,7 +276,7 @@ fun LiquidLinearProgressIndicator(
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.85f),
+                            highlightColor.copy(alpha = 0.82f),
                             activePrimary.copy(alpha = 0f)
                         ),
                         center = Offset(lastX, lastY),
@@ -279,8 +298,8 @@ fun LiquidLinearProgressIndicator(
 fun LiquidCircularProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float? = null,
-    indicatorSize: Dp = 38.dp,
-    strokeWidth: Dp = 3.6.dp,
+    indicatorSize: Dp = 40.dp,
+    strokeWidth: Dp = 4.dp,
     trackColor: Color? = null,
     progressColor: Color? = null,
     color: Color? = null,
@@ -290,8 +309,22 @@ fun LiquidCircularProgressIndicator(
     val colorScheme = MaterialTheme.colorScheme
     val activePrimary = color ?: progressColor ?: colorScheme.primary
     val activeSecondary = colorScheme.tertiary
-    val isDark = isSystemInDarkTheme()
-    val defaultTrack = trackColor ?: if (isDark) Color.White.copy(alpha = 0.16f) else Color.Black.copy(alpha = 0.10f)
+    val highlightColor = colorScheme.onSurface
+    val defaultTrack = trackColor ?: colorScheme.onSurface.copy(alpha = 0.14f)
+    val normalizedProgress = progress?.coerceIn(0f, 1f)
+    val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else backdrop
+    val semanticsModifier = if (normalizedProgress != null) {
+        modifier.progressSemantics(normalizedProgress)
+    } else {
+        modifier.progressSemantics()
+    }
+    val trackModifier = semanticsModifier.liquidGlass(
+        backdrop = effectiveBackdrop,
+        shape = Capsule(),
+        role = LiquidGlassRole.Control,
+        preset = LiquidGlassPresets.Subtle,
+        containerColor = Color.Transparent
+    )
 
     val infiniteTransition = rememberInfiniteTransition(label = "CircularProgressAnimation")
     val rotation by infiniteTransition.animateFloat(
@@ -314,16 +347,16 @@ fun LiquidCircularProgressIndicator(
         label = "SweepAngle"
     )
 
-    if (progress != null) {
+    if (normalizedProgress != null) {
         // Determinate Circular Progress Arc
         val animatedProgress by animateFloatAsState(
-            targetValue = progress.coerceIn(0f, 1f),
+            targetValue = normalizedProgress,
             animationSpec = spring(dampingRatio = 0.78f, stiffness = 380f),
             label = "determinateCircularAnim"
         )
 
         Canvas(
-            modifier = modifier.defaultMinSize(minWidth = indicatorSize, minHeight = indicatorSize)
+            modifier = trackModifier.defaultMinSize(minWidth = indicatorSize, minHeight = indicatorSize)
         ) {
             val strokePx = strokeWidth.toPx()
             val canvasWidth = this.size.width
@@ -363,7 +396,7 @@ fun LiquidCircularProgressIndicator(
     } else {
         // Indeterminate Liquid Spinner
         Canvas(
-            modifier = modifier.defaultMinSize(minWidth = indicatorSize, minHeight = indicatorSize)
+            modifier = trackModifier.defaultMinSize(minWidth = indicatorSize, minHeight = indicatorSize)
         ) {
             val strokePx = strokeWidth.toPx()
             val canvasWidth = this.size.width
@@ -389,7 +422,7 @@ fun LiquidCircularProgressIndicator(
                         activePrimary.copy(alpha = 0.10f),
                         activePrimary,
                         activeSecondary,
-                        Color.White
+                        highlightColor
                     ),
                     center = Offset(canvasWidth / 2f, canvasHeight / 2f)
                 ),

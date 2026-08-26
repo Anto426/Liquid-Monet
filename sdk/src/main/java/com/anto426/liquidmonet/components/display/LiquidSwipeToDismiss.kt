@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.launch
@@ -71,6 +73,7 @@ fun LiquidSwipeToDismissBox(
     }
 
     val density = LocalDensity.current
+    val surfaceBackdrop = rememberLayerBackdrop()
     val coroutineScope = rememberCoroutineScope()
     val offsetAnim = remember { Animatable(0f) }
 
@@ -280,6 +283,12 @@ fun LiquidSwipeToDismissBox(
                     scaleY = 1f - 0.018f * dragFraction.coerceAtMost(1f)
                     cameraDistance = 14f
                 }
+                .liquidGlass(
+                    backdrop = effectiveBackdrop,
+                    shape = shape,
+                    role = LiquidGlassRole.Surface,
+                    exportedBackdrop = surfaceBackdrop
+                )
                 .pointerInput(onDismissLeft, onDismissRight, thresholdPx, maxDragPx) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
@@ -332,7 +341,9 @@ fun LiquidSwipeToDismissBox(
                     )
                 }
         ) {
-            content()
+            CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {
+                content()
+            }
         }
     }
 }

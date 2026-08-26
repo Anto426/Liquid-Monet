@@ -72,6 +72,7 @@ import kotlinx.coroutines.launch
 fun LiquidDialog(
     onDismissRequest: () -> Unit,
     title: String,
+    text: String? = null,
     modifier: Modifier = Modifier,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
@@ -79,11 +80,26 @@ fun LiquidDialog(
     dismissButton: (@Composable () -> Unit)? = null,
     scrimColor: Color? = null,
     containerColor: Color? = null,
-    accentColor: Color? = null,
-    content: @Composable () -> Unit
+    content: (@Composable () -> Unit)? = null
 ) {
     val modalOverlayState = LocalLiquidGlassModalOverlayState.current
     val effectiveBackdrop = LocalLiquidGlassContentBackdrop.current ?: backdropState
+    val dialogContent: @Composable () -> Unit = content ?: {
+        val contentColor = MaterialTheme.colorScheme.onSurface
+        BasicText(
+            text = text.orEmpty(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
+            style = TextStyle(
+                color = contentColor.copy(alpha = 0.78f),
+                fontSize = 15.sp,
+                lineHeight = 22.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            ),
+            maxLines = 6
+        )
+    }
     val hostedContent: @Composable () -> Unit = {
         LiquidDialogLayer(
             onDismissRequest = onDismissRequest,
@@ -94,8 +110,7 @@ fun LiquidDialog(
             dismissButton = dismissButton,
             scrimColor = scrimColor,
             containerColor = containerColor,
-            accentColor = accentColor,
-            content = content
+            content = dialogContent
         )
     }
 
@@ -112,51 +127,6 @@ fun LiquidDialog(
     }
 }
 
-/**
- * In-scene modal dialog. Its panel is clear optical glass: it never paints a default color over
- * the recorded scene, so Monet comes through the refraction instead of tinting the container.
- */
-@Composable
-fun LiquidDialog(
-    onDismissRequest: () -> Unit,
-    title: String,
-    text: String,
-    modifier: Modifier = Modifier,
-    backdrop: Backdrop = emptyBackdrop(),
-    backdropState: Backdrop = backdrop,
-    confirmButton: (@Composable () -> Unit)? = null,
-    dismissButton: (@Composable () -> Unit)? = null,
-    scrimColor: Color? = null,
-    containerColor: Color? = null,
-    accentColor: Color? = null
-) {
-    LiquidDialog(
-        onDismissRequest = onDismissRequest,
-        title = title,
-        modifier = modifier,
-        backdrop = backdrop,
-        backdropState = backdropState,
-        confirmButton = confirmButton,
-        dismissButton = dismissButton,
-        scrimColor = scrimColor,
-        containerColor = containerColor,
-        accentColor = accentColor
-    ) {
-        val contentColor = MaterialTheme.colorScheme.onSurface
-        BasicText(
-            text = text,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-            style = TextStyle(
-                color = contentColor.copy(alpha = 0.78f),
-                fontSize = 15.sp,
-                lineHeight = 22.sp,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            ),
-            maxLines = 6
-        )
-    }
-}
-
 @Composable
 private fun LiquidDialogLayer(
     onDismissRequest: () -> Unit,
@@ -167,7 +137,6 @@ private fun LiquidDialogLayer(
     dismissButton: (@Composable () -> Unit)? = null,
     scrimColor: Color? = null,
     containerColor: Color? = null,
-    accentColor: Color? = null,
     content: @Composable () -> Unit
 ) {
     val performance = LocalLiquidGlassPerformance.current
@@ -277,7 +246,7 @@ private fun LiquidDialogLayer(
                         )
                     )
             ) {
-                LiquidDialogContent(
+                LiquidDialogPanel(
                     title = title,
                     backdrop = effectiveBackdrop,
                     modifier = modifier.clickable(
@@ -286,7 +255,6 @@ private fun LiquidDialogLayer(
                         onClick = {}
                     ),
                     containerColor = containerColor,
-                    accentColor = accentColor,
                     confirmButton = confirmButton,
                     dismissButton = dismissButton,
                     content = content
@@ -296,14 +264,13 @@ private fun LiquidDialogLayer(
     }
 }
 
-/** Clear liquid-glass dialog panel shared by hosted and standalone dialogs. */
+/** Single liquid-glass panel used by every dialog presentation. */
 @Composable
-fun LiquidDialogContent(
+private fun LiquidDialogPanel(
     title: String,
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
     containerColor: Color? = null,
-    accentColor: Color? = null,
     confirmButton: (@Composable () -> Unit)? = null,
     dismissButton: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
@@ -368,64 +335,5 @@ fun LiquidDialogContent(
             }
         }
         }
-    }
-}
-
-/** Monet-aware dialog action with tactile bounce; the dialog panel itself remains untinted. */
-@Composable
-fun LiquidDialogActionButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isPrimary: Boolean = false,
-    accentColor: Color? = null,
-    enabled: Boolean = true
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    val effectiveAccent = accentColor ?: colorScheme.primary
-    val buttonHighlight = rememberLiquidControlHighlight()
-
-    val backgroundColor = if (isPrimary) {
-        effectiveAccent
-    } else {
-        colorScheme.onSurface.copy(alpha = 0.10f)
-    }
-    val textColor = when {
-        !isPrimary -> colorScheme.onSurface
-        accentColor == null -> colorScheme.onPrimary
-        else -> colorScheme.surface
-    }
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(46.dp)
-            .graphicsLayer(liquidControlLayerBlock(enabled, buttonHighlight) ?: {})
-            .liquidControlPressFeedback(
-                enabled = enabled,
-                interactiveHighlight = buttonHighlight,
-                drawHighlightOverlay = false
-            )
-            .clip(Capsule())
-            .background(backgroundColor)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                role = Role.Button,
-                enabled = enabled,
-                onClick = onClick
-            )
-            .padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BasicText(
-            text = text,
-            style = TextStyle(
-                color = textColor,
-                fontSize = 15.sp,
-                fontWeight = if (isPrimary) FontWeight.Bold else FontWeight.Medium
-            )
-        )
     }
 }

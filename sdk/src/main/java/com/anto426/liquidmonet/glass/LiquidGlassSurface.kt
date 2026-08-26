@@ -84,8 +84,8 @@ object LiquidGlassStyleManager {
 
     private val dialog = LiquidGlassSurfaceStyle(
         preset = LiquidGlassPresets.Navigation,
-        lightSurfaceAlpha = 0.30f,
-        darkSurfaceAlpha = 0.26f,
+        lightSurfaceAlpha = 0.12f,
+        darkSurfaceAlpha = 0.22f,
         lightBrightness = 0.14f,
         saturation = 1.40f,
         highlightAlpha = 0.72f,
@@ -96,9 +96,9 @@ object LiquidGlassStyleManager {
     )
 
     private val sheet = LiquidGlassSurfaceStyle(
-        preset = LiquidGlassPresets.Navigation,
-        lightSurfaceAlpha = 0.30f,
-        darkSurfaceAlpha = 0.26f,
+        preset = LiquidGlassPresets.Immersive,
+        lightSurfaceAlpha = 0.12f,
+        darkSurfaceAlpha = 0.22f,
         lightBrightness = 0.12f,
         saturation = 1.38f,
         highlightAlpha = 0.68f,
@@ -210,7 +210,15 @@ fun Modifier.liquidGlass(
                 else 0.05f * (0.4f + 0.6f * liquidStrength)
     )
 
-    val surfaceColor = containerColor ?: colorScheme.surface.copy(alpha = defaultAlpha)
+    val isModalSurface = role == LiquidGlassRole.Dialog || role == LiquidGlassRole.Sheet
+    val defaultSurfaceColor = when {
+        // Modal glass is intentionally a little darker than navigation without becoming opaque.
+        // In light themes a restrained neutral veil darkens the refracted scene; in dark themes
+        // the existing surface tone already provides that contribution.
+        isModalSurface && isLightSurface -> Color.Black.copy(alpha = defaultAlpha)
+        else -> colorScheme.surface.copy(alpha = defaultAlpha)
+    }
+    val surfaceColor = containerColor ?: defaultSurfaceColor
 
     return drawBackdrop(
         backdrop = effectiveBackdrop,
@@ -272,7 +280,9 @@ fun Modifier.liquidGlass(
             if (surfaceColor.alpha > 0f) {
                 drawRect(surfaceColor)
             }
-            if (containerColor == null && subtleMonetTint.alpha > 0f) {
+            // Every Liquid Monet surface receives the same restrained chromatic veil. Explicit
+            // neutral/custom surface colors may tune opacity, but must not silently disable Monet.
+            if (role != LiquidGlassRole.TopBar && subtleMonetTint.alpha > 0f) {
                 drawRect(subtleMonetTint)
             }
         }

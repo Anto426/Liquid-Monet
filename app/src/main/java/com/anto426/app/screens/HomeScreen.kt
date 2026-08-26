@@ -28,7 +28,8 @@ import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
 import com.anto426.liquidmonet.components.cards.LiquidMediaController
-import com.anto426.liquidmonet.components.pickers.LiquidMonetPaletteSelector
+import com.anto426.liquidmonet.components.pickers.LiquidPaletteOption
+import com.anto426.liquidmonet.components.pickers.LiquidPaletteSelector
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.cards.LiquidStatusCard
 import com.anto426.liquidmonet.components.cards.LiquidStatusType
@@ -77,12 +78,12 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                LiquidMonetPaletteSelector(
-                    seeds = listOf(
-                        "Sapphire" to LiquidMonetPresets.Sapphire,
-                        "Emerald" to LiquidMonetPresets.Emerald,
-                        "Sunset" to LiquidMonetPresets.Sunset,
-                        "Violet" to LiquidMonetPresets.Violet
+                LiquidPaletteSelector(
+                    options = listOf(
+                        LiquidPaletteOption("Sapphire", LiquidMonetPresets.Sapphire.lightPrimary),
+                        LiquidPaletteOption("Emerald", LiquidMonetPresets.Emerald.lightPrimary),
+                        LiquidPaletteOption("Sunset", LiquidMonetPresets.Sunset.lightPrimary),
+                        LiquidPaletteOption("Violet", LiquidMonetPresets.Violet.lightPrimary)
                     ),
                     selectedIndex = selectedPresetIndex,
                     onSelectIndex = onSelectPreset,

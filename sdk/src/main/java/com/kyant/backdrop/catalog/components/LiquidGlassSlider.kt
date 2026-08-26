@@ -1,6 +1,5 @@
 package com.kyant.backdrop.catalog.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -20,19 +19,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
-import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.anto426.liquidmonet.components.selection.requireLiquidSliderRange
 import com.anto426.liquidmonet.components.selection.snapLiquidSliderValue
@@ -69,8 +65,8 @@ internal fun LiquidGlassSlider(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tint: Color = Color.Unspecified,
-    trackHeight: Dp = 6.dp,
-    thumbSize: Dp = 26.dp
+    trackHeight: Dp = 8.dp,
+    thumbSize: Dp = 24.dp
 ) {
     requireLiquidSliderRange(valueRange)
     val isLightTheme = !isSystemInDarkTheme()
@@ -154,26 +150,26 @@ internal fun LiquidGlassSlider(
                         )
                 )
 
-                Box(
-                    Modifier
-                        .clip(Capsule())
-                        .background(accentColor)
-                        .height(trackHeight)
-                        .layout { measurable, constraints ->
-                            val visualProgress = if (isLtr) {
-                                dampedDragAnimation.progress
-                            } else {
-                                1f - dampedDragAnimation.progress
-                            }.fastCoerceIn(0f, 1f)
-                            val width = (constraints.maxWidth * visualProgress).fastRoundToInt()
-                            val placeable = measurable.measure(
-                                constraints.copy(minWidth = width, maxWidth = width)
+                val visualProgress = if (isLtr) {
+                    dampedDragAnimation.progress
+                } else {
+                    1f - dampedDragAnimation.progress
+                }.fastCoerceIn(0f, 1f)
+                if (visualProgress > 0.001f) {
+                    Box(
+                        Modifier
+                            .align(if (isLtr) Alignment.CenterStart else Alignment.CenterEnd)
+                            .fillMaxWidth(visualProgress)
+                            .height(trackHeight)
+                            .liquidGlass(
+                                backdrop = effectiveBackdrop,
+                                shape = Capsule(),
+                                role = LiquidGlassRole.Control,
+                                containerColor = accentColor.copy(alpha = 0.68f),
+                                preset = LiquidGlassPresets.Subtle
                             )
-                            layout(constraints.maxWidth, placeable.height) {
-                                placeable.place(if (isLtr) 0 else constraints.maxWidth - width, 0)
-                            }
-                        }
-                )
+                    )
+                }
             }
 
             // Floating Optical Lens Thumb with Snell Refraction & Specular Highlights
@@ -252,10 +248,10 @@ internal fun LiquidGlassSlider(
                         },
                         onDrawSurface = {
                             val progress = dampedDragAnimation.pressProgress
-                            drawRect(Color.White.copy(alpha = 1f - progress))
+                            drawRect(accentColor.copy(alpha = lerp(0.70f, 0.18f, progress)))
                         }
                     )
-                    .size(width = thumbSize * 1.46f, height = thumbSize * 0.92f)
+                    .size(thumbSize)
             )
 
             // Material's input/semantics layer provides a reliable 48dp tap and drag target.

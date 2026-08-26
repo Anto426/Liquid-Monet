@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +30,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.icons.LiquidIcons
-import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.catalog.components.LiquidGlassButton
@@ -121,41 +119,10 @@ fun LiquidPaletteSelector(
 }
 
 /**
- * Convenience overload of LiquidPaletteSelector accepting LiquidMonetSeed list.
- */
-@Composable
-fun LiquidMonetPaletteSelector(
-    seeds: List<Pair<String, LiquidMonetSeed>>,
-    selectedIndex: Int,
-    onSelectIndex: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    title: String? = "Tonalità Monet Glass",
-    showBadge: Boolean = true,
-    backdrop: Backdrop = emptyBackdrop(),
-    backdropState: Backdrop = backdrop
-) {
-    val options = remember(seeds) {
-        seeds.map { (name, seed) ->
-            LiquidPaletteOption(name = name, color = seed.lightPrimary)
-        }
-    }
-    LiquidPaletteSelector(
-        options = options,
-        selectedIndex = selectedIndex,
-        onSelectIndex = onSelectIndex,
-        modifier = modifier,
-        title = title,
-        showBadge = showBadge,
-        backdrop = backdrop,
-        backdropState = backdropState
-    )
-}
-
-/**
  * LiquidPaletteItem - Individual Liquid Glass Pill for color selection.
  */
 @Composable
-fun LiquidPaletteItem(
+private fun LiquidPaletteItem(
     color: Color,
     isSelected: Boolean,
     onClick: () -> Unit,

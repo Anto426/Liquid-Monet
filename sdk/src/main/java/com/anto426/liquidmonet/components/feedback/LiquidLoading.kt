@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,16 +29,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
+import com.kyant.shapes.Capsule
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -100,14 +101,14 @@ fun LiquidLoading(
     when (style) {
         LiquidLoadingStyle.Circular -> {
             val indicatorSize: Dp = when (size) {
-                LiquidLoadingSize.Small -> 20.dp
-                LiquidLoadingSize.Medium -> 36.dp
-                LiquidLoadingSize.Large -> 52.dp
+                LiquidLoadingSize.Small -> 24.dp
+                LiquidLoadingSize.Medium -> 40.dp
+                LiquidLoadingSize.Large -> 56.dp
             }
             val strokeWidth: Dp = when (size) {
                 LiquidLoadingSize.Small -> 2.5.dp
-                LiquidLoadingSize.Medium -> 3.5.dp
-                LiquidLoadingSize.Large -> 4.8.dp
+                LiquidLoadingSize.Medium -> 4.dp
+                LiquidLoadingSize.Large -> 5.dp
             }
 
             if (message != null) {
@@ -124,13 +125,14 @@ fun LiquidLoading(
                         progressColor = primaryColor,
                         backdropState = backdropState
                     )
-                    BasicText(
+                    Text(
                         text = message,
-                        style = TextStyle(
-                            color = Color.White,
-                            fontSize = if (size == LiquidLoadingSize.Small) 13.sp else 15.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        style = if (size == LiquidLoadingSize.Small) {
+                            MaterialTheme.typography.bodySmall
+                        } else {
+                            MaterialTheme.typography.bodyMedium
+                        },
+                        color = colorScheme.onSurface.copy(alpha = 0.88f)
                     )
                 }
             } else {
@@ -147,19 +149,16 @@ fun LiquidLoading(
 
         LiquidLoadingStyle.Linear -> {
             val heightDp = when (size) {
-                LiquidLoadingSize.Small -> 12.dp
-                LiquidLoadingSize.Medium -> 18.dp
-                LiquidLoadingSize.Large -> 24.dp
+                LiquidLoadingSize.Small -> 4.dp
+                LiquidLoadingSize.Medium -> 6.dp
+                LiquidLoadingSize.Large -> 8.dp
             }
             Column(modifier = modifier.fillMaxWidth()) {
                 if (message != null) {
-                    BasicText(
+                    Text(
                         text = message,
-                        style = TextStyle(
-                            color = Color.White.copy(alpha = 0.88f),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onSurface.copy(alpha = 0.88f),
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
@@ -178,7 +177,8 @@ fun LiquidLoading(
                 loadingSize = size,
                 primaryColor = primaryColor,
                 secondaryColor = secondaryColor,
-                message = message
+                message = message,
+                backdropState = backdropState
             )
         }
 
@@ -202,6 +202,7 @@ fun LiquidLoading(
 
         LiquidLoadingStyle.Overlay -> {
             LiquidLoadingOverlay(
+                modifier = modifier,
                 message = message ?: "Caricamento in corso...",
                 primaryColor = primaryColor,
                 backdropState = backdropState
@@ -219,12 +220,13 @@ private fun LiquidLoadingDots(
     loadingSize: LiquidLoadingSize,
     primaryColor: Color,
     secondaryColor: Color,
-    message: String?
+    message: String?,
+    backdropState: Backdrop
 ) {
     val dotDiameter: Dp = when (loadingSize) {
         LiquidLoadingSize.Small -> 6.dp
-        LiquidLoadingSize.Medium -> 10.dp
-        LiquidLoadingSize.Large -> 14.dp
+        LiquidLoadingSize.Medium -> 8.dp
+        LiquidLoadingSize.Large -> 10.dp
     }
     val spacing: Dp = when (loadingSize) {
         LiquidLoadingSize.Small -> 4.dp
@@ -266,43 +268,43 @@ private fun LiquidLoadingDots(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Canvas(
+        Row(
             modifier = Modifier.size(
                 width = dotDiameter * 3 + spacing * 2,
                 height = dotDiameter * 2.2f
-            )
+            ),
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val r = dotDiameter.toPx() / 2f
-            val yBase = this.size.height / 2f
-            val maxBounce = dotDiameter.toPx() * 0.45f
-
-            // Dot 1
-            drawCircle(
-                color = primaryColor.copy(alpha = 0.45f + 0.55f * dot1Offset),
-                radius = r * (0.85f + 0.25f * dot1Offset),
-                center = Offset(r, yBase - maxBounce * dot1Offset)
-            )
-            // Dot 2
-            drawCircle(
-                color = primaryColor.copy(alpha = 0.45f + 0.55f * dot2Offset),
-                radius = r * (0.85f + 0.25f * dot2Offset),
-                center = Offset(r * 3 + spacing.toPx(), yBase - maxBounce * dot2Offset)
-            )
-            // Dot 3
-            drawCircle(
-                color = secondaryColor.copy(alpha = 0.45f + 0.55f * dot3Offset),
-                radius = r * (0.85f + 0.25f * dot3Offset),
-                center = Offset(r * 5 + spacing.toPx() * 2, yBase - maxBounce * dot3Offset)
-            )
+            listOf(
+                dot1Offset to primaryColor,
+                dot2Offset to primaryColor,
+                dot3Offset to secondaryColor
+            ).forEach { (phase, dotColor) ->
+                Box(
+                    modifier = Modifier
+                        .size(dotDiameter)
+                        .graphicsLayer {
+                            val scale = 0.85f + 0.25f * phase
+                            scaleX = scale
+                            scaleY = scale
+                            translationY = -dotDiameter.toPx() * 0.45f * phase
+                        }
+                        .liquidGlass(
+                            backdrop = backdropState,
+                            shape = Capsule(),
+                            role = LiquidGlassRole.Control,
+                            preset = LiquidGlassPresets.Interactive,
+                            containerColor = dotColor.copy(alpha = 0.08f + 0.10f * phase)
+                        )
+                )
+            }
         }
         if (message != null) {
-            BasicText(
+            Text(
                 text = message,
-                style = TextStyle(
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f)
             )
         }
     }
@@ -341,42 +343,44 @@ private fun LiquidLoadingPulse(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Canvas(modifier = Modifier.size(totalSize)) {
-            val center = Offset(this.size.width / 2f, this.size.height / 2f)
-            val maxR = this.size.minDimension / 2f
-            val coreR = maxR * 0.40f
+        Box(
+            modifier = Modifier.size(totalSize),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val center = Offset(this.size.width / 2f, this.size.height / 2f)
+                val maxR = this.size.minDimension / 2f
+                val coreR = maxR * 0.40f
 
-            // Outer expanding ripple
-            drawCircle(
-                color = primaryColor.copy(alpha = (1f - pulseProg) * 0.35f),
-                radius = coreR + (maxR - coreR) * pulseProg,
-                center = center,
-                style = Stroke(width = 2.dp.toPx())
-            )
-
-            // Radiant glowing core
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color.White,
-                        primaryColor,
-                        primaryColor.copy(alpha = 0.40f)
-                    ),
+                drawCircle(
+                    color = primaryColor.copy(alpha = (1f - pulseProg) * 0.35f),
+                    radius = coreR + (maxR - coreR) * pulseProg,
                     center = center,
-                    radius = coreR
-                ),
-                radius = coreR * (0.92f + 0.12f * sin(pulseProg * 2 * PI.toFloat())),
-                center = center
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(totalSize * 0.40f)
+                    .graphicsLayer {
+                        val scale = 0.92f + 0.12f * sin(pulseProg * 2 * PI.toFloat())
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .liquidGlass(
+                        backdrop = backdropState,
+                        shape = Capsule(),
+                        role = LiquidGlassRole.Control,
+                        preset = LiquidGlassPresets.Interactive,
+                        containerColor = primaryColor.copy(alpha = 0.16f)
+                    )
             )
         }
         if (message != null) {
-            BasicText(
+            Text(
                 text = message,
-                style = TextStyle(
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f)
             )
         }
     }
@@ -387,24 +391,25 @@ private fun LiquidLoadingPulse(
  */
 @Composable
 private fun LiquidLoadingOverlay(
+    modifier: Modifier,
     message: String,
     primaryColor: Color,
     backdropState: Backdrop
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .liquidGlass(
                 backdrop = backdropState,
-                shape = RoundedRectangle(24.dp),
+                shape = RoundedRectangle(28.dp),
                 role = LiquidGlassRole.Dialog,
-                containerColor = Color.White.copy(alpha = 0.08f)
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.08f)
             )
-            .padding(horizontal = 28.dp, vertical = 22.dp),
+            .padding(horizontal = 24.dp, vertical = 20.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LiquidCircularProgressIndicator(
                 progress = null,
@@ -412,13 +417,10 @@ private fun LiquidLoadingOverlay(
                 progressColor = primaryColor,
                 backdropState = backdropState
             )
-            BasicText(
+            Text(
                 text = message,
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

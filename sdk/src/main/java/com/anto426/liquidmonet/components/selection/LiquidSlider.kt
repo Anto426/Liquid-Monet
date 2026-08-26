@@ -24,8 +24,8 @@ fun LiquidSlider(
     enabled: Boolean = true,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0,
-    trackHeight: Dp = 6.dp,
-    thumbSize: Dp = 26.dp,
+    trackHeight: Dp = 8.dp,
+    thumbSize: Dp = 24.dp,
     tint: Color = Color.Unspecified,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop

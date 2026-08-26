@@ -219,35 +219,3 @@ fun LiquidChip(
         }
     }
 }
-
-/**
- * LiquidFilterChip - Filter variation of LiquidChip with toggle selection and count badge.
- */
-@Composable
-fun LiquidFilterChip(
-    selected: Boolean,
-    onSelectedChange: (Boolean) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = null,
-    badge: String? = null,
-    enabled: Boolean = true,
-    backdrop: Backdrop = emptyBackdrop(),
-    backdropState: Backdrop = backdrop,
-    tint: Color = Color.Unspecified
-) {
-    LiquidChip(
-        label = label,
-        onClick = { onSelectedChange(!selected) },
-        modifier = modifier,
-        selected = selected,
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon,
-        badge = badge,
-        enabled = enabled,
-        tint = tint,
-        backdrop = backdrop,
-        backdropState = backdropState
-    )
-}

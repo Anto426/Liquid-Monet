@@ -1,6 +1,5 @@
 package com.anto426.liquidmonet.components.selection
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -20,19 +19,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
-import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
@@ -70,8 +66,8 @@ fun LiquidRangeSlider(
     tint: Color = Color.Unspecified,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
-    trackHeight: Dp = 6.dp,
-    thumbSize: Dp = 26.dp
+    trackHeight: Dp = 8.dp,
+    thumbSize: Dp = 24.dp
 ) {
     LiquidRangeSliderImpl(
         value = value,
@@ -99,8 +95,8 @@ private fun LiquidRangeSliderImpl(
     tint: Color = Color.Unspecified,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
-    trackHeight: Dp = 6.dp,
-    thumbSize: Dp = 26.dp
+    trackHeight: Dp = 8.dp,
+    thumbSize: Dp = 24.dp
 ) {
     requireLiquidSliderRange(valueRange)
     require(steps >= 0) { "LiquidRangeSlider steps must be zero or positive." }
@@ -226,35 +222,34 @@ private fun LiquidRangeSliderImpl(
                 )
 
                 // Active Range Track Fill
-                Box(
-                    Modifier
-                        .clip(Capsule())
-                        .background(accentColor)
-                        .height(trackHeight)
-                        .layout { measurable, constraints ->
-                            val startProg = if (isLtr) {
-                                startDragAnimation.progress
-                            } else {
-                                1f - startDragAnimation.progress
-                            }.fastCoerceIn(0f, 1f)
-                            val endProg = if (isLtr) {
-                                endDragAnimation.progress
-                            } else {
-                                1f - endDragAnimation.progress
-                            }.fastCoerceIn(0f, 1f)
-                            val minProg = minOf(startProg, endProg)
-                            val maxProg = maxOf(startProg, endProg)
-                            val startX = (constraints.maxWidth * minProg).fastRoundToInt()
-                            val endX = (constraints.maxWidth * maxProg).fastRoundToInt()
-                            val width = (endX - startX).coerceAtLeast(0)
-                            val placeable = measurable.measure(
-                                constraints.copy(minWidth = width, maxWidth = width)
+                val startProgress = if (isLtr) {
+                    startDragAnimation.progress
+                } else {
+                    1f - startDragAnimation.progress
+                }.fastCoerceIn(0f, 1f)
+                val endProgress = if (isLtr) {
+                    endDragAnimation.progress
+                } else {
+                    1f - endDragAnimation.progress
+                }.fastCoerceIn(0f, 1f)
+                val rangeStart = minOf(startProgress, endProgress)
+                val rangeFraction = (maxOf(startProgress, endProgress) - rangeStart)
+                    .fastCoerceIn(0f, 1f)
+                if (rangeFraction > 0.001f) {
+                    Box(
+                        Modifier
+                            .graphicsLayer { translationX = trackWidth * rangeStart }
+                            .fillMaxWidth(rangeFraction)
+                            .height(trackHeight)
+                            .liquidGlass(
+                                backdrop = effectiveBackdrop,
+                                shape = Capsule(),
+                                role = LiquidGlassRole.Control,
+                                containerColor = accentColor.copy(alpha = 0.68f),
+                                preset = LiquidGlassPresets.Subtle
                             )
-                            layout(constraints.maxWidth, placeable.height) {
-                                placeable.place(startX, 0)
-                            }
-                        }
-                )
+                    )
+                }
             }
 
             LiquidRangeSliderThumb(
@@ -265,7 +260,8 @@ private fun LiquidRangeSliderImpl(
                 isLtr = isLtr,
                 enabled = enabled,
                 thumbSize = thumbSize,
-                glassTokens = glassTokens
+                glassTokens = glassTokens,
+                accentColor = accentColor
             )
             LiquidRangeSliderThumb(
                 animation = endDragAnimation,
@@ -275,7 +271,8 @@ private fun LiquidRangeSliderImpl(
                 isLtr = isLtr,
                 enabled = enabled,
                 thumbSize = thumbSize,
-                glassTokens = glassTokens
+                glassTokens = glassTokens,
+                accentColor = accentColor
             )
 
             // Native Material input and semantics stay on top of the custom optical renderer.
@@ -311,7 +308,8 @@ private fun LiquidRangeSliderThumb(
     isLtr: Boolean,
     enabled: Boolean,
     thumbSize: Dp,
-    glassTokens: LiquidGlassTokens
+    glassTokens: LiquidGlassTokens,
+    accentColor: Color
 ) {
     Box(
         Modifier
@@ -385,9 +383,9 @@ private fun LiquidRangeSliderThumb(
                 },
                 onDrawSurface = {
                     val progress = animation.pressProgress
-                    drawRect(Color.White.copy(alpha = 1f - progress))
+                    drawRect(accentColor.copy(alpha = lerp(0.70f, 0.18f, progress)))
                 }
             )
-            .size(width = thumbSize * 1.46f, height = thumbSize * 0.92f)
+            .size(thumbSize)
     )
 }

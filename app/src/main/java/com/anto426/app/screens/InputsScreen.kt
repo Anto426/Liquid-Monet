@@ -22,20 +22,16 @@ import com.anto426.liquidmonet.components.pickers.LiquidColorPicker
 import com.anto426.liquidmonet.components.pickers.LiquidDatePickerDialog
 import com.anto426.liquidmonet.components.pickers.LiquidDatePickerField
 import com.anto426.liquidmonet.components.selection.LiquidSelect
-import com.anto426.liquidmonet.components.inputs.LiquidEmailTextField
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
-import com.anto426.liquidmonet.components.inputs.LiquidNumberTextField
 import com.anto426.liquidmonet.components.inputs.LiquidOtpInput
-import com.anto426.liquidmonet.components.inputs.LiquidPasswordTextField
-import com.anto426.liquidmonet.components.inputs.LiquidPhoneTextField
 import com.anto426.liquidmonet.components.selection.LiquidRadioButton
 import com.anto426.liquidmonet.components.selection.LiquidRangeSlider
 import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.selection.LiquidStepper
 import com.anto426.liquidmonet.components.selection.LiquidSwitch
-import com.anto426.liquidmonet.components.inputs.LiquidTextArea
 import com.anto426.liquidmonet.components.inputs.LiquidTextField
+import com.anto426.liquidmonet.components.inputs.LiquidTextFieldType
 import com.anto426.liquidmonet.components.pickers.LiquidTimePickerDialog
 import com.anto426.liquidmonet.components.pickers.LiquidTimePickerField
 import com.anto426.liquidmonet.icons.LiquidIcons
@@ -123,9 +119,10 @@ fun InputsScreen(
                     backdropState = backdropState
                 )
 
-                LiquidPasswordTextField(
+                LiquidTextField(
                     value = passwordVal,
                     onValueChange = { passwordVal = it },
+                    type = LiquidTextFieldType.Password,
                     label = "Password Sicura",
                     backdropState = backdropState
                 )
@@ -134,25 +131,28 @@ fun InputsScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    LiquidEmailTextField(
+                    LiquidTextField(
                         value = emailVal,
                         onValueChange = { emailVal = it },
+                        type = LiquidTextFieldType.Email,
                         label = "Email",
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
-                    LiquidPhoneTextField(
+                    LiquidTextField(
                         value = phoneVal,
                         onValueChange = { phoneVal = it },
+                        type = LiquidTextFieldType.Phone,
                         label = "Telefono",
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                LiquidNumberTextField(
+                LiquidTextField(
                     value = numberVal,
                     onValueChange = { numberVal = it },
+                    type = LiquidTextFieldType.Number,
                     label = "Importo Numerico",
                     backdropState = backdropState
                 )
@@ -166,9 +166,10 @@ fun InputsScreen(
                     backdropState = backdropState
                 )
 
-                LiquidTextArea(
+                LiquidTextField(
                     value = notesVal,
                     onValueChange = { notesVal = it },
+                    type = LiquidTextFieldType.TextArea,
                     placeholder = "Inserisci note o descrizioni...",
                     maxLength = 200,
                     backdropState = backdropState

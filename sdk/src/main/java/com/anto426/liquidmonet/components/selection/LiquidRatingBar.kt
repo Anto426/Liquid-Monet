@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,8 +28,12 @@ import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.glass.LiquidGlassRole
+import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
+import com.kyant.shapes.Capsule
 
 /**
  * LiquidRatingBar - Minimal, sleek Material 3 Star Rating Selector.
@@ -50,9 +55,17 @@ fun LiquidRatingBar(
     val colorScheme = MaterialTheme.colorScheme
     val resolvedActiveColor = if (activeColor.isSpecified) activeColor else colorScheme.primary
     val resolvedInactiveColor = if (inactiveColor.isSpecified) inactiveColor else colorScheme.onSurface.copy(alpha = 0.22f)
+    val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else backdrop
 
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .liquidGlass(
+                backdrop = effectiveBackdrop,
+                shape = Capsule(),
+                role = LiquidGlassRole.Control,
+                preset = LiquidGlassPresets.Subtle
+            )
+            .padding(horizontal = 4.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -43,6 +43,7 @@ internal fun LiquidGlassButton(
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
     isInteractive: Boolean = true,
+    enabled: Boolean = isInteractive,
     shape: Shape = LiquidControlDefaults.shape,
     height: Dp = 48.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
@@ -61,14 +62,18 @@ internal fun LiquidGlassButton(
 
     val animatedContainerColor = if (targetContainerColor != null) {
         animateColorAsState(
-            targetValue = if (isInteractive) targetContainerColor else targetContainerColor.copy(alpha = targetContainerColor.alpha * 0.45f),
+            targetValue = if (enabled) {
+                targetContainerColor
+            } else {
+                targetContainerColor.copy(alpha = targetContainerColor.alpha * 0.45f)
+            },
             animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
             label = "buttonContainerColor"
         ).value
     } else null
 
     val animatedAlpha by animateFloatAsState(
-        targetValue = if (isInteractive) 1f else 0.50f,
+        targetValue = if (enabled) 1f else 0.50f,
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "buttonAlpha"
     )

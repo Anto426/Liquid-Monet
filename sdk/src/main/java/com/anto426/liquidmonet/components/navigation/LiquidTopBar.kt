@@ -1,12 +1,16 @@
 package com.anto426.liquidmonet.components.navigation
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,15 +32,13 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -44,15 +46,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.statusBarsPadding
 import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
@@ -68,10 +61,6 @@ import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.shapes.Capsule
-
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.RectangleShape
 
 data class LiquidTopBarAction(
     val icon: ImageVector,
@@ -273,7 +262,7 @@ private fun LiquidTopBarTitle(
 }
 
 @Composable
-fun LiquidBackButton(
+private fun LiquidBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     backdropState: Backdrop = emptyBackdrop(),
@@ -309,51 +298,6 @@ fun LiquidBackButton(
             contentDescription = contentDescription,
             tint = contentColor,
             modifier = Modifier.size(20.dp)
-        )
-    }
-}
-
-@Composable
-fun LiquidTopBarIconButton(
-    icon: ImageVector,
-    contentDescription: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    iconRotation: Float = 0f,
-    backdropState: Backdrop = emptyBackdrop()
-) {
-    val contentColor = MaterialTheme.colorScheme.onSurface
-    val shape = Capsule()
-    val interactiveHighlight = rememberLiquidControlHighlight()
-
-    Box(
-        modifier = modifier
-            .padding(horizontal = 4.dp)
-            .size(40.dp)
-            .liquidGlass(
-                backdrop = backdropState,
-                shape = shape,
-                role = LiquidGlassRole.Navigation,
-                layerBlock = liquidControlLayerBlock(true, interactiveHighlight)
-            )
-            .liquidControlPressFeedback(
-                enabled = true,
-                interactiveHighlight = interactiveHighlight
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = contentColor,
-            modifier = Modifier
-                .size(20.dp)
-                .rotate(iconRotation)
         )
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
 
@@ -75,6 +77,7 @@ fun LiquidMediaController(
         hostContentBackdrop != null && hostContentBackdrop != emptyBackdrop() -> hostContentBackdrop
         else -> backdrop
     }
+    val surfaceBackdrop = rememberLayerBackdrop()
 
     val shape = RoundedRectangle(28.dp)
     val albumShape = RoundedRectangle(16.dp)
@@ -106,6 +109,7 @@ fun LiquidMediaController(
                 backdrop = effectiveBackdrop,
                 shape = shape,
                 role = LiquidGlassRole.Surface,
+                exportedBackdrop = surfaceBackdrop,
                 layerBlock = if (onContainerClick != null) liquidControlLayerBlock(enabled, containerHighlight) else null
             )
             .then(
@@ -123,6 +127,7 @@ fun LiquidMediaController(
             )
             .padding(18.dp)
     ) {
+        CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -164,7 +169,7 @@ fun LiquidMediaController(
                             backdrop = effectiveBackdrop,
                             shape = albumShape,
                             role = LiquidGlassRole.Navigation,
-                            containerColor = primaryColor.copy(alpha = 0.55f)
+                            containerColor = primaryColor.copy(alpha = 0.32f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -259,8 +264,7 @@ fun LiquidMediaController(
                         .liquidGlass(
                             backdrop = effectiveBackdrop,
                             shape = controlShape,
-                            role = LiquidGlassRole.Navigation,
-                            containerColor = Color.White.copy(alpha = 0.12f)
+                            role = LiquidGlassRole.Navigation
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -309,7 +313,7 @@ fun LiquidMediaController(
                             backdrop = effectiveBackdrop,
                             shape = controlShape,
                             role = LiquidGlassRole.Navigation,
-                            containerColor = primaryColor.copy(alpha = 0.85f)
+                            containerColor = primaryColor.copy(alpha = 0.44f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -350,8 +354,7 @@ fun LiquidMediaController(
                         .liquidGlass(
                             backdrop = effectiveBackdrop,
                             shape = controlShape,
-                            role = LiquidGlassRole.Navigation,
-                            containerColor = Color.White.copy(alpha = 0.12f)
+                            role = LiquidGlassRole.Navigation
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -363,6 +366,7 @@ fun LiquidMediaController(
                     )
                 }
             }
+        }
         }
     }
 }

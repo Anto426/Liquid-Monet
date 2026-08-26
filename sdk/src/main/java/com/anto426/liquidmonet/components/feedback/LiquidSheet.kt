@@ -62,10 +62,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * Floating bottom sheet rendered as clear optical glass. No default surface color is painted:
- * the visible material comes from the scene's blur, refraction, highlight and edge shadows.
- */
+/** Floating bottom sheet with refractive glass and a restrained modal tone. */
 @Composable
 fun LiquidSheet(
     onDismissRequest: () -> Unit,

@@ -2,7 +2,6 @@ package com.kyant.backdrop.catalog.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isSpecified
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -43,6 +41,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.LiquidGlassStyleManager
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.kyant.backdrop.Backdrop
@@ -89,6 +88,7 @@ internal fun LiquidGlassBottomTabs(
     val performance = LocalLiquidGlassPerformance.current
     val navigationTokens = LiquidGlassPresets.Navigation.resolve(performance)
     val dropletTokens = LiquidGlassPresets.Interactive.resolve(performance)
+    val currentPerformance by rememberUpdatedState(performance)
     val currentSelectedTabIndex by rememberUpdatedState(selectedTabIndex)
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
 
@@ -136,7 +136,14 @@ internal fun LiquidGlassBottomTabs(
                 onDragStopped = {
                     currentIndex = targetValue.fastRoundToInt().coerceIn(0, maxIndex)
                     animationScope.launch {
-                        offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
+                        offsetAnimation.animateTo(
+                            targetValue = 0f,
+                            animationSpec = LiquidGlassMotionSpecs.spring(
+                                performance = currentPerformance,
+                                dampingRatio = 1f,
+                                stiffness = 300f
+                            )
+                        )
                     }
                 },
                 onDrag = { _, dragAmount ->
@@ -181,6 +188,20 @@ internal fun LiquidGlassBottomTabs(
                     )
                 }
             )
+        }
+        val dropletInteractionProgress by remember(dampedDragAnimation) {
+            derivedStateOf {
+                val displacementProgress = abs(
+                    dampedDragAnimation.targetValue - dampedDragAnimation.value
+                ).fastCoerceIn(0f, 1f)
+                val velocityProgress =
+                    (abs(dampedDragAnimation.velocity) / 4f).fastCoerceIn(0f, 1f)
+                maxOf(
+                    dampedDragAnimation.pressProgress,
+                    displacementProgress,
+                    velocityProgress
+                ).fastCoerceIn(0f, 1f)
+            }
         }
 
         Row(
@@ -280,9 +301,13 @@ internal fun LiquidGlassBottomTabs(
                     backdrop = rememberCombinedBackdrop(effectiveBackdrop, tabsBackdrop),
                     shape = { Capsule() },
                     effects = {
-                        val progress = dampedDragAnimation.pressProgress
-                        val refractionHeight = dropletTokens.refractionHeight * progress
-                        val refractionAmount = dropletTokens.refractionAmount * progress
+                        val refractionStrength = lerp(
+                            start = 0.28f,
+                            stop = 0.52f,
+                            fraction = dropletInteractionProgress
+                        )
+                        val refractionHeight = dropletTokens.refractionHeight * refractionStrength
+                        val refractionAmount = dropletTokens.refractionAmount * refractionStrength
                         if (
                             size.isSpecified &&
                             size.minDimension > 0f &&
@@ -312,16 +337,15 @@ internal fun LiquidGlassBottomTabs(
                         scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
                     },
                     onDrawSurface = {
-                        val progress = dampedDragAnimation.pressProgress
-                        drawRect(
-                            color = if (isLightTheme) {
-                                Color.Black.copy(alpha = 0.10f)
-                            } else {
-                                Color.White.copy(alpha = 0.10f)
-                            },
-                            alpha = 1f - progress
+                        val liquidStrength = performance.liquidIntensity.coerceIn(0f, 1f)
+                        val panelTintAlpha = (if (isLightTheme) 0.07f else 0.05f) *
+                            (0.4f + 0.6f * liquidStrength)
+                        val dropletTintAlpha = lerp(
+                            start = panelTintAlpha,
+                            stop = (panelTintAlpha * 1.25f).coerceAtMost(0.09f),
+                            fraction = dropletInteractionProgress
                         )
-                        drawRect(Color.Black.copy(alpha = 0.03f * progress))
+                        drawRect(accentColor.copy(alpha = dropletTintAlpha))
                     }
                 )
                 .height(56.dp)

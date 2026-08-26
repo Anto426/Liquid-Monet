@@ -1,8 +1,11 @@
 package com.anto426.liquidmonet.components.pickers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Modifier
+import com.anto426.liquidmonet.components.buttons.LiquidButton
+import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
 import com.anto426.liquidmonet.components.feedback.LiquidDialog
-import com.anto426.liquidmonet.components.feedback.LiquidDialogActionButton
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import java.util.Calendar
@@ -28,9 +31,10 @@ fun LiquidDatePickerDialog(
         title = "Seleziona Data",
         backdropState = backdropState,
         confirmButton = {
-            LiquidDialogActionButton(
+            LiquidButton(
                 text = "Conferma",
-                isPrimary = true,
+                variant = LiquidButtonVariant.Primary,
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     state.selectedDate?.let { onDateSelected(it) }
                     onDismissRequest()
@@ -38,8 +42,10 @@ fun LiquidDatePickerDialog(
             )
         },
         dismissButton = {
-            LiquidDialogActionButton(
+            LiquidButton(
                 text = "Annulla",
+                variant = LiquidButtonVariant.Secondary,
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onDismissRequest
             )
         }
