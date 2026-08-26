@@ -16,29 +16,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.anto426.antoui.components.cards.AntoCard
-import com.anto426.antoui.components.selection.AntoCheckbox
-import com.anto426.antoui.components.pickers.AntoColorPicker
-import com.anto426.antoui.components.pickers.AntoDatePickerDialog
-import com.anto426.antoui.components.pickers.AntoDatePickerField
-import com.anto426.antoui.components.selection.AntoDropdownSelect
-import com.anto426.antoui.components.inputs.AntoEmailTextField
-import com.anto426.antoui.components.display.AntoHorizontalDivider
-import com.anto426.antoui.components.inputs.AntoNumberTextField
-import com.anto426.antoui.components.inputs.AntoOtpInput
-import com.anto426.antoui.components.inputs.AntoPasswordTextField
-import com.anto426.antoui.components.inputs.AntoPhoneTextField
-import com.anto426.antoui.components.selection.AntoRadioButton
-import com.anto426.antoui.components.selection.AntoRangeSlider
-import com.anto426.antoui.components.inputs.AntoSearchBar
-import com.anto426.antoui.components.selection.AntoSlider
-import com.anto426.antoui.components.selection.AntoStepper
-import com.anto426.antoui.components.selection.AntoSwitch
-import com.anto426.antoui.components.inputs.AntoTextArea
-import com.anto426.antoui.components.inputs.AntoTextField
-import com.anto426.antoui.components.pickers.AntoTimePickerDialog
-import com.anto426.antoui.components.pickers.AntoTimePickerField
-import com.anto426.antoui.icons.AntoIcons
+import com.anto426.liquidmonet.components.cards.LiquidCard
+import com.anto426.liquidmonet.components.selection.LiquidCheckbox
+import com.anto426.liquidmonet.components.pickers.LiquidColorPicker
+import com.anto426.liquidmonet.components.pickers.LiquidDatePickerDialog
+import com.anto426.liquidmonet.components.pickers.LiquidDatePickerField
+import com.anto426.liquidmonet.components.selection.LiquidSelect
+import com.anto426.liquidmonet.components.inputs.LiquidEmailTextField
+import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.inputs.LiquidNumberTextField
+import com.anto426.liquidmonet.components.inputs.LiquidOtpInput
+import com.anto426.liquidmonet.components.inputs.LiquidPasswordTextField
+import com.anto426.liquidmonet.components.inputs.LiquidPhoneTextField
+import com.anto426.liquidmonet.components.selection.LiquidRadioButton
+import com.anto426.liquidmonet.components.selection.LiquidRangeSlider
+import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
+import com.anto426.liquidmonet.components.selection.LiquidSlider
+import com.anto426.liquidmonet.components.selection.LiquidStepper
+import com.anto426.liquidmonet.components.selection.LiquidSwitch
+import com.anto426.liquidmonet.components.inputs.LiquidTextArea
+import com.anto426.liquidmonet.components.inputs.LiquidTextField
+import com.anto426.liquidmonet.components.pickers.LiquidTimePickerDialog
+import com.anto426.liquidmonet.components.pickers.LiquidTimePickerField
+import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import java.util.Calendar
 
@@ -80,7 +80,7 @@ fun InputsScreen(
     ) {
         // Barra di Ricerca
         SectionTitle("Barra di Ricerca in Vetro")
-        AntoSearchBar(
+        LiquidSearchBar(
             query = searchVal,
             onQueryChange = { searchVal = it },
             backdropState = backdropState
@@ -88,19 +88,19 @@ fun InputsScreen(
 
         // Campi Data & Ora
         SectionTitle("Selettori Data & Ora Liquid Glass")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AntoDatePickerField(
+                    LiquidDatePickerField(
                         selectedDate = selectedDate,
                         onClick = { isDatePickerOpen = true },
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
-                    AntoTimePickerField(
+                    LiquidTimePickerField(
                         selectedHour = selectedHour,
                         selectedMinute = selectedMinute,
                         onClick = { isTimePickerOpen = true },
@@ -113,17 +113,17 @@ fun InputsScreen(
 
         // Campi di Testo & Password
         SectionTitle("Campi di Testo, Password & Specializzati")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AntoTextField(
+                LiquidTextField(
                     value = textVal,
                     onValueChange = { textVal = it },
                     label = "Nome Utente",
-                    leadingIcon = AntoIcons.AccountCircle,
+                    leadingIcon = LiquidIcons.AccountCircle,
                     backdropState = backdropState
                 )
 
-                AntoPasswordTextField(
+                LiquidPasswordTextField(
                     value = passwordVal,
                     onValueChange = { passwordVal = it },
                     label = "Password Sicura",
@@ -134,14 +134,14 @@ fun InputsScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AntoEmailTextField(
+                    LiquidEmailTextField(
                         value = emailVal,
                         onValueChange = { emailVal = it },
                         label = "Email",
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
-                    AntoPhoneTextField(
+                    LiquidPhoneTextField(
                         value = phoneVal,
                         onValueChange = { phoneVal = it },
                         label = "Telefono",
@@ -150,23 +150,23 @@ fun InputsScreen(
                     )
                 }
 
-                AntoNumberTextField(
+                LiquidNumberTextField(
                     value = numberVal,
                     onValueChange = { numberVal = it },
                     label = "Importo Numerico",
                     backdropState = backdropState
                 )
 
-                AntoDropdownSelect(
+                LiquidSelect(
                     items = listOf("Opzione Zaffiro", "Opzione Smeraldo", "Opzione Tramonto", "Opzione Violetto"),
                     selectedItem = selectedDropdownOption,
                     onItemSelected = { selectedDropdownOption = it },
                     label = "Tema di Sistema",
-                    leadingIcon = AntoIcons.Star,
+                    leadingIcon = LiquidIcons.Star,
                     backdropState = backdropState
                 )
 
-                AntoTextArea(
+                LiquidTextArea(
                     value = notesVal,
                     onValueChange = { notesVal = it },
                     placeholder = "Inserisci note o descrizioni...",
@@ -178,9 +178,9 @@ fun InputsScreen(
 
         // Stepper & OTP Code
         SectionTitle("Contatori Numerici & Codice OTP")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                AntoStepper(
+                LiquidStepper(
                     value = stepperVal,
                     onValueChange = { stepperVal = it },
                     label = "Quantità Elementi",
@@ -190,10 +190,10 @@ fun InputsScreen(
                     backdropState = backdropState
                 )
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
                 Text("Codice di Verifica OTP (4 Cifre)", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
-                AntoOtpInput(
+                LiquidOtpInput(
                     otpValue = otpCode,
                     onOtpChange = { otpCode = it },
                     length = 4,
@@ -205,7 +205,7 @@ fun InputsScreen(
 
         // Controlli Booleani & Selezione
         SectionTitle("Interruttori, Checkbox & Radio")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -213,14 +213,14 @@ fun InputsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Interruttore Liquid Switch", color = Color.White)
-                    AntoSwitch(
+                    LiquidSwitch(
                         checked = switchVal,
                         onCheckedChange = { switchVal = it },
                         backdropState = backdropState
                     )
                 }
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -228,14 +228,14 @@ fun InputsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Sincronizzazione Automatica", color = Color.White)
-                    AntoCheckbox(
+                    LiquidCheckbox(
                         checked = checkboxVal,
                         onCheckedChange = { checkboxVal = it },
                         backdropState = backdropState
                     )
                 }
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -243,7 +243,7 @@ fun InputsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Opzione Radio 1", color = Color.White)
-                    AntoRadioButton(
+                    LiquidRadioButton(
                         selected = radioVal == 0,
                         onClick = { radioVal = 0 },
                         backdropState = backdropState
@@ -256,7 +256,7 @@ fun InputsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Opzione Radio 2", color = Color.White)
-                    AntoRadioButton(
+                    LiquidRadioButton(
                         selected = radioVal == 1,
                         onClick = { radioVal = 1 },
                         backdropState = backdropState
@@ -267,28 +267,28 @@ fun InputsScreen(
 
         // Sliders & Color Picker
         SectionTitle("Slider, Range Slider & Selettore Colore")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
                     text = "Slider Singolo: ${(sliderVal * 100).toInt()}%",
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                AntoSlider(
+                LiquidSlider(
                     value = sliderVal,
                     onValueChange = { sliderVal = it },
                     valueRange = 0f..1f,
                     backdropState = backdropState
                 )
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
                 Text(
                     text = "Range Slider: ${(rangeSliderVal.start * 100).toInt()}€ - ${(rangeSliderVal.endInclusive * 100).toInt()}€",
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                AntoRangeSlider(
+                LiquidRangeSlider(
                     value = rangeSliderVal,
                     onValueChange = { rangeSliderVal = it },
                     backdropState = backdropState
@@ -296,7 +296,7 @@ fun InputsScreen(
             }
         }
 
-        AntoColorPicker(
+        LiquidColorPicker(
             selectedColor = colorPickerVal,
             onColorSelected = { colorPickerVal = it },
             backdropState = backdropState
@@ -304,7 +304,7 @@ fun InputsScreen(
     }
 
     // Modal Pickers Dialogs
-    AntoDatePickerDialog(
+    LiquidDatePickerDialog(
         isOpen = isDatePickerOpen,
         onDismissRequest = { isDatePickerOpen = false },
         onDateSelected = { selectedDate = it },
@@ -312,7 +312,7 @@ fun InputsScreen(
         backdropState = backdropState
     )
 
-    AntoTimePickerDialog(
+    LiquidTimePickerDialog(
         isOpen = isTimePickerOpen,
         onDismissRequest = { isTimePickerOpen = false },
         onTimeSelected = { h, m ->

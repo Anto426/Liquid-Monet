@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -15,12 +17,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,25 +42,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import com.anto426.antoui.components.navigation.AntoExpressiveTopBar
-import com.anto426.antoui.components.buttons.AntoFloatingActionButton
-import com.anto426.antoui.components.navigation.AntoFluidNavigationBar
-import com.anto426.antoui.components.navigation.AntoNavItemData
-import com.anto426.antoui.components.inputs.AntoSearchBar
-import com.anto426.antoui.components.navigation.AntoTopBarAction
-import com.anto426.antoui.components.feedback.AntoToastHost
-import com.anto426.antoui.components.feedback.AntoToastType
-import com.anto426.antoui.components.feedback.rememberAntoToastState
-import com.anto426.antoui.glass.AntoBackgroundEffect
-import com.anto426.antoui.glass.AntoGlassScene
-import com.anto426.antoui.glass.AntoLiquidBackground
-import com.anto426.antoui.icons.AntoIcons
-import com.anto426.antoui.motion.AntoAnimatedNavContent
-import com.anto426.antoui.motion.AntoNavTransition
-import com.anto426.antoui.theme.LiquidMonetTheme
-import com.anto426.antoui.theme.monet.AntoMonetPresets
-import com.anto426.antoui.theme.monet.AntoMonetSeed
+import com.anto426.liquidmonet.components.navigation.LiquidTopBar
+import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
+import com.anto426.liquidmonet.components.navigation.LiquidNavigationBar
+import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
+import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
+import com.anto426.liquidmonet.components.navigation.LiquidTopBarAction
+import com.anto426.liquidmonet.components.feedback.LiquidToastHost
+import com.anto426.liquidmonet.components.feedback.LiquidToastType
+import com.anto426.liquidmonet.components.feedback.rememberLiquidToastState
+import com.anto426.liquidmonet.glass.LiquidBackgroundEffect
+import com.anto426.liquidmonet.glass.LiquidGlassScene
+import com.anto426.liquidmonet.glass.LiquidBackground
+import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
+import com.anto426.liquidmonet.motion.LiquidNavTransition
+import com.anto426.liquidmonet.theme.LiquidMonetTheme
+import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
+import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
 import com.anto426.app.screens.ControlsInputHubScreen
 import com.anto426.app.screens.ModalsFeedbackHubScreen
 import com.anto426.app.screens.NavigationHubScreen
@@ -70,11 +75,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             var selectedPresetIndex by remember { mutableIntStateOf(0) }
             var sliderVal by remember { mutableFloatStateOf(0.65f) }
-            val currentSeed: AntoMonetSeed = when (selectedPresetIndex) {
-                0 -> AntoMonetPresets.Sapphire
-                1 -> AntoMonetPresets.Emerald
-                2 -> AntoMonetPresets.Sunset
-                else -> AntoMonetPresets.Violet
+            val currentSeed: LiquidMonetSeed = when (selectedPresetIndex) {
+                0 -> LiquidMonetPresets.Sapphire
+                1 -> LiquidMonetPresets.Emerald
+                2 -> LiquidMonetPresets.Sunset
+                else -> LiquidMonetPresets.Violet
             }
 
             LiquidMonetTheme(
@@ -86,13 +91,13 @@ class MainActivity : ComponentActivity() {
 
                 var selectedEffectIndex by remember { mutableIntStateOf(0) }
                 val backgroundEffects = listOf(
-                    AntoBackgroundEffect.RadiantBeam,
-                    AntoBackgroundEffect.Aurora,
-                    AntoBackgroundEffect.MeshGlow,
-                    AntoBackgroundEffect.OrbitalPulse
+                    LiquidBackgroundEffect.RadiantBeam,
+                    LiquidBackgroundEffect.Aurora,
+                    LiquidBackgroundEffect.MeshGlow,
+                    LiquidBackgroundEffect.OrbitalPulse
                 )
 
-                val toastState = rememberAntoToastState()
+                val toastState = rememberLiquidToastState()
                 var isSearchOpen by remember { mutableStateOf(false) }
                 var searchQuery by remember { mutableStateOf("") }
                 var isNavBarVisible by remember { mutableStateOf(true) }
@@ -121,14 +126,78 @@ class MainActivity : ComponentActivity() {
                 // La demo è organizzata in quattro aree principali; ogni hub
                 // contiene le proprie sotto-schermate e non duplica la shell.
                 val pageTitles = listOf("Studio", "Controlli", "Feedback", "Navigazione")
+                val searchBarInset by animateDpAsState(
+                    targetValue = if (isSearchOpen) 68.dp else 0.dp,
+                    animationSpec = spring(dampingRatio = 0.75f, stiffness = 380f),
+                    label = "demoTopBarSearchInset"
+                )
 
-                AntoGlassScene(
+                LiquidGlassScene(
                     modifier = Modifier.fillMaxSize(),
                     background = {
-                        AntoLiquidBackground(
+                        LiquidBackground(
                             effect = backgroundEffects[selectedEffectIndex],
                             monetSeed = currentSeed,
                             intensity = sliderVal
+                        )
+                    },
+                    topBar = { contentBackdrop ->
+                        LiquidTopBar(
+                            title = pageTitles[currentTab],
+                            subtitle = "Demo catalog",
+                            backdropState = contentBackdrop,
+                            scrollBehavior = scrollBehavior,
+                            isSearchActive = isSearchOpen,
+                            searchQuery = searchQuery,
+                            onQueryChange = { searchQuery = it },
+                            onSearchActiveChange = { isSearchOpen = it },
+                            searchPlaceholder = "Cerca componenti, controlli, gesture...",
+                            actionItems = listOf(
+                                LiquidTopBarAction(
+                                    icon = LiquidIcons.Search,
+                                    label = "Cerca componenti",
+                                    onClick = { isSearchOpen = !isSearchOpen }
+                                ),
+                                LiquidTopBarAction(
+                                    icon = LiquidIcons.MoreVert,
+                                    label = "Azioni",
+                                    subItems = listOf(
+                                        LiquidTopBarAction(
+                                            icon = LiquidIcons.Refresh,
+                                            label = "Ricarica catalogo",
+                                            onClick = {
+                                                toastState.show(
+                                                    message = "Catalogo sincronizzato",
+                                                    subtitle = "Interfaccia fluida a 120 FPS",
+                                                    type = LiquidToastType.Info
+                                                )
+                                            }
+                                        ),
+                                        LiquidTopBarAction(
+                                            icon = LiquidIcons.Share,
+                                            label = "Condividi link",
+                                            onClick = {
+                                                toastState.show(
+                                                    message = "Link copiato negli appunti",
+                                                    subtitle = "https://github.com/Anto426/Antosdk",
+                                                    type = LiquidToastType.Success
+                                                )
+                                            }
+                                        ),
+                                        LiquidTopBarAction(
+                                            icon = LiquidIcons.Info,
+                                            label = "Informazioni SDK",
+                                            onClick = {
+                                                toastState.show(
+                                                    message = "Liquid Monet Liquid Monet 2.0",
+                                                    subtitle = "AGSL Optical Snell Refraction Engine",
+                                                    type = LiquidToastType.Info
+                                                )
+                                            }
+                                        )
+                                    )
+                                )
+                            )
                         )
                     },
                     bottomBar = { contentBackdrop ->
@@ -137,21 +206,53 @@ class MainActivity : ComponentActivity() {
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
                         ) {
-                            AntoFluidNavigationBar(
+                            LiquidNavigationBar(
                                 selectedIndex = currentTab,
                                 onItemSelected = { selectedNav ->
                                     currentTab = selectedNav
                                 },
                                 items = listOf(
-                                    AntoNavItemData(AntoIcons.Star, "Studio"),
-                                    AntoNavItemData(AntoIcons.Edit, "Controlli"),
-                                    AntoNavItemData(AntoIcons.Notifications, "Feedback"),
-                                    AntoNavItemData(AntoIcons.Share, "Navigazione")
+                                    LiquidNavigationItem(label = "Studio", icon = LiquidIcons.Star),
+                                    LiquidNavigationItem(label = "Controlli", icon = LiquidIcons.Edit),
+                                    LiquidNavigationItem(label = "Feedback", icon = LiquidIcons.Notifications),
+                                    LiquidNavigationItem(label = "Navigazione", icon = LiquidIcons.Share)
                                 ),
                                 visible = isNavBarVisible,
                                 backdropState = contentBackdrop
                             )
                         }
+                    },
+                    overlay = { contentBackdrop ->
+                        LiquidFloatingActionButton(
+                            onClick = {
+                                toastState.show(
+                                    message = "Azione rapida eseguita!",
+                                    subtitle = "Scheda attiva: ${pageTitles[currentTab]}",
+                                    type = LiquidToastType.Success
+                                )
+                            },
+                            visible = isNavBarVisible,
+                            backdropState = contentBackdrop,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .navigationBarsPadding()
+                                .padding(end = 16.dp, bottom = 92.dp)
+                        ) {
+                            Icon(
+                                imageVector = LiquidIcons.Add,
+                                contentDescription = "Nuovo",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        LiquidToastHost(
+                            state = toastState,
+                            backdropState = contentBackdrop,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 80.dp)
+                        )
                     }
                 ) { backdropState ->
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -162,83 +263,18 @@ class MainActivity : ComponentActivity() {
                                 .nestedScroll(navBarScrollConnection),
                             containerColor = Color.Transparent,
                             topBar = {
-                                AntoExpressiveTopBar(
-                                    title = pageTitles[currentTab],
-                                    subtitle = "Demo catalog",
-                                    backdropState = backdropState,
-                                    scrollBehavior = scrollBehavior,
-                                    isSearchActive = isSearchOpen,
-                                    searchQuery = searchQuery,
-                                    onQueryChange = { searchQuery = it },
-                                    onSearchActiveChange = { isSearchOpen = it },
-                                    searchPlaceholder = "Cerca componenti, controlli, gesture...",
-                                    actionItems = listOf(
-                                        AntoTopBarAction(
-                                            icon = AntoIcons.Search,
-                                            label = "Cerca componenti",
-                                            onClick = { isSearchOpen = !isSearchOpen }
-                                        ),
-                                        AntoTopBarAction(
-                                            icon = AntoIcons.MoreVert,
-                                            label = "Azioni",
-                                            subItems = listOf(
-                                                AntoTopBarAction(
-                                                    icon = AntoIcons.Refresh,
-                                                    label = "Ricarica catalogo",
-                                                    onClick = {
-                                                        toastState.show(
-                                                            message = "Catalogo sincronizzato",
-                                                            subtitle = "Interfaccia fluida a 120 FPS",
-                                                            type = AntoToastType.Info
-                                                        )
-                                                    }
-                                                ),
-                                                AntoTopBarAction(
-                                                    icon = AntoIcons.Share,
-                                                    label = "Condividi link",
-                                                    onClick = {
-                                                        toastState.show(
-                                                            message = "Link copiato negli appunti",
-                                                            subtitle = "https://github.com/Anto426/Antosdk",
-                                                            type = AntoToastType.Success
-                                                        )
-                                                    }
-                                                ),
-                                                AntoTopBarAction(
-                                                    icon = AntoIcons.Info,
-                                                    label = "Informazioni SDK",
-                                                    onClick = {
-                                                        toastState.show(
-                                                            message = "AntoUI Liquid Monet 2.0",
-                                                            subtitle = "AGSL Optical Snell Refraction Engine",
-                                                            type = AntoToastType.Info
-                                                        )
-                                                    }
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            },
-                            floatingActionButton = {
-                                AntoFloatingActionButton(
-                                    onClick = {
-                                        toastState.show(
-                                            message = "Azione rapida eseguita!",
-                                            subtitle = "Scheda attiva: ${pageTitles[currentTab]}",
-                                            type = AntoToastType.Success
-                                        )
-                                    },
-                                    visible = isNavBarVisible,
-                                    backdropState = backdropState,
-                                    modifier = Modifier.padding(bottom = 76.dp)
+                                Column(
+                                    modifier = Modifier.clearAndSetSemantics { }
                                 ) {
-                                    Icon(
-                                        imageVector = AntoIcons.Add,
-                                        contentDescription = "Nuovo",
-                                        tint = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.size(24.dp)
+                                    LargeTopAppBar(
+                                        title = {},
+                                        colors = TopAppBarDefaults.topAppBarColors(
+                                            containerColor = Color.Transparent,
+                                            scrolledContainerColor = Color.Transparent
+                                        ),
+                                        scrollBehavior = scrollBehavior
                                     )
+                                    Spacer(modifier = Modifier.height(searchBarInset))
                                 }
                             }
                         ) { innerPadding ->
@@ -255,9 +291,9 @@ class MainActivity : ComponentActivity() {
                                     Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
 
                                     // Hub Content Switcher with Expressive Directional Transitions
-                                    AntoAnimatedNavContent(
+                                    LiquidAnimatedNavContent(
                                         targetState = currentTab,
-                                        transition = AntoNavTransition.AutoDirectional,
+                                        transition = LiquidNavTransition.AutoDirectional,
                                         label = "mainScreenTransition"
                                     ) { tab ->
                                         when (tab) {
@@ -289,14 +325,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        // Toast Notification Layer
-                        AntoToastHost(
-                            state = toastState,
-                            backdropState = backdropState,
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 80.dp)
-                        )
                     }
                 }
             }

@@ -18,14 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.anto426.antoui.components.display.AntoAvatar
-import com.anto426.antoui.components.display.AntoAvatarPresence
-import com.anto426.antoui.components.cards.AntoCard
-import com.anto426.antoui.components.display.AntoHorizontalDivider
-import com.anto426.antoui.components.cards.AntoPreferenceItem
-import com.anto426.antoui.components.selection.AntoSlider
-import com.anto426.antoui.components.selection.AntoSwitch
-import com.anto426.antoui.icons.AntoIcons
+import com.anto426.liquidmonet.components.display.LiquidAvatar
+import com.anto426.liquidmonet.components.display.LiquidAvatarPresence
+import com.anto426.liquidmonet.components.cards.LiquidCard
+import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.cards.LiquidPreferenceItem
+import com.anto426.liquidmonet.components.selection.LiquidSlider
+import com.anto426.liquidmonet.components.selection.LiquidSwitch
+import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 
 @Composable
@@ -44,7 +44,7 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // User Profile Card
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -52,9 +52,9 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                AntoAvatar(
+                LiquidAvatar(
                     initials = "AU",
-                    presence = AntoAvatarPresence.Online,
+                    presence = LiquidAvatarPresence.Online,
                     size = 54.dp,
                     backdropState = backdropState
                 )
@@ -76,14 +76,14 @@ fun SettingsScreen(
 
         // Connettività & Notifiche
         SectionTitle("Connettività & Notifiche")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AntoPreferenceItem(
+                LiquidPreferenceItem(
                     title = "Rete Wi-Fi",
                     subtitle = if (wifiState) "Connesso a Liquid-5G" else "Disattivato",
-                    icon = AntoIcons.Phone,
+                    icon = LiquidIcons.Phone,
                     trailingContent = {
-                        AntoSwitch(
+                        LiquidSwitch(
                             checked = wifiState,
                             onCheckedChange = { wifiState = it },
                             backdropState = backdropState
@@ -91,14 +91,14 @@ fun SettingsScreen(
                     }
                 )
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
-                AntoPreferenceItem(
+                LiquidPreferenceItem(
                     title = "Notifiche di Sistema",
                     subtitle = if (notificationsState) "Attive con suoni aptici" else "Silenziate",
-                    icon = AntoIcons.Notifications,
+                    icon = LiquidIcons.Notifications,
                     trailingContent = {
-                        AntoSwitch(
+                        LiquidSwitch(
                             checked = notificationsState,
                             onCheckedChange = { notificationsState = it },
                             backdropState = backdropState
@@ -106,14 +106,14 @@ fun SettingsScreen(
                     }
                 )
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
-                AntoPreferenceItem(
+                LiquidPreferenceItem(
                     title = "Modalità Vetro Scuro",
                     subtitle = if (darkGlassState) "Contrasto e riflessi profondi" else "Vetro chiaro",
-                    icon = AntoIcons.Star,
+                    icon = LiquidIcons.Star,
                     trailingContent = {
-                        AntoSwitch(
+                        LiquidSwitch(
                             checked = darkGlassState,
                             onCheckedChange = { darkGlassState = it },
                             backdropState = backdropState
@@ -125,7 +125,7 @@ fun SettingsScreen(
 
         // Audio & Luminosità
         SectionTitle("Luminosità & Volume Audio")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -135,14 +135,14 @@ fun SettingsScreen(
                     Text("Luminosità Schermo", color = Color.White)
                     Text("${(brightnessVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
-                AntoSlider(
+                LiquidSlider(
                     value = brightnessVal,
                     onValueChange = { brightnessVal = it },
                     valueRange = 0f..1f,
                     backdropState = backdropState
                 )
 
-                AntoHorizontalDivider()
+                LiquidHorizontalDivider()
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -152,7 +152,7 @@ fun SettingsScreen(
                     Text("Volume Audio", color = Color.White)
                     Text("${(volumeVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
-                AntoSlider(
+                LiquidSlider(
                     value = volumeVal,
                     onValueChange = { volumeVal = it },
                     valueRange = 0f..1f,
@@ -163,17 +163,17 @@ fun SettingsScreen(
 
         // Info SDK & Diagnostica
         SectionTitle("Informazioni SDK & Rendering")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                AntoPreferenceItem(
+                LiquidPreferenceItem(
                     title = "Runtime Grafico",
                     subtitle = "AGSL Skia Hardware Acceleration",
-                    icon = AntoIcons.Info
+                    icon = LiquidIcons.Info
                 )
-                AntoPreferenceItem(
-                    title = "Versione AntoUI",
+                LiquidPreferenceItem(
+                    title = "Versione Liquid Monet",
                     subtitle = "2.0.0 Expressive Liquid Glass Edition",
-                    icon = AntoIcons.Check
+                    icon = LiquidIcons.Check
                 )
             }
         }

@@ -27,21 +27,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anto426.antoui.components.cards.AntoCard
-import com.anto426.antoui.components.cards.AntoControlCenterTile
-import com.anto426.antoui.components.display.AntoHorizontalDivider
-import com.anto426.antoui.components.navigation.AntoLiquidTabRow
-import com.anto426.antoui.components.cards.AntoMediaController
-import com.anto426.antoui.components.pickers.AntoMonetPaletteSelector
-import com.anto426.antoui.components.selection.AntoBackgroundSelector
-import com.anto426.antoui.components.selection.AntoSlider
-import com.anto426.antoui.components.cards.AntoStatusCard
-import com.anto426.antoui.components.cards.AntoStatusType
-import com.anto426.antoui.glass.AntoBackgroundEffect
-import com.anto426.antoui.motion.AntoAnimatedNavContent
-import com.anto426.antoui.motion.AntoNavTransition
-import com.anto426.antoui.icons.AntoIcons
-import com.anto426.antoui.theme.monet.AntoMonetPresets
+import com.anto426.liquidmonet.components.cards.LiquidCard
+import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
+import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
+import com.anto426.liquidmonet.components.navigation.LiquidTabBar
+import com.anto426.liquidmonet.components.cards.LiquidMediaController
+import com.anto426.liquidmonet.components.pickers.LiquidMonetPaletteSelector
+import com.anto426.liquidmonet.components.selection.LiquidBackgroundSelector
+import com.anto426.liquidmonet.components.selection.LiquidSlider
+import com.anto426.liquidmonet.components.cards.LiquidStatusCard
+import com.anto426.liquidmonet.components.cards.LiquidStatusType
+import com.anto426.liquidmonet.glass.LiquidBackgroundEffect
+import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
+import com.anto426.liquidmonet.motion.LiquidNavTransition
+import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.kyant.backdrop.Backdrop
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -54,11 +55,15 @@ fun StudioHubScreen(
     onSliderChange: (Float) -> Unit,
     backdropState: Backdrop,
     modifier: Modifier = Modifier,
-    selectedEffect: AntoBackgroundEffect = AntoBackgroundEffect.RadiantBeam,
-    onSelectEffect: (AntoBackgroundEffect) -> Unit = {}
+    selectedEffect: LiquidBackgroundEffect = LiquidBackgroundEffect.RadiantBeam,
+    onSelectEffect: (LiquidBackgroundEffect) -> Unit = {}
 ) {
     var currentSubTab by remember { mutableIntStateOf(0) }
-    val subTabs = listOf("Panoramica", "Media Player", "Control Center")
+    val subTabs = listOf(
+        LiquidNavigationItem("Panoramica"),
+        LiquidNavigationItem("Media Player"),
+        LiquidNavigationItem("Control Center")
+    )
 
     var isPlayingMusic by remember { mutableStateOf(true) }
     var progressVal by remember { mutableFloatStateOf(0.35f) }
@@ -84,16 +89,16 @@ fun StudioHubScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Sub-Navigation Liquid Tabs
-        AntoLiquidTabRow(
+        LiquidTabBar(
             items = subTabs,
             selectedIndex = currentSubTab,
             onTabSelected = { currentSubTab = it },
             backdropState = backdropState
         )
 
-        AntoAnimatedNavContent(
+        LiquidAnimatedNavContent(
             targetState = currentSubTab,
-            transition = AntoNavTransition.AutoDirectional,
+            transition = LiquidNavTransition.AutoDirectional,
             label = "studioSubTabTransition"
         ) { tab ->
             when (tab) {
@@ -101,26 +106,26 @@ fun StudioHubScreen(
                     // Sotto-Schermata 1: Panoramica & Monet
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         SectionTitle("Personalizzazione Cromatica Monet")
-                        AntoCard(backdropState = backdropState) {
+                        LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 Text(
                                     text = "Armonie Cromatiche di Sistema",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
-                                AntoMonetPaletteSelector(
+                                LiquidMonetPaletteSelector(
                                     seeds = listOf(
-                                        "Sapphire" to AntoMonetPresets.Sapphire,
-                                        "Emerald" to AntoMonetPresets.Emerald,
-                                        "Sunset" to AntoMonetPresets.Sunset,
-                                        "Violet" to AntoMonetPresets.Violet
+                                        "Sapphire" to LiquidMonetPresets.Sapphire,
+                                        "Emerald" to LiquidMonetPresets.Emerald,
+                                        "Sunset" to LiquidMonetPresets.Sunset,
+                                        "Violet" to LiquidMonetPresets.Violet
                                     ),
                                     selectedIndex = selectedPresetIndex,
                                     onSelectIndex = onSelectPreset,
                                     backdropState = backdropState
                                 )
 
-                                AntoHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -130,21 +135,21 @@ fun StudioHubScreen(
                                     Text("Intensità Vetro Rifrattivo", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
                                     Text("${(sliderVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                                 }
-                                AntoSlider(
+                                LiquidSlider(
                                     value = sliderVal,
                                     onValueChange = onSliderChange,
                                     valueRange = 0f..1f,
                                     backdropState = backdropState
                                 )
 
-                                AntoHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                                 Text(
                                     text = "Sfondo Ottico Dinamico",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
-                                AntoBackgroundSelector(
+                                LiquidBackgroundSelector(
                                     selectedEffect = selectedEffect,
                                     onEffectSelected = onSelectEffect,
                                     backdropState = backdropState
@@ -154,16 +159,16 @@ fun StudioHubScreen(
 
                         SectionTitle("Stato dei Servizi")
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            AntoStatusCard(
+                            LiquidStatusCard(
                                 title = "Pipeline Grafica",
                                 description = "Shaders AGSL e accelerazione hardware attivi a 120 FPS.",
-                                statusType = AntoStatusType.Success,
+                                statusType = LiquidStatusType.Success,
                                 backdropState = backdropState
                             )
-                            AntoStatusCard(
+                            LiquidStatusCard(
                                 title = "Cache Shader",
                                 description = "Ottimizzazione rendering completata con successo.",
-                                statusType = AntoStatusType.Info,
+                                statusType = LiquidStatusType.Info,
                                 backdropState = backdropState
                             )
                         }
@@ -174,7 +179,7 @@ fun StudioHubScreen(
                     // Sotto-Schermata 2: Media Player
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         SectionTitle("Player Multimediale Liquid Glass")
-                        AntoMediaController(
+                        LiquidMediaController(
                             title = "Cosmic Aurora",
                             artist = "Electronic Soundscape • Lossless",
                             isPlaying = isPlayingMusic,
@@ -187,7 +192,7 @@ fun StudioHubScreen(
                             backdropState = backdropState
                         )
 
-                        AntoCard(backdropState = backdropState) {
+                        LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text(
                                     text = "Dettagli Traccia & Audio Engine",
@@ -209,34 +214,34 @@ fun StudioHubScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         SectionTitle("Control Center Rapido")
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            AntoControlCenterTile(
+                            LiquidControlCenterTile(
                                 title = "Rete Wi-Fi",
                                 subtitle = if (wifiActive) "Connesso • Liquid-5G" else "Disattivato",
-                                icon = AntoIcons.Phone,
+                                icon = LiquidIcons.Phone,
                                 active = wifiActive,
                                 onClick = { wifiActive = !wifiActive },
                                 backdropState = backdropState
                             )
-                            AntoControlCenterTile(
+                            LiquidControlCenterTile(
                                 title = "Bluetooth",
                                 subtitle = if (bluetoothActive) "Dispositivi accoppiati" else "Non attivo",
-                                icon = AntoIcons.Settings,
+                                icon = LiquidIcons.Settings,
                                 active = bluetoothActive,
                                 onClick = { bluetoothActive = !bluetoothActive },
                                 backdropState = backdropState
                             )
-                            AntoControlCenterTile(
+                            LiquidControlCenterTile(
                                 title = "Modalità Aereo",
                                 subtitle = if (airplaneActive) "Tutte le radio disattivate" else "Connessioni attive",
-                                icon = AntoIcons.Info,
+                                icon = LiquidIcons.Info,
                                 active = airplaneActive,
                                 onClick = { airplaneActive = !airplaneActive },
                                 backdropState = backdropState
                             )
-                            AntoControlCenterTile(
+                            LiquidControlCenterTile(
                                 title = "Torcia Prismatica",
                                 subtitle = if (torchActive) "Luce attiva al 100%" else "Spenta",
-                                icon = AntoIcons.Star,
+                                icon = LiquidIcons.Star,
                                 active = torchActive,
                                 onClick = { torchActive = !torchActive },
                                 backdropState = backdropState

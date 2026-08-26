@@ -24,16 +24,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anto426.antoui.components.cards.AntoCard
-import com.anto426.antoui.components.cards.AntoControlCenterTile
-import com.anto426.antoui.components.display.AntoHorizontalDivider
-import com.anto426.antoui.components.cards.AntoMediaController
-import com.anto426.antoui.components.pickers.AntoMonetPaletteSelector
-import com.anto426.antoui.components.selection.AntoSlider
-import com.anto426.antoui.components.cards.AntoStatusCard
-import com.anto426.antoui.components.cards.AntoStatusType
-import com.anto426.antoui.icons.AntoIcons
-import com.anto426.antoui.theme.monet.AntoMonetPresets
+import com.anto426.liquidmonet.components.cards.LiquidCard
+import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
+import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.cards.LiquidMediaController
+import com.anto426.liquidmonet.components.pickers.LiquidMonetPaletteSelector
+import com.anto426.liquidmonet.components.selection.LiquidSlider
+import com.anto426.liquidmonet.components.cards.LiquidStatusCard
+import com.anto426.liquidmonet.components.cards.LiquidStatusType
+import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.kyant.backdrop.Backdrop
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -70,26 +70,26 @@ fun HomeScreen(
     ) {
         // Monet Palette & Glass Intensity
         SectionTitle("Personalizzazione & Ottica Vetro")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
                     text = "Armonie Cromatiche Monet",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                AntoMonetPaletteSelector(
+                LiquidMonetPaletteSelector(
                     seeds = listOf(
-                        "Sapphire" to AntoMonetPresets.Sapphire,
-                        "Emerald" to AntoMonetPresets.Emerald,
-                        "Sunset" to AntoMonetPresets.Sunset,
-                        "Violet" to AntoMonetPresets.Violet
+                        "Sapphire" to LiquidMonetPresets.Sapphire,
+                        "Emerald" to LiquidMonetPresets.Emerald,
+                        "Sunset" to LiquidMonetPresets.Sunset,
+                        "Violet" to LiquidMonetPresets.Violet
                     ),
                     selectedIndex = selectedPresetIndex,
                     onSelectIndex = onSelectPreset,
                     backdropState = backdropState
                 )
 
-                AntoHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -99,7 +99,7 @@ fun HomeScreen(
                     Text("Intensità Vetro Liquido", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
                     Text("${(sliderVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
-                AntoSlider(
+                LiquidSlider(
                     value = sliderVal,
                     onValueChange = onSliderChange,
                     valueRange = 0f..1f,
@@ -110,7 +110,7 @@ fun HomeScreen(
 
         // Media Player
         SectionTitle("Player Multimediale")
-        AntoMediaController(
+        LiquidMediaController(
             title = "Cosmic Aurora",
             artist = "Electronic Soundscape",
             isPlaying = isPlayingMusic,
@@ -126,18 +126,18 @@ fun HomeScreen(
         // Control Center
         SectionTitle("Control Center Rapido")
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            AntoControlCenterTile(
+            LiquidControlCenterTile(
                 title = "Rete Wi-Fi",
                 subtitle = if (wifiActive) "Connesso • 5 GHz" else "Disattivato",
-                icon = AntoIcons.Phone,
+                icon = LiquidIcons.Phone,
                 active = wifiActive,
                 onClick = { wifiActive = !wifiActive },
                 backdropState = backdropState
             )
-            AntoControlCenterTile(
+            LiquidControlCenterTile(
                 title = "Bluetooth",
                 subtitle = if (bluetoothActive) "Dispositivi connessi" else "Non attivo",
-                icon = AntoIcons.Settings,
+                icon = LiquidIcons.Settings,
                 active = bluetoothActive,
                 onClick = { bluetoothActive = !bluetoothActive },
                 backdropState = backdropState
@@ -147,16 +147,16 @@ fun HomeScreen(
         // Status Cards
         SectionTitle("Stato di Sistema")
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            AntoStatusCard(
+            LiquidStatusCard(
                 title = "Sistema Operativo",
                 description = "Pipeline grafica AGSL e rendering attivi a 120 FPS.",
-                statusType = AntoStatusType.Success,
+                statusType = LiquidStatusType.Success,
                 backdropState = backdropState
             )
-            AntoStatusCard(
+            LiquidStatusCard(
                 title = "Spazio in Esaurimento",
                 description = "Rimangono meno di 2 GB di spazio disponibile su dispositivo.",
-                statusType = AntoStatusType.Warning,
+                statusType = LiquidStatusType.Warning,
                 backdropState = backdropState
             )
         }

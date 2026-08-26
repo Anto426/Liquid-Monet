@@ -20,18 +20,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.anto426.antoui.components.buttons.AntoButton
-import com.anto426.antoui.components.buttons.AntoButtonVariant
-import com.anto426.antoui.components.cards.AntoCard
-import com.anto426.antoui.components.selection.AntoChip
-import com.anto426.antoui.components.selection.AntoFilterChip
-import com.anto426.antoui.components.buttons.AntoFloatingActionButton
-import com.anto426.antoui.components.display.AntoHorizontalDivider
-import com.anto426.antoui.components.buttons.AntoIconButton
-import com.anto426.antoui.components.navigation.AntoLiquidTabRow
-import com.anto426.antoui.components.selection.AntoRatingBar
-import com.anto426.antoui.components.navigation.AntoTabData
-import com.anto426.antoui.icons.AntoIcons
+import com.anto426.liquidmonet.components.buttons.LiquidButton
+import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
+import com.anto426.liquidmonet.components.cards.LiquidCard
+import com.anto426.liquidmonet.components.selection.LiquidChip
+import com.anto426.liquidmonet.components.selection.LiquidFilterChip
+import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
+import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.buttons.LiquidIconButton
+import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
+import com.anto426.liquidmonet.components.navigation.LiquidTabBar
+import com.anto426.liquidmonet.components.selection.LiquidRatingBar
+import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 
 @Composable
@@ -49,20 +49,20 @@ fun ButtonsControlsScreen(
     ) {
         // Liquid Glass Tabs (Goccia Scorrevole Fluida)
         SectionTitle("Liquid Tabs con Goccia Ottica Scorrevole")
-        AntoLiquidTabRow(
-            tabs = listOf(
-                AntoTabData("Panoramica", AntoIcons.Home),
-                AntoTabData("Attività", AntoIcons.Refresh, badge = "3"),
-                AntoTabData("Preferiti", AntoIcons.Star)
+        LiquidTabBar(
+            items = listOf(
+                LiquidNavigationItem(label = "Panoramica", icon = LiquidIcons.Home),
+                LiquidNavigationItem(label = "Attività", icon = LiquidIcons.Refresh, badge = "3"),
+                LiquidNavigationItem(label = "Preferiti", icon = LiquidIcons.Star)
             ),
             selectedIndex = liquidTabIndex,
             onTabSelected = { liquidTabIndex = it },
             backdropState = backdropState
         )
 
-        // Matrice Pulsanti AntoButton
+        // Matrice Pulsanti LiquidButton
         SectionTitle("Matrice Pulsanti (10 Varianti in Vetro)")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Prominenti & Vetro Puro",
@@ -73,17 +73,17 @@ fun ButtonsControlsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AntoButton(
+                    LiquidButton(
                         text = "Primary",
                         onClick = { },
-                        variant = AntoButtonVariant.Primary,
+                        variant = LiquidButtonVariant.Primary,
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
-                    AntoButton(
+                    LiquidButton(
                         text = "Secondary",
                         onClick = { },
-                        variant = AntoButtonVariant.Secondary,
+                        variant = LiquidButtonVariant.Secondary,
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
@@ -93,17 +93,17 @@ fun ButtonsControlsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AntoButton(
+                    LiquidButton(
                         text = "Tonal",
                         onClick = { },
-                        variant = AntoButtonVariant.Tonal,
+                        variant = LiquidButtonVariant.Tonal,
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
-                    AntoButton(
+                    LiquidButton(
                         text = "Glass Pure",
                         onClick = { },
-                        variant = AntoButtonVariant.Glass,
+                        variant = LiquidButtonVariant.Glass,
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
@@ -113,17 +113,17 @@ fun ButtonsControlsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AntoButton(
+                    LiquidButton(
                         text = "Outlined",
                         onClick = { },
-                        variant = AntoButtonVariant.Outlined,
+                        variant = LiquidButtonVariant.Outlined,
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
-                    AntoButton(
+                    LiquidButton(
                         text = "Text",
                         onClick = { },
-                        variant = AntoButtonVariant.Text,
+                        variant = LiquidButtonVariant.Text,
                         backdropState = backdropState,
                         modifier = Modifier.weight(1f)
                     )
@@ -133,47 +133,47 @@ fun ButtonsControlsScreen(
 
         // Icon Buttons & FAB
         SectionTitle("Pulsanti Icona & Azione Flottante (FAB)")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AntoIconButton(
-                    icon = AntoIcons.PlayArrow,
+                LiquidIconButton(
+                    icon = LiquidIcons.PlayArrow,
                     onClick = { },
                     size = 46.dp,
                     iconSize = 22.dp,
                     backdropState = backdropState
                 )
-                AntoIconButton(
-                    icon = AntoIcons.Star,
+                LiquidIconButton(
+                    icon = LiquidIcons.Star,
                     onClick = { },
                     size = 46.dp,
                     iconSize = 22.dp,
                     backdropState = backdropState
                 )
-                AntoIconButton(
-                    icon = AntoIcons.Share,
+                LiquidIconButton(
+                    icon = LiquidIcons.Share,
                     onClick = { },
                     size = 46.dp,
                     iconSize = 22.dp,
                     backdropState = backdropState
                 )
-                AntoIconButton(
-                    icon = AntoIcons.Settings,
+                LiquidIconButton(
+                    icon = LiquidIcons.Settings,
                     onClick = { },
                     size = 46.dp,
                     iconSize = 22.dp,
                     backdropState = backdropState
                 )
-                AntoFloatingActionButton(
+                LiquidFloatingActionButton(
                     onClick = { },
                     size = 46.dp,
                     backdropState = backdropState
                 ) {
                     Icon(
-                        imageVector = AntoIcons.Add,
+                        imageVector = LiquidIcons.Add,
                         contentDescription = "Nuovo",
                         tint = Color.White,
                         modifier = Modifier.size(22.dp)
@@ -191,12 +191,12 @@ fun ButtonsControlsScreen(
                 .horizontalScroll(rememberScrollState())
         ) {
             listOf(
-                Triple("Tutti", AntoIcons.Home, "24"),
-                Triple("Preferiti", AntoIcons.Star, "8"),
-                Triple("Recenti", AntoIcons.Refresh, "12"),
-                Triple("Audio", AntoIcons.Settings, "5")
+                Triple("Tutti", LiquidIcons.Home, "24"),
+                Triple("Preferiti", LiquidIcons.Star, "8"),
+                Triple("Recenti", LiquidIcons.Refresh, "12"),
+                Triple("Audio", LiquidIcons.Settings, "5")
             ).forEach { (label, icon, count) ->
-                AntoFilterChip(
+                LiquidFilterChip(
                     selected = selectedChip == label,
                     onSelectedChange = { selectedChip = label },
                     label = label,
@@ -213,25 +213,25 @@ fun ButtonsControlsScreen(
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
         ) {
-            AntoChip(
+            LiquidChip(
                 label = "Monet M3",
                 onClick = { },
                 selected = true,
                 backdropState = backdropState
             )
-            AntoChip(
+            LiquidChip(
                 label = "Vetro Snell",
                 onClick = { },
                 onCloseClick = { },
                 backdropState = backdropState
             )
-            AntoChip(
+            LiquidChip(
                 label = "Liquid 2.0",
                 onClick = { },
                 onCloseClick = { },
                 backdropState = backdropState
             )
-            AntoChip(
+            LiquidChip(
                 label = "AGSL Shaders",
                 onClick = { },
                 backdropState = backdropState
@@ -240,13 +240,13 @@ fun ButtonsControlsScreen(
 
         // Rating Bar
         SectionTitle("Valutazione a Stelle (Rating Bar)")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AntoRatingBar(
+                LiquidRatingBar(
                     rating = starRating,
                     onRatingChanged = { starRating = it },
                     backdropState = backdropState

@@ -10,13 +10,13 @@
 - 🎨 **Monet Dynamic Color Theming**: Real-time palette harmonization with smooth animated transitions between seeds (`Sapphire`, `Emerald`, `Sunset`, `Violet`).
 - ⚡ **Next.js-Inspired Dynamic Backgrounds**: Synthesized canvas backgrounds including the iconic `RadiantBeam` spotlight with radial-masked sub-pixel grid, `Aurora`, `MeshGlow`, and `OrbitalPulse`.
 - 🌊 **Material 3 Expressive Components**:
-  - `AntoExpressiveTopBar` & `AntoAnimatedSearchField`
-  - `AntoFluidNavigationBar` & `AntoGlassBottomTabs`
-  - `AntoDialog` & `AntoSheet` (Optical crystal modal panels)
-  - `AntoCard`, `AntoButton`, `AntoSwitch`, `AntoSlider`
-  - `AntoLinearProgressIndicator` & `AntoCircularProgressIndicator` (Wavy & Standard)
-  - `AntoMediaController`, `AntoControlCenterTile`, `AntoFilterChip`, `AntoShimmerBox`
-  - `AntoMonetPaletteSelector`
+  - `LiquidTopBar` & `LiquidAnimatedSearchField`
+  - `LiquidNavigationBar` & `LiquidGlassBottomTabs`
+  - `LiquidDialog` & `LiquidSheet` (Optical crystal modal panels)
+  - `LiquidCard`, `LiquidButton`, `LiquidSwitch`, `LiquidSlider`
+  - `LiquidLinearProgressIndicator` & `LiquidCircularProgressIndicator` (Wavy & Standard)
+  - `LiquidMediaController`, `LiquidControlCenterTile`, `LiquidFilterChip`, `LiquidShimmerBox`
+  - `LiquidMonetPaletteSelector`
 
 ---
 
@@ -25,20 +25,20 @@
 ### 1. Setup Theme & Glass Scene
 
 ```kotlin
-AntoUITheme(
+LiquidMonetTheme(
     useMonetEngine = true,
-    customMonetSeed = AntoMonetPresets.Sapphire
+    customMonetSeed = LiquidMonetPresets.Sapphire
 ) {
-    AntoGlassScene(
+    LiquidGlassScene(
         modifier = Modifier.fillMaxSize(),
         background = {
-            AntoLiquidBackground(
-                effect = AntoBackgroundEffect.RadiantBeam
+            LiquidBackground(
+                effect = LiquidBackgroundEffect.RadiantBeam
             )
         }
     ) { backdropState ->
         // Your liquid glass UI components here
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Text("Powered by Liquid Monet")
         }
     }
@@ -48,13 +48,13 @@ AntoUITheme(
 ### 2. Add Floating Liquid Navigation Bar
 
 ```kotlin
-AntoFluidNavigationBar(
+LiquidNavigationBar(
     selectedIndex = selectedTab,
     onItemSelected = { selectedTab = it },
     items = listOf(
-        AntoNavItemData(AntoIcons.Home, "Home"),
-        AntoNavItemData(AntoIcons.Star, "Componenti"),
-        AntoNavItemData(AntoIcons.Settings, "Impostazioni")
+        LiquidNavItemData(LiquidIcons.Home, "Home"),
+        LiquidNavItemData(LiquidIcons.Star, "Componenti"),
+        LiquidNavItemData(LiquidIcons.Settings, "Impostazioni")
     ),
     backdropState = backdropState
 )

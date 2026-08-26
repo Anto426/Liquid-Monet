@@ -55,7 +55,15 @@ class DampedDragAnimation(
     private val velocityTracker = VelocityTracker()
 
     val value: Float get() = valueAnimation.value
-    val progress: Float get() = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+    val progress: Float
+        get() {
+            val span = valueRange.endInclusive - valueRange.start
+            return if (span.isFinite() && span > 0f) {
+                ((value - valueRange.start) / span).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
+        }
     val targetValue: Float get() = valueAnimation.targetValue
     val pressProgress: Float get() = pressProgressAnimation.value
     val scaleX: Float get() = scaleXAnimation.value
@@ -131,7 +139,9 @@ class DampedDragAnimation(
             Clock.System.now().toEpochMilliseconds(),
             Offset(value, 0f)
         )
-        val targetVelocity = velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)
+        val span = valueRange.endInclusive - valueRange.start
+        if (!span.isFinite() || span <= 0f) return
+        val targetVelocity = velocityTracker.calculateVelocity().x / span
         animationScope.launch { velocityAnimation.animateTo(targetVelocity, velocityAnimationSpec) }
     }
 }

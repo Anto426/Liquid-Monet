@@ -16,26 +16,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.anto426.antoui.components.cards.AntoAccordionItem
-import com.anto426.antoui.components.display.AntoAvatar
-import com.anto426.antoui.components.display.AntoAvatarGroup
-import com.anto426.antoui.components.display.AntoAvatarPresence
-import com.anto426.antoui.components.navigation.AntoBreadcrumbItem
-import com.anto426.antoui.components.navigation.AntoBreadcrumbs
-import com.anto426.antoui.components.cards.AntoCard
-import com.anto426.antoui.components.display.AntoEmptyState
-import com.anto426.antoui.components.navigation.AntoPageIndicator
-import com.anto426.antoui.components.navigation.AntoPagination
-import com.anto426.antoui.components.cards.AntoPreferenceItem
-import com.anto426.antoui.components.display.AntoSwipeToDismissBox
-import com.anto426.antoui.components.feedback.AntoToastState
-import com.anto426.antoui.components.feedback.AntoToastType
-import com.anto426.antoui.icons.AntoIcons
+import com.anto426.liquidmonet.components.cards.LiquidAccordionItem
+import com.anto426.liquidmonet.components.display.LiquidAvatar
+import com.anto426.liquidmonet.components.display.LiquidAvatarGroup
+import com.anto426.liquidmonet.components.display.LiquidAvatarPresence
+import com.anto426.liquidmonet.components.navigation.LiquidBreadcrumbItem
+import com.anto426.liquidmonet.components.navigation.LiquidBreadcrumbs
+import com.anto426.liquidmonet.components.cards.LiquidCard
+import com.anto426.liquidmonet.components.display.LiquidEmptyState
+import com.anto426.liquidmonet.components.navigation.LiquidPageIndicator
+import com.anto426.liquidmonet.components.navigation.LiquidPagination
+import com.anto426.liquidmonet.components.cards.LiquidPreferenceItem
+import com.anto426.liquidmonet.components.display.LiquidSwipeToDismissBox
+import com.anto426.liquidmonet.components.feedback.LiquidToastState
+import com.anto426.liquidmonet.components.feedback.LiquidToastType
+import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 
 @Composable
 fun NavigationGesturesScreen(
-    toastState: AntoToastState,
+    toastState: LiquidToastState,
     backdropState: Backdrop,
     modifier: Modifier = Modifier
 ) {
@@ -50,12 +50,12 @@ fun NavigationGesturesScreen(
     ) {
         // Breadcrumbs Trail
         SectionTitle("Percorso & Briciole di Pane (Breadcrumbs)")
-        AntoBreadcrumbs(
+        LiquidBreadcrumbs(
             items = listOf(
-                AntoBreadcrumbItem("Home") { toastState.show("Navigato a Home", type = AntoToastType.Info) },
-                AntoBreadcrumbItem("Impostazioni") { toastState.show("Navigato a Impostazioni", type = AntoToastType.Info) },
-                AntoBreadcrumbItem("Sicurezza & Accesso") { toastState.show("Navigato a Sicurezza", type = AntoToastType.Info) },
-                AntoBreadcrumbItem("Attuale")
+                LiquidBreadcrumbItem("Home") { toastState.show("Navigato a Home", type = LiquidToastType.Info) },
+                LiquidBreadcrumbItem("Impostazioni") { toastState.show("Navigato a Impostazioni", type = LiquidToastType.Info) },
+                LiquidBreadcrumbItem("Sicurezza & Accesso") { toastState.show("Navigato a Sicurezza", type = LiquidToastType.Info) },
+                LiquidBreadcrumbItem("Attuale")
             ),
             backdropState = backdropState
         )
@@ -63,10 +63,10 @@ fun NavigationGesturesScreen(
         // Accordion Expandable Panels
         SectionTitle("Pannelli Espandibili (Accordion)")
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            AntoAccordionItem(
+            LiquidAccordionItem(
                 title = "Architettura Snell & AGSL Shaders",
                 subtitle = "Dettagli sulla riflessione e rifrazione della luce",
-                leadingIcon = AntoIcons.Info,
+                leadingIcon = LiquidIcons.Info,
                 isExpanded = accordion1Open,
                 onExpandedChange = { accordion1Open = it },
                 backdropState = backdropState
@@ -78,10 +78,10 @@ fun NavigationGesturesScreen(
                 )
             }
 
-            AntoAccordionItem(
+            LiquidAccordionItem(
                 title = "Monet Dynamic Chromatic Tint",
                 subtitle = "Armonizzazione colore in tempo reale",
-                leadingIcon = AntoIcons.Star,
+                leadingIcon = LiquidIcons.Star,
                 isExpanded = accordion2Open,
                 onExpandedChange = { accordion2Open = it },
                 backdropState = backdropState
@@ -96,19 +96,19 @@ fun NavigationGesturesScreen(
 
         // Avatar & Presence
         SectionTitle("Avatar & Badge Presenza Liquid Glass")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    AntoAvatar(initials = "AG", presence = AntoAvatarPresence.Online, backdropState = backdropState)
-                    AntoAvatar(initials = "LM", presence = AntoAvatarPresence.Busy, backdropState = backdropState)
-                    AntoAvatar(presence = AntoAvatarPresence.Away, backdropState = backdropState)
+                    LiquidAvatar(initials = "AG", presence = LiquidAvatarPresence.Online, backdropState = backdropState)
+                    LiquidAvatar(initials = "LM", presence = LiquidAvatarPresence.Busy, backdropState = backdropState)
+                    LiquidAvatar(presence = LiquidAvatarPresence.Away, backdropState = backdropState)
                 }
 
-                AntoAvatarGroup(
+                LiquidAvatarGroup(
                     avatars = listOf("AL", "MK", "ST", "DV", "RK", "PX"),
                     maxDisplay = 3,
                     backdropState = backdropState
@@ -118,20 +118,20 @@ fun NavigationGesturesScreen(
 
         // Paginazione & Pager Indicator
         SectionTitle("Paginazione & Indicatori Pager")
-        AntoCard(backdropState = backdropState) {
+        LiquidCard(backdropState = backdropState) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                AntoPageIndicator(
+                LiquidPageIndicator(
                     pageCount = 5,
                     currentPage = pagerIndicatorPage,
                     onPageSelected = { pagerIndicatorPage = it },
                     backdropState = backdropState,
                     modifier = Modifier.fillMaxWidth()
                 )
-                AntoPagination(
+                LiquidPagination(
                     currentPage = paginationPage,
                     totalPages = 5,
                     onPageChange = { paginationPage = it },
@@ -143,32 +143,32 @@ fun NavigationGesturesScreen(
 
         // Swipe to Action
         SectionTitle("Gesto Swipe to Dismiss / Action")
-        AntoSwipeToDismissBox(
+        LiquidSwipeToDismissBox(
             onDismissLeft = {
-                toastState.show("Elemento archiviato!", type = AntoToastType.Info)
+                toastState.show("Elemento archiviato!", type = LiquidToastType.Info)
             },
             onDismissRight = {
-                toastState.show("Aggiunto ai preferiti!", type = AntoToastType.Success)
+                toastState.show("Aggiunto ai preferiti!", type = LiquidToastType.Success)
             },
             backdropState = backdropState
         ) {
-            AntoPreferenceItem(
+            LiquidPreferenceItem(
                 title = "Scorri a destra o sinistra",
                 subtitle = "Trascina per visualizzare le azioni rapide in vetro",
-                icon = AntoIcons.Share,
+                icon = LiquidIcons.Share,
                 backdropState = backdropState
             )
         }
 
         // Empty State Placeholder
         SectionTitle("Stato Vuoto (Empty State)")
-        AntoEmptyState(
+        LiquidEmptyState(
             title = "Nessun Nuovo Elemento",
             description = "Tutte le notifiche e le attività sono state completate con successo.",
-            icon = AntoIcons.Check,
+            icon = LiquidIcons.Check,
             actionButtonText = "Ricarica Dati",
             onActionClick = {
-                toastState.show("Dati aggiornati con successo!", type = AntoToastType.Success)
+                toastState.show("Dati aggiornati con successo!", type = LiquidToastType.Success)
             },
             backdropState = backdropState
         )

@@ -4,12 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.anto426.antoui.sdk"
+    namespace = "com.anto426.liquidmonet.sdk"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {

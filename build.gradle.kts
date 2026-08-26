@@ -6,7 +6,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.anto426.antoui"
+    group = "com.anto426.liquidmonet"
     version = "1.0"
 }
 

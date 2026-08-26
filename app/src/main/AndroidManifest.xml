@@ -5,7 +5,7 @@
         android:allowBackup="true"
         android:label="Liquid Monet"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AntoUIDemo">
+        android:theme="@style/Theme.LiquidMonetDemo">
         <activity
             android:name=".MainActivity"
             android:exported="true">
