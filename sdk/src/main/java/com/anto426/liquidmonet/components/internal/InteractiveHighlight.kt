@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 
 import androidx.compose.ui.graphics.isSpecified
 
+@androidx.compose.runtime.Stable
 class InteractiveHighlight(
     val animationScope: CoroutineScope,
     val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset }

@@ -39,6 +39,17 @@ enum class LiquidGlassRole {
     Navigation
 }
 
+/**
+ * Selects which backdrop wins when a custom glass component is hosted inside a scene.
+ *
+ * [SceneFirst] preserves the automatic SDK behavior. [ExplicitFirst] is intended for custom
+ * components that record a local [LayerBackdrop] and need to refract that exact layer.
+ */
+enum class LiquidGlassBackdropPolicy {
+    SceneFirst,
+    ExplicitFirst
+}
+
 /** Unscaled optical values for one glass role. */
 @Immutable
 data class LiquidGlassSurfaceStyle(
@@ -158,14 +169,26 @@ object LiquidGlassStyleManager {
 @Composable
 internal fun resolveLiquidGlassBackdrop(
     backdrop: Backdrop,
-    backdropState: Backdrop = backdrop
+    backdropState: Backdrop = backdrop,
+    policy: LiquidGlassBackdropPolicy = LiquidGlassBackdropPolicy.SceneFirst
 ): Backdrop {
     val sceneBackdrop = LocalLiquidGlassContentBackdrop.current
-    return when {
-        sceneBackdrop != null && sceneBackdrop != emptyBackdrop() -> sceneBackdrop
+    val explicitBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
         backdrop != emptyBackdrop() -> backdrop
-        else -> emptyBackdrop()
+        else -> null
+    }
+    return when (policy) {
+        LiquidGlassBackdropPolicy.SceneFirst -> when {
+            sceneBackdrop != null && sceneBackdrop != emptyBackdrop() -> sceneBackdrop
+            explicitBackdrop != null -> explicitBackdrop
+            else -> emptyBackdrop()
+        }
+        LiquidGlassBackdropPolicy.ExplicitFirst -> when {
+            explicitBackdrop != null -> explicitBackdrop
+            sceneBackdrop != null && sceneBackdrop != emptyBackdrop() -> sceneBackdrop
+            else -> emptyBackdrop()
+        }
     }
 }
 
@@ -184,9 +207,10 @@ fun Modifier.liquidGlass(
     preset: LiquidGlassPreset? = null,
     performance: LiquidGlassPerformanceState = LocalLiquidGlassPerformance.current,
     layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
-    exportedBackdrop: LayerBackdrop? = null
+    exportedBackdrop: LayerBackdrop? = null,
+    backdropPolicy: LiquidGlassBackdropPolicy = LiquidGlassBackdropPolicy.SceneFirst
 ): Modifier {
-    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop)
+    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, policy = backdropPolicy)
     val colorScheme = MaterialTheme.colorScheme
     val isLightSurface = colorScheme.surface.luminance() > 0.5f
     val style = LiquidGlassStyleManager.resolve(role)

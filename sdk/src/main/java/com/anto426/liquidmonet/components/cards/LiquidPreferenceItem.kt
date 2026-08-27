@@ -86,6 +86,7 @@ fun LiquidPreferenceItem(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    leadingContent: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
@@ -98,11 +99,6 @@ fun LiquidPreferenceItem(
     val iconHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
 
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isPressed && isInteractive) colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent,
-        label = "preferenceBg"
-    )
-
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
@@ -114,8 +110,12 @@ fun LiquidPreferenceItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
+            .graphicsLayer(liquidControlLayerBlock(isInteractive, interactiveHighlight) ?: {})
+            .liquidControlPressFeedback(
+                enabled = isInteractive,
+                interactiveHighlight = interactiveHighlight,
+                drawHighlightOverlay = false
+            )
             .then(
                 if (isInteractive) {
                     Modifier.clickable(
@@ -128,7 +128,10 @@ fun LiquidPreferenceItem(
             .padding(horizontal = 6.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
+        if (leadingContent != null) {
+            leadingContent()
+            Spacer(modifier = Modifier.width(12.dp))
+        } else if (icon != null) {
             Box(
                 modifier = Modifier
                     .size(38.dp)

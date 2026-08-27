@@ -32,9 +32,10 @@ fun LiquidGlass(
     refractionAmount: Dp = 32.dp,
     containerColor: Color? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    backdropPolicy: LiquidGlassBackdropPolicy = LiquidGlassBackdropPolicy.SceneFirst,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
+    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState, backdropPolicy)
     val surfaceBackdrop = rememberLayerBackdrop()
     Box(
         modifier = modifier.liquidGlass(
@@ -48,7 +49,8 @@ fun LiquidGlass(
                     refractionAmount = refractionAmount,
                     chromaticAberration = 0.18f
                 ),
-                exportedBackdrop = surfaceBackdrop
+                exportedBackdrop = surfaceBackdrop,
+                backdropPolicy = backdropPolicy
             )
     ) {
         CompositionLocalProvider(
