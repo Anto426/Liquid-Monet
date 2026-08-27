@@ -32,6 +32,7 @@ import com.anto426.liquidmonet.components.pickers.LiquidDatePickerField
 import com.anto426.liquidmonet.components.selection.LiquidSelect
 import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
@@ -117,7 +118,10 @@ fun ControlsInputHubScreen(
                 0 -> {
                     // Sotto-Schermata 1: Pulsanti & Azioni
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Matrice Pulsanti in Vetro Liquido")
+                        LiquidSectionHeader(
+                            title = "Matrice Pulsanti in Vetro Liquido",
+                            subtitle = "Confronta gerarchie e varianti senza rinunciare alla risposta elastica."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("Varianti Vetro Liquido", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f))
@@ -136,7 +140,10 @@ fun ControlsInputHubScreen(
                             }
                         }
 
-                        SectionTitle("Pulsanti Icona & Azione Flottante (FAB)")
+                        LiquidSectionHeader(
+                            title = "Pulsanti Icona & Azione Flottante (FAB)",
+                            subtitle = "Azioni rapide, compatte e accessibili anche senza etichetta visibile."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -153,7 +160,10 @@ fun ControlsInputHubScreen(
                             }
                         }
 
-                        SectionTitle("Valutazione a Stelle")
+                        LiquidSectionHeader(
+                            title = "Valutazione a Stelle",
+                            subtitle = "Seleziona un punteggio con feedback visivo e aptico."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -170,10 +180,16 @@ fun ControlsInputHubScreen(
                 1 -> {
                     // Sotto-Schermata 2: Campi & Form
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Barra di Ricerca")
+                        LiquidSectionHeader(
+                            title = "Barra di Ricerca",
+                            subtitle = "Filtra i contenuti con un campo liquido dedicato alla ricerca."
+                        )
                         LiquidSearchBar(query = searchVal, onQueryChange = { searchVal = it }, backdropState = backdropState)
 
-                        SectionTitle("Campi di Testo & Specializzati")
+                        LiquidSectionHeader(
+                            title = "Campi di Testo & Specializzati",
+                            subtitle = "Input testuali, password e formattazioni specifiche in un'unica famiglia."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 LiquidTextField(
@@ -208,7 +224,10 @@ fun ControlsInputHubScreen(
                 2 -> {
                     // Sotto-Schermata 3: Data, Ora & Colore
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Selettori di Data & Ora")
+                        LiquidSectionHeader(
+                            title = "Selettori di Data & Ora",
+                            subtitle = "Scegli valori temporali e opzioni da controlli coerenti con il tema."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
@@ -226,7 +245,10 @@ fun ControlsInputHubScreen(
                             }
                         }
 
-                        SectionTitle("Selettore Spettro Cromatico")
+                        LiquidSectionHeader(
+                            title = "Selettore Spettro Cromatico",
+                            subtitle = "Esplora lo spettro e restituisci il colore scelto in tempo reale."
+                        )
                         LiquidColorPicker(selectedColor = colorPickerVal, onColorSelected = { colorPickerVal = it }, backdropState = backdropState)
                     }
                 }
@@ -234,7 +256,10 @@ fun ControlsInputHubScreen(
                 else -> {
                     // Sotto-Schermata 4: Slider & Toggle
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Contatori Numerici & Codice OTP")
+                        LiquidSectionHeader(
+                            title = "Contatori Numerici & Codice OTP",
+                            subtitle = "Inserimenti brevi con vincoli, avanzamento e stato sempre leggibili."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 LiquidStepper(value = stepperVal, onValueChange = { stepperVal = it }, label = "Quantità Elementi", unit = "pz", minValue = 1, maxValue = 20, backdropState = backdropState)
@@ -244,7 +269,10 @@ fun ControlsInputHubScreen(
                             }
                         }
 
-                        SectionTitle("Controlli Booleani")
+                        LiquidSectionHeader(
+                            title = "Controlli Booleani",
+                            subtitle = "Switch, checkbox e radio per stati esclusivi o indipendenti."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
@@ -268,7 +296,10 @@ fun ControlsInputHubScreen(
                             }
                         }
 
-                        SectionTitle("Slider & Range Slider")
+                        LiquidSectionHeader(
+                            title = "Slider & Range Slider",
+                            subtitle = "Regola un valore o un intervallo seguendo la traccia colorata."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 Text("Slider Singolo: ${(sliderVal * 100).toInt()}%", color = Color.White, style = MaterialTheme.typography.bodyMedium)

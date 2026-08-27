@@ -3,12 +3,8 @@ package com.anto426.app.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,13 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.cards.LiquidMediaController
 import com.anto426.liquidmonet.components.pickers.LiquidPaletteOption
 import com.anto426.liquidmonet.components.pickers.LiquidPaletteSelector
@@ -70,7 +65,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         // Monet Palette & Glass Intensity
-        SectionTitle("Personalizzazione & Ottica Vetro")
+        LiquidSectionHeader("Personalizzazione & Ottica Vetro")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
@@ -110,7 +105,7 @@ fun HomeScreen(
         }
 
         // Media Player
-        SectionTitle("Player Multimediale")
+        LiquidSectionHeader("Player Multimediale")
         LiquidMediaController(
             title = "Cosmic Aurora",
             artist = "Electronic Soundscape",
@@ -125,7 +120,7 @@ fun HomeScreen(
         )
 
         // Control Center
-        SectionTitle("Control Center Rapido")
+        LiquidSectionHeader("Control Center Rapido")
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             LiquidControlCenterTile(
                 title = "Rete Wi-Fi",
@@ -146,7 +141,7 @@ fun HomeScreen(
         }
 
         // Status Cards
-        SectionTitle("Stato di Sistema")
+        LiquidSectionHeader("Stato di Sistema")
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             LiquidStatusCard(
                 title = "Sistema Operativo",
@@ -162,17 +157,4 @@ fun HomeScreen(
             )
         }
     }
-}
-
-@Composable
-fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium.copy(
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp
-        ),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.90f),
-        modifier = Modifier.padding(top = 10.dp, bottom = 2.dp)
-    )
 }

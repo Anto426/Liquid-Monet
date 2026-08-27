@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -25,17 +26,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
@@ -81,7 +90,44 @@ fun LiquidLazyFooter(
 ) {
     val performance = LocalLiquidGlassPerformance.current
     val hapticFeedback = LocalHapticFeedback.current
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val visible = state != LiquidLazyFooterState.Hidden
+    var lastVisibleState by remember {
+        mutableStateOf(
+            state.takeUnless { it == LiquidLazyFooterState.Hidden }
+                ?: LiquidLazyFooterState.Loading
+        )
+    }
+    val renderedState = state.takeUnless { it == LiquidLazyFooterState.Hidden }
+        ?: lastVisibleState
+    val liquidImpulse = remember { Animatable(0f) }
+    val transformOrigin = when (orientation) {
+        LiquidLazyFooterOrientation.Vertical -> TransformOrigin(0.5f, 1f)
+        LiquidLazyFooterOrientation.Horizontal -> TransformOrigin(
+            pivotFractionX = if (isLtr) 1f else 0f,
+            pivotFractionY = 0.5f
+        )
+    }
+
+    LaunchedEffect(state) {
+        if (state == LiquidLazyFooterState.Hidden) {
+            liquidImpulse.snapTo(0f)
+        } else {
+            lastVisibleState = state
+            // A single damped impulse makes Loading/End/Error changes feel liquid without
+            // running a permanent animation while an idle footer is on screen.
+            liquidImpulse.snapTo(1f)
+            liquidImpulse.animateTo(
+                targetValue = 0f,
+                animationSpec = LiquidGlassMotionSpecs.spring(
+                    performance = performance,
+                    dampingRatio = 0.48f,
+                    stiffness = 380f
+                )
+            )
+        }
+    }
+
     val enterTransition = fadeIn(LiquidGlassMotionSpecs.tween(performance, 190)) +
         scaleIn(
             animationSpec = LiquidGlassMotionSpecs.spring(
@@ -89,7 +135,8 @@ fun LiquidLazyFooter(
                 dampingRatio = 0.56f,
                 stiffness = 340f
             ),
-            initialScale = 0.82f
+            initialScale = 0.90f,
+            transformOrigin = transformOrigin
         ) + when (orientation) {
             LiquidLazyFooterOrientation.Vertical -> expandVertically(
                 animationSpec = LiquidGlassMotionSpecs.spring(
@@ -119,7 +166,8 @@ fun LiquidLazyFooter(
                 dampingRatio = 0.80f,
                 stiffness = 440f
             ),
-            targetScale = 0.88f
+            targetScale = 0.92f,
+            transformOrigin = transformOrigin
         ) + when (orientation) {
             LiquidLazyFooterOrientation.Vertical -> shrinkVertically(
                 animationSpec = LiquidGlassMotionSpecs.tween(performance, 170),
@@ -135,14 +183,11 @@ fun LiquidLazyFooter(
 
     AnimatedVisibility(
         visible = visible,
-        // Reserve a small drawing gutter for the under-damped scale spring. Lazy layouts clip at
-        // their viewport, so drawing the glass directly against the item bounds would otherwise
-        // cut the liquid overshoot. zIndex keeps that overshoot above adjacent lazy items.
+        // zIndex is applied to the lazy item root so the under-damped edge can draw over the
+        // neighbouring item. The drawing gutter lives inside AnimatedVisibility: Hidden must
+        // collapse to zero instead of leaving a phantom 12 dp footer behind.
         modifier = modifier
-            // AnimatedVisibility keeps drawing after visible becomes false; use a stable z-index
-            // so the exit bounce cannot fall underneath the neighbouring lazy item.
-            .zIndex(1f)
-            .padding(6.dp),
+            .zIndex(2f),
         enter = enterTransition,
         exit = exitTransition
     ) {
@@ -157,44 +202,67 @@ fun LiquidLazyFooter(
         }
 
         Box(
-            modifier = orientationModifier
-                .liquidGlass(
-                    backdrop = emptyBackdrop(),
-                    shape = shape,
-                    role = LiquidGlassRole.Surface
-                )
-                .then(
-                    if (state == LiquidLazyFooterState.Error && onRetry != null) {
-                        Modifier.clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            role = Role.Button
-                        ) {
-                            hapticFeedback.performHapticFeedback(
-                                HapticFeedbackType.TextHandleMove
-                            )
-                            onRetry()
-                        }
-                    } else {
-                        Modifier
-                    }
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .zIndex(2f)
+                .padding(6.dp),
             contentAlignment = Alignment.Center
         ) {
-            LiquidAnimatedSwitcher(
-                targetState = state,
-                transition = LiquidSwitcherTransition.LiquidMorph,
-                label = "LiquidLazyFooterState"
-            ) { currentState ->
-                LiquidLazyFooterContent(
-                    state = currentState,
-                    loadingLabel = loadingLabel,
-                    endLabel = endLabel,
-                    errorLabel = errorLabel,
-                    retryLabel = retryLabel,
-                    onRetry = onRetry
-                )
+            Box(
+                modifier = orientationModifier
+                    .graphicsLayer {
+                        val impulse = liquidImpulse.value
+                        this.transformOrigin = transformOrigin
+                        clip = false
+                        when (orientation) {
+                            LiquidLazyFooterOrientation.Vertical -> {
+                                scaleX = 1f + impulse * 0.045f
+                                scaleY = 1f - impulse * 0.10f
+                            }
+
+                            LiquidLazyFooterOrientation.Horizontal -> {
+                                scaleX = 1f - impulse * 0.10f
+                                scaleY = 1f + impulse * 0.045f
+                            }
+                        }
+                    }
+                    .liquidGlass(
+                        backdrop = emptyBackdrop(),
+                        shape = shape,
+                        role = LiquidGlassRole.Surface
+                    )
+                    .then(
+                        if (state == LiquidLazyFooterState.Error && onRetry != null) {
+                            Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                role = Role.Button
+                            ) {
+                                hapticFeedback.performHapticFeedback(
+                                    HapticFeedbackType.TextHandleMove
+                                )
+                                onRetry()
+                            }
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                LiquidAnimatedSwitcher(
+                    targetState = renderedState,
+                    transition = LiquidSwitcherTransition.LiquidMorph,
+                    label = "LiquidLazyFooterState"
+                ) { currentState ->
+                    LiquidLazyFooterContent(
+                        state = currentState,
+                        loadingLabel = loadingLabel,
+                        endLabel = endLabel,
+                        errorLabel = errorLabel,
+                        retryLabel = retryLabel,
+                        onRetry = onRetry
+                    )
+                }
             }
         }
     }

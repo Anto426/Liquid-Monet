@@ -24,6 +24,7 @@ import com.anto426.liquidmonet.components.navigation.LiquidBreadcrumbItem
 import com.anto426.liquidmonet.components.navigation.LiquidBreadcrumbs
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.display.LiquidEmptyState
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.navigation.LiquidPageIndicator
 import com.anto426.liquidmonet.components.navigation.LiquidPagination
 import com.anto426.liquidmonet.components.cards.LiquidPreferenceItem
@@ -49,7 +50,7 @@ fun NavigationGesturesScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Breadcrumbs Trail
-        SectionTitle("Percorso & Briciole di Pane (Breadcrumbs)")
+        LiquidSectionHeader("Percorso & Briciole di Pane (Breadcrumbs)")
         LiquidBreadcrumbs(
             items = listOf(
                 LiquidBreadcrumbItem("Home") { toastState.show("Navigato a Home", type = LiquidToastType.Info) },
@@ -61,7 +62,7 @@ fun NavigationGesturesScreen(
         )
 
         // Accordion Expandable Panels
-        SectionTitle("Pannelli Espandibili (Accordion)")
+        LiquidSectionHeader("Pannelli Espandibili (Accordion)")
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             LiquidAccordionItem(
                 title = "Architettura Snell & AGSL Shaders",
@@ -95,7 +96,7 @@ fun NavigationGesturesScreen(
         }
 
         // Avatar & Presence
-        SectionTitle("Avatar & Badge Presenza Liquid Glass")
+        LiquidSectionHeader("Avatar & Badge Presenza Liquid Glass")
         LiquidCard(backdropState = backdropState) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -117,7 +118,7 @@ fun NavigationGesturesScreen(
         }
 
         // Paginazione & Pager Indicator
-        SectionTitle("Paginazione & Indicatori Pager")
+        LiquidSectionHeader("Paginazione & Indicatori Pager")
         LiquidCard(backdropState = backdropState) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -142,7 +143,7 @@ fun NavigationGesturesScreen(
         }
 
         // Swipe to Action
-        SectionTitle("Gesto Swipe to Dismiss / Action")
+        LiquidSectionHeader("Gesto Swipe to Dismiss / Action")
         LiquidSwipeToDismissBox(
             onDismissLeft = {
                 toastState.show("Elemento archiviato!", type = LiquidToastType.Info)
@@ -161,7 +162,7 @@ fun NavigationGesturesScreen(
         }
 
         // Empty State Placeholder
-        SectionTitle("Stato Vuoto (Empty State)")
+        LiquidSectionHeader("Stato Vuoto (Empty State)")
         LiquidEmptyState(
             title = "Nessun Nuovo Elemento",
             description = "Tutte le notifiche e le attività sono state completate con successo.",

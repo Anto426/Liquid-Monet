@@ -22,6 +22,7 @@ import com.anto426.liquidmonet.components.display.LiquidAvatar
 import com.anto426.liquidmonet.components.display.LiquidAvatarPresence
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.cards.LiquidPreferenceItem
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.selection.LiquidSwitch
@@ -75,7 +76,10 @@ fun SettingsScreen(
         }
 
         // Connettività & Notifiche
-        SectionTitle("Connettività & Notifiche")
+        LiquidSectionHeader(
+            title = "Connettività & Notifiche",
+            subtitle = "Configura reti, avvisi e aspetto del vetro di sistema."
+        )
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 LiquidPreferenceItem(
@@ -124,7 +128,10 @@ fun SettingsScreen(
         }
 
         // Audio & Luminosità
-        SectionTitle("Luminosità & Volume Audio")
+        LiquidSectionHeader(
+            title = "Luminosità & Volume Audio",
+            subtitle = "Regola i livelli principali del dispositivo."
+        )
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
@@ -162,7 +169,10 @@ fun SettingsScreen(
         }
 
         // Info SDK & Diagnostica
-        SectionTitle("Informazioni SDK & Rendering")
+        LiquidSectionHeader(
+            title = "Informazioni SDK & Rendering",
+            subtitle = "Versione, pipeline grafica e capacità attive."
+        )
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 LiquidPreferenceItem(

@@ -32,6 +32,7 @@ import com.anto426.liquidmonet.components.feedback.LiquidDialog
 import com.anto426.liquidmonet.components.menu.LiquidDropdownMenu
 import com.anto426.liquidmonet.components.menu.LiquidMenuItem
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
 import com.anto426.liquidmonet.components.feedback.LiquidLoading
@@ -103,7 +104,10 @@ fun ModalsFeedbackHubScreen(
                 0 -> {
                     // Sotto-Schermata 1: Dialog & Sheet
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Finestre Modali & Bottom Sheet")
+                        LiquidSectionHeader(
+                            title = "Finestre Modali & Bottom Sheet",
+                            subtitle = "Presenta decisioni e dettagli temporanei sopra il contenuto corrente."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("Finestre in Vetro Ottico con Rifrazione Snell", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
@@ -119,7 +123,10 @@ fun ModalsFeedbackHubScreen(
                 1 -> {
                     // Sotto-Schermata 2: Dropdown Menu
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Menu a Tendina (Dropdown)")
+                        LiquidSectionHeader(
+                            title = "Menu a Tendina (Dropdown)",
+                            subtitle = "Verifica apertura, direzione e allineamento del menu rispetto all'ancora."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("Direzione Verticale", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
@@ -183,7 +190,10 @@ fun ModalsFeedbackHubScreen(
                 2 -> {
                     // Sotto-Schermata 3: Notifiche Toast
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Notifiche Toast in Cristallo Rifrattivo")
+                        LiquidSectionHeader(
+                            title = "Notifiche Toast in Cristallo Rifrattivo",
+                            subtitle = "Comunica esito, avvisi ed errori senza interrompere il flusso."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text("Tocca un pulsante per mostrare un Toast in puro vetro liquido:", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f), style = MaterialTheme.typography.bodySmall)
@@ -231,7 +241,10 @@ fun ModalsFeedbackHubScreen(
                 else -> {
                     // Sotto-Schermata 4: Caricamento & Shimmer
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Indicatori di Avanzamento & Skeleton")
+                        LiquidSectionHeader(
+                            title = "Indicatori di Avanzamento & Skeleton",
+                            subtitle = "Mostra progresso determinato, attese brevi e contenuti in preparazione."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 LiquidLoading(style = LiquidLoadingStyle.Linear, progress = 0.68f, message = "Avanzamento ondulatorio fluido (68%)", backdropState = backdropState)

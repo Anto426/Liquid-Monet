@@ -28,6 +28,7 @@ import com.anto426.liquidmonet.components.feedback.LiquidDialog
 import com.anto426.liquidmonet.components.menu.LiquidDropdownMenu
 import com.anto426.liquidmonet.components.menu.LiquidMenuItem
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
 import com.anto426.liquidmonet.components.feedback.LiquidLoading
@@ -73,7 +74,7 @@ fun ModalsFeedbackScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         // Finestre di Dialogo & Bottom Sheet
-        SectionTitle("Finestre Modali & Bottom Sheet")
+        LiquidSectionHeader("Finestre Modali & Bottom Sheet")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
@@ -104,7 +105,7 @@ fun ModalsFeedbackScreen(
         }
 
         // Dropdown Menu con Direzione & Allineamento
-        SectionTitle("Menu a Tendina (Dropdown con Ottica Liquida)")
+        LiquidSectionHeader("Menu a Tendina (Dropdown con Ottica Liquida)")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
@@ -193,7 +194,7 @@ fun ModalsFeedbackScreen(
         }
 
         // Notifiche Toast in Puro Cristallo
-        SectionTitle("Notifiche Toast in Cristallo Rifrattivo")
+        LiquidSectionHeader("Notifiche Toast in Cristallo Rifrattivo")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
@@ -272,7 +273,7 @@ fun ModalsFeedbackScreen(
         }
 
         // Caricamento & Indicatori di Avanzamento
-        SectionTitle("Animazioni di Caricamento & Shimmer")
+        LiquidSectionHeader("Animazioni di Caricamento & Shimmer")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 LiquidLoading(

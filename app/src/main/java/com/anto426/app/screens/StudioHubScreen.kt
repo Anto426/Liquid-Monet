@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
 import com.anto426.liquidmonet.components.cards.LiquidMediaController
@@ -106,7 +107,10 @@ fun StudioHubScreen(
                 0 -> {
                     // Sotto-Schermata 1: Panoramica & Monet
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Personalizzazione Cromatica Monet")
+                        LiquidSectionHeader(
+                            title = "Personalizzazione Cromatica Monet",
+                            subtitle = "Scegli palette dinamica, sfondo e intensità dell'ottica di vetro."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 Text(
@@ -158,7 +162,10 @@ fun StudioHubScreen(
                             }
                         }
 
-                        SectionTitle("Stato dei Servizi")
+                        LiquidSectionHeader(
+                            title = "Stato dei Servizi",
+                            subtitle = "Controlla in un colpo d'occhio rendering, sincronizzazione e risorse."
+                        )
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             LiquidStatusCard(
                                 title = "Pipeline Grafica",
@@ -179,7 +186,10 @@ fun StudioHubScreen(
                 1 -> {
                     // Sotto-Schermata 2: Media Player
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Player Multimediale Liquid Glass")
+                        LiquidSectionHeader(
+                            title = "Player Multimediale Liquid Glass",
+                            subtitle = "Riproduzione, avanzamento e controlli riuniti in una superficie rifrattiva."
+                        )
                         LiquidMediaController(
                             title = "Cosmic Aurora",
                             artist = "Electronic Soundscape • Lossless",
@@ -213,7 +223,10 @@ fun StudioHubScreen(
                 else -> {
                     // Sotto-Schermata 3: Control Center
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Control Center Rapido")
+                        LiquidSectionHeader(
+                            title = "Control Center Rapido",
+                            subtitle = "Attiva le funzioni principali con controlli compatti e risposta immediata."
+                        )
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             LiquidControlCenterTile(
                                 title = "Rete Wi-Fi",

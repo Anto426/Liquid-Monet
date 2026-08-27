@@ -31,6 +31,7 @@ import com.anto426.liquidmonet.components.cards.LiquidAccordionItem
 import com.anto426.liquidmonet.components.display.LiquidAvatar
 import com.anto426.liquidmonet.components.display.LiquidAvatarGroup
 import com.anto426.liquidmonet.components.display.LiquidAvatarPresence
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.layout.LiquidAnimatedSwitcher
 import com.anto426.liquidmonet.components.layout.LiquidLazyFooter
 import com.anto426.liquidmonet.components.layout.LiquidLazyFooterOrientation
@@ -115,7 +116,10 @@ fun NavigationHubScreen(
                 0 -> {
                     // Sotto-Schermata 1: Nav, Paginazione & Chip
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Percorso Breadcrumbs")
+                        LiquidSectionHeader(
+                            title = "Percorso Breadcrumbs",
+                            subtitle = "Mostra posizione e livelli attraversabili dentro una gerarchia."
+                        )
                         LiquidBreadcrumbs(
                             items = listOf(
                                 LiquidBreadcrumbItem("Home") { toastState.show("Navigato a Home", type = LiquidToastType.Info) },
@@ -126,7 +130,10 @@ fun NavigationHubScreen(
                             backdropState = backdropState
                         )
 
-                        SectionTitle("Indicatori Pager & Paginazione")
+                        LiquidSectionHeader(
+                            title = "Indicatori Pager & Paginazione",
+                            subtitle = "Rendi evidente la pagina corrente e consenti il salto diretto."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -153,7 +160,10 @@ fun NavigationHubScreen(
                             }
                         }
 
-                        SectionTitle("Cambio Contenuto Animato")
+                        LiquidSectionHeader(
+                            title = "Cambio Contenuto Animato",
+                            subtitle = "Passa tra viste con continuità, direzione e inerzia liquide."
+                        )
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
@@ -229,7 +239,10 @@ fun NavigationHubScreen(
                             }
                         }
 
-                        SectionTitle("Selezione Multipla Chip")
+                        LiquidSectionHeader(
+                            title = "Selezione Multipla Chip",
+                            subtitle = "Seleziona singoli filtri oppure applicali e rimuovili tutti insieme."
+                        )
                         LiquidChipSelectionGroup(
                             items = listOf("Monet M3", "Vetro Snell", "Liquid 2.0", "AGSL Shaders"),
                             selectedItems = selectedChips,
@@ -260,7 +273,10 @@ fun NavigationHubScreen(
                 1 -> {
                     // Sotto-Schermata 2: Accordion Espandibili
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Pannelli a Fisarmonica (Accordion)")
+                        LiquidSectionHeader(
+                            title = "Pannelli a Fisarmonica (Accordion)",
+                            subtitle = "Rivela informazioni secondarie mantenendo compatta la schermata."
+                        )
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             LiquidAccordionItem(
                                 title = "Architettura Snell & AGSL Shaders",
@@ -298,7 +314,10 @@ fun NavigationHubScreen(
                 2 -> {
                     // Sotto-Schermata 3: Gesti, Avatar & Empty State
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle("Gesto Swipe to Dismiss / Action")
+                        LiquidSectionHeader(
+                            title = "Gesto Swipe to Dismiss / Action",
+                            subtitle = "Scorri l'elemento per scoprire azioni contestuali e completarle."
+                        )
                         LiquidSwipeToDismissBox(
                             onDismissLeft = { toastState.show("Elemento archiviato!", type = LiquidToastType.Info) },
                             onDismissRight = { toastState.show("Aggiunto ai preferiti!", type = LiquidToastType.Success) },
@@ -312,7 +331,10 @@ fun NavigationHubScreen(
                             )
                         }
 
-                        SectionTitle("Avatar & Badge Presenza")
+                        LiquidSectionHeader(
+                            title = "Avatar & Badge Presenza",
+                            subtitle = "Identità, stato e gruppi rimangono leggibili anche in poco spazio."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -324,7 +346,10 @@ fun NavigationHubScreen(
                             }
                         }
 
-                        SectionTitle("Stato Vuoto (Empty State)")
+                        LiquidSectionHeader(
+                            title = "Stato Vuoto (Empty State)",
+                            subtitle = "Spiega l'assenza di contenuti e propone il prossimo passo."
+                        )
                         LiquidEmptyState(
                             title = "Nessun Nuovo Elemento",
                             description = "Tutte le notifiche e le attività sono state completate con successo.",
@@ -334,7 +359,10 @@ fun NavigationHubScreen(
                             backdropState = backdropState
                         )
 
-                        SectionTitle("Footer Lazy Verticale & Orizzontale")
+                        LiquidSectionHeader(
+                            title = "Footer Lazy Verticale & Orizzontale",
+                            subtitle = "Conclude LazyColumn e LazyRow con stati liquidi, rimbalzo e azione di recupero."
+                        )
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
@@ -366,7 +394,10 @@ fun NavigationHubScreen(
                                 .height(220.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(3) { index ->
+                            items(
+                                count = 5,
+                                key = { index -> "vertical-footer-demo-$index" }
+                            ) { index ->
                                 LiquidCard(
                                     backdropState = backdropState,
                                     contentPadding = 12.dp
@@ -377,7 +408,7 @@ fun NavigationHubScreen(
                                     )
                                 }
                             }
-                            item {
+                            item(key = "vertical-liquid-footer") {
                                 LiquidLazyFooter(
                                     state = footerState,
                                     orientation = LiquidLazyFooterOrientation.Vertical,
@@ -401,7 +432,10 @@ fun NavigationHubScreen(
                                 .height(112.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(3) { index ->
+                            items(
+                                count = 4,
+                                key = { index -> "horizontal-footer-demo-$index" }
+                            ) { index ->
                                 LiquidCard(
                                     modifier = Modifier.width(164.dp),
                                     backdropState = backdropState,
@@ -413,7 +447,7 @@ fun NavigationHubScreen(
                                     )
                                 }
                             }
-                            item {
+                            item(key = "horizontal-liquid-footer") {
                                 LiquidLazyFooter(
                                     state = footerState,
                                     orientation = LiquidLazyFooterOrientation.Horizontal,
@@ -442,7 +476,10 @@ fun NavigationHubScreen(
                             }
                         }
 
-                        SectionTitle("Connettività & Notifiche")
+                        LiquidSectionHeader(
+                            title = "Connettività & Notifiche",
+                            subtitle = "Gestisci servizi e avvisi con la gerarchia delle impostazioni Android."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 LiquidPreferenceItem(
@@ -477,7 +514,10 @@ fun NavigationHubScreen(
                             }
                         }
 
-                        SectionTitle("Luminosità & Volume")
+                        LiquidSectionHeader(
+                            title = "Luminosità & Volume",
+                            subtitle = "Regola i livelli principali e leggine subito il valore corrente."
+                        )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

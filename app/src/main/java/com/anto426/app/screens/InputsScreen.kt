@@ -23,6 +23,7 @@ import com.anto426.liquidmonet.components.pickers.LiquidDatePickerDialog
 import com.anto426.liquidmonet.components.pickers.LiquidDatePickerField
 import com.anto426.liquidmonet.components.selection.LiquidSelect
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.inputs.LiquidOtpInput
 import com.anto426.liquidmonet.components.selection.LiquidRadioButton
 import com.anto426.liquidmonet.components.selection.LiquidRangeSlider
@@ -75,7 +76,7 @@ fun InputsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Barra di Ricerca
-        SectionTitle("Barra di Ricerca in Vetro")
+        LiquidSectionHeader("Barra di Ricerca in Vetro")
         LiquidSearchBar(
             query = searchVal,
             onQueryChange = { searchVal = it },
@@ -83,7 +84,7 @@ fun InputsScreen(
         )
 
         // Campi Data & Ora
-        SectionTitle("Selettori Data & Ora Liquid Glass")
+        LiquidSectionHeader("Selettori Data & Ora Liquid Glass")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
@@ -108,7 +109,7 @@ fun InputsScreen(
         }
 
         // Campi di Testo & Password
-        SectionTitle("Campi di Testo, Password & Specializzati")
+        LiquidSectionHeader("Campi di Testo, Password & Specializzati")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 LiquidTextField(
@@ -178,7 +179,7 @@ fun InputsScreen(
         }
 
         // Stepper & OTP Code
-        SectionTitle("Contatori Numerici & Codice OTP")
+        LiquidSectionHeader("Contatori Numerici & Codice OTP")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 LiquidStepper(
@@ -205,7 +206,7 @@ fun InputsScreen(
         }
 
         // Controlli Booleani & Selezione
-        SectionTitle("Interruttori, Checkbox & Radio")
+        LiquidSectionHeader("Interruttori, Checkbox & Radio")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(
@@ -267,7 +268,7 @@ fun InputsScreen(
         }
 
         // Sliders & Color Picker
-        SectionTitle("Slider, Range Slider & Selettore Colore")
+        LiquidSectionHeader("Slider, Range Slider & Selettore Colore")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(

@@ -26,6 +26,7 @@ import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.selection.LiquidChip
 import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
@@ -47,7 +48,7 @@ fun ButtonsControlsScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         // Liquid Glass Tabs (Goccia Scorrevole Fluida)
-        SectionTitle("Liquid Tabs con Goccia Ottica Scorrevole")
+        LiquidSectionHeader("Liquid Tabs con Goccia Ottica Scorrevole")
         LiquidTabBar(
             items = listOf(
                 LiquidNavigationItem(label = "Panoramica", icon = LiquidIcons.Home),
@@ -60,7 +61,7 @@ fun ButtonsControlsScreen(
         )
 
         // Matrice Pulsanti LiquidButton
-        SectionTitle("Matrice Pulsanti (10 Varianti in Vetro)")
+        LiquidSectionHeader("Matrice Pulsanti (10 Varianti in Vetro)")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
@@ -131,7 +132,7 @@ fun ButtonsControlsScreen(
         }
 
         // Icon Buttons & FAB
-        SectionTitle("Pulsanti Icona & Azione Flottante (FAB)")
+        LiquidSectionHeader("Pulsanti Icona & Azione Flottante (FAB)")
         LiquidCard(backdropState = backdropState) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -182,7 +183,7 @@ fun ButtonsControlsScreen(
         }
 
         // Filter Chips & Tags
-        SectionTitle("Filtri & Chip Interattivi")
+        LiquidSectionHeader("Filtri & Chip Interattivi")
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
@@ -238,7 +239,7 @@ fun ButtonsControlsScreen(
         }
 
         // Rating Bar
-        SectionTitle("Valutazione a Stelle (Rating Bar)")
+        LiquidSectionHeader("Valutazione a Stelle (Rating Bar)")
         LiquidCard(backdropState = backdropState) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
