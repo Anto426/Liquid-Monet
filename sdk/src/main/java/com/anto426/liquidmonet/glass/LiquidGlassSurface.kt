@@ -95,18 +95,8 @@ object LiquidGlassStyleManager {
         innerShadowAlpha = 0.18f
     )
 
-    private val sheet = LiquidGlassSurfaceStyle(
-        preset = LiquidGlassPresets.Immersive,
-        lightSurfaceAlpha = 0.12f,
-        darkSurfaceAlpha = 0.22f,
-        lightBrightness = 0.12f,
-        saturation = 1.38f,
-        highlightAlpha = 0.68f,
-        shadowRadius = 24.dp,
-        shadowAlpha = 0.22f,
-        innerShadowRadius = 2.dp,
-        innerShadowAlpha = 0.16f
-    )
+    // Dialog and sheet use the same modal optics; their placement is the only visual difference.
+    private val sheet = dialog.copy()
 
     private val menu = LiquidGlassSurfaceStyle(
         preset = LiquidGlassPresets.Navigation,

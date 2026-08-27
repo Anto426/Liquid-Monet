@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
-import com.kyant.backdrop.catalog.components.LiquidGlassBottomTab
-import com.kyant.backdrop.catalog.components.LiquidGlassBottomTabs
+import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTab
+import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTabs
 import com.kyant.shapes.Capsule
 
 data class LiquidNavigationItem(

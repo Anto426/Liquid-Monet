@@ -1,4 +1,4 @@
-package com.kyant.backdrop.catalog.components
+package com.anto426.liquidmonet.components.internal
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

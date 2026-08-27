@@ -38,6 +38,10 @@ fun LiquidGlassScene(
 ) {
     val backgroundBackdrop = rememberLayerBackdrop()
     val contentBackdrop = rememberLayerBackdrop()
+    // Modal glass must refract the complete scene that is visibly behind it, including bars,
+    // floating actions and non-modal overlays. Recording only the scrollable content makes a
+    // bottom sheet sample an empty/dark area where those elements actually are.
+    val modalBackdrop = rememberLayerBackdrop()
     val overlayState = rememberLiquidGlassOverlayState()
     val modalOverlayState = rememberLiquidGlassModalOverlayState()
     CompositionLocalProvider(
@@ -57,17 +61,23 @@ fun LiquidGlassScene(
                     }
                 )
         ) {
-            Box(modifier = Modifier.fillMaxSize().layerBackdrop(contentBackdrop)) {
-                Box(modifier = Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
-                    background()
+            Box(modifier = Modifier.fillMaxSize().layerBackdrop(modalBackdrop)) {
+                Box(modifier = Modifier.fillMaxSize().layerBackdrop(contentBackdrop)) {
+                    Box(modifier = Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
+                        background()
+                    }
+                    content(backgroundBackdrop)
                 }
-                content(backgroundBackdrop)
+                CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides contentBackdrop) {
+                    topBar?.invoke(this@Box, contentBackdrop)
+                    bottomBar?.invoke(this@Box, contentBackdrop)
+                    overlay?.invoke(this@Box, contentBackdrop)
+                    LiquidGlassOverlayHost(overlayState)
+                }
             }
-            CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides contentBackdrop) {
-                topBar?.invoke(this@Box, contentBackdrop)
-                bottomBar?.invoke(this@Box, contentBackdrop)
-                overlay?.invoke(this@Box, contentBackdrop)
-                LiquidGlassOverlayHost(overlayState)
+
+            // Keep the modal host outside the recorded layer to prevent recursive sampling.
+            CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides modalBackdrop) {
                 LiquidGlassModalOverlayHost(modalOverlayState)
             }
         }

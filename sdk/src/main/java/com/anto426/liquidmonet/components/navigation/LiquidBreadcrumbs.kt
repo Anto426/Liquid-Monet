@@ -114,7 +114,7 @@ private fun LiquidBreadcrumbItemView(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         role = Role.Button,
-                        onClick = { item.onClick?.invoke() }
+                        onClick = { item.onClick.invoke() }
                     )
                 } else Modifier
             )

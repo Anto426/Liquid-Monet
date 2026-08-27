@@ -3,8 +3,8 @@ package com.anto426.liquidmonet.components.navigation
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -25,16 +25,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
-import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
-import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
-import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
@@ -67,17 +66,10 @@ fun LiquidPageIndicator(
 
     val safePageCount = pageCount.coerceAtLeast(1)
     val safeCurrentPage = currentPage.coerceIn(0, safePageCount - 1)
-    val barHighlight = rememberLiquidControlHighlight()
 
     Box(
         modifier = modifier
             .height(50.dp)
-            .graphicsLayer(liquidControlLayerBlock(true, barHighlight) ?: {})
-            .liquidControlPressFeedback(
-                enabled = true,
-                interactiveHighlight = barHighlight,
-                drawHighlightOverlay = false
-            )
             .liquidGlass(
                 backdrop = effectiveBackdrop,
                 shape = Capsule(),
@@ -92,9 +84,10 @@ fun LiquidPageIndicator(
             contentAlignment = Alignment.CenterStart
         ) {
             val slotWidth = maxWidth / safePageCount
+            val activeWidth = dotSize * 1.5f
 
             val slidingOffset by animateDpAsState(
-                targetValue = slotWidth * safeCurrentPage + (slotWidth - dotSize) / 2f,
+                targetValue = slotWidth * safeCurrentPage + (slotWidth - activeWidth) / 2f,
                 animationSpec = spring(
                     dampingRatio = 0.65f,
                     stiffness = 320f
@@ -102,14 +95,53 @@ fun LiquidPageIndicator(
                 label = "pageIndicatorDropletOffset"
             )
 
-            // Active Sliding Liquid Glass Droplet Indicator with Integrated Dynamic Color & Radiant Halo
+            // Equal-Width Interactive Dot Slots
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                for (i in 0 until safePageCount) {
+                    val isClickable = onPageSelected != null
+                    val isSelected = i == safeCurrentPage
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp)
+                            .then(
+                                if (isClickable) {
+                                    Modifier.selectable(
+                                        selected = isSelected,
+                                        interactionSource = remember(i) { MutableInteractionSource() },
+                                        indication = null,
+                                        role = Role.Tab,
+                                        onClick = { onPageSelected(i) }
+                                    )
+                                } else {
+                                    Modifier.semantics { selected = isSelected }
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(dotSize)
+                                .clip(Capsule())
+                                .background(colorScheme.onSurface.copy(alpha = 0.24f))
+                        )
+                    }
+                }
+            }
+
+            // The animated droplet is the only selected mark. Keeping the base dots neutral
+            // prevents a second selected dot from flashing while this one is moving.
             Box(
                 modifier = Modifier
                     .offset(x = slidingOffset)
-                    .size(width = dotSize * 1.5f, height = dotSize)
+                    .zIndex(1f)
+                    .size(width = activeWidth, height = dotSize)
                     .drawBehind {
                         val glowRadius = size.maxDimension * 2.2f
-                        // Radiant Monet Chromatic Luminescence Bloom
                         drawCircle(
                             brush = Brush.radialGradient(
                                 colors = listOf(
@@ -134,42 +166,6 @@ fun LiquidPageIndicator(
                         )
                     )
             )
-
-            // Equal-Width Interactive Dot Slots
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (i in 0 until safePageCount) {
-                    val isClickable = onPageSelected != null
-                    val isSelected = i == safeCurrentPage
-                    val dotColor = if (isSelected) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.24f)
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(50.dp)
-                            .then(
-                                if (isClickable) {
-                                    Modifier.clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        role = Role.Button,
-                                        onClick = { onPageSelected(i) }
-                                    )
-                                } else Modifier
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(dotSize)
-                                .clip(Capsule())
-                                .background(dotColor)
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -198,17 +194,10 @@ fun LiquidPagination(
     val safeCurrentPage = currentPage.coerceIn(1, safeTotalPages)
     val itemHeight = 50.dp
     val buttonSize = 36.dp
-    val paginationHighlight = rememberLiquidControlHighlight()
 
     Row(
         modifier = modifier
             .height(itemHeight)
-            .graphicsLayer(liquidControlLayerBlock(true, paginationHighlight) ?: {})
-            .liquidControlPressFeedback(
-                enabled = true,
-                interactiveHighlight = paginationHighlight,
-                drawHighlightOverlay = false
-            )
             .liquidGlass(
                 backdrop = effectiveBackdrop,
                 shape = Capsule(),
@@ -222,8 +211,10 @@ fun LiquidPagination(
         // Previous Page Button
         LiquidIconButton(
             icon = LiquidIcons.ChevronLeft,
-            onClick = { if (currentPage > 1) onPageChange(currentPage - 1) },
-            enabled = currentPage > 1,
+            onClick = {
+                if (safeCurrentPage > 1) onPageChange(safeCurrentPage - 1)
+            },
+            enabled = safeCurrentPage > 1,
             size = buttonSize,
             backdropState = effectiveBackdrop
         )
@@ -288,10 +279,11 @@ fun LiquidPagination(
                         modifier = Modifier
                             .weight(1f)
                             .height(itemHeight)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
+                            .selectable(
+                                selected = isSelected,
+                                interactionSource = remember(p) { MutableInteractionSource() },
                                 indication = null,
-                                role = Role.Button,
+                                role = Role.Tab,
                                 onClick = { onPageChange(p) }
                             ),
                         contentAlignment = Alignment.Center
@@ -312,8 +304,10 @@ fun LiquidPagination(
         // Next Page Button
         LiquidIconButton(
             icon = LiquidIcons.ChevronRight,
-            onClick = { if (currentPage < safeTotalPages) onPageChange(currentPage + 1) },
-            enabled = currentPage < safeTotalPages,
+            onClick = {
+                if (safeCurrentPage < safeTotalPages) onPageChange(safeCurrentPage + 1)
+            },
+            enabled = safeCurrentPage < safeTotalPages,
             size = buttonSize,
             backdropState = effectiveBackdrop
         )

@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
-import com.kyant.backdrop.catalog.components.LiquidGlassBottomTab
-import com.kyant.backdrop.catalog.components.LiquidGlassBottomTabs
+import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTab
+import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTabs
 import com.kyant.shapes.Capsule
 
 /**
@@ -76,8 +76,10 @@ private fun AdaptiveTabItem(
     contentColor: Color
 ) {
     val count = tabsCount.coerceAtLeast(1)
-    val hasIcon = item.icon != null
-    val hasBadge = !item.badge.isNullOrEmpty()
+    val icon = item.icon
+    val badge = item.badge?.takeIf(String::isNotEmpty)
+    val hasIcon = icon != null
+    val hasBadge = badge != null
     val isLongText = item.label.length > 7
 
     val fontSize = when {
@@ -119,7 +121,7 @@ private fun AdaptiveTabItem(
             verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
         ) {
             Icon(
-                imageVector = item.icon!!,
+                imageVector = icon,
                 contentDescription = item.label,
                 tint = contentColor,
                 modifier = Modifier.size(iconSize)
@@ -139,7 +141,7 @@ private fun AdaptiveTabItem(
                     textAlign = TextAlign.Center
                 )
                 if (hasBadge) {
-                    CompactBadge(badge = item.badge!!, contentColor = contentColor, count = count)
+                    CompactBadge(badge = badge, contentColor = contentColor, count = count)
                 }
             }
         }
@@ -153,7 +155,7 @@ private fun AdaptiveTabItem(
         ) {
             if (hasIcon) {
                 Icon(
-                    imageVector = item.icon!!,
+                    imageVector = icon,
                     contentDescription = item.label,
                     tint = contentColor,
                     modifier = Modifier.size(iconSize)
@@ -170,7 +172,7 @@ private fun AdaptiveTabItem(
                 textAlign = TextAlign.Center
             )
             if (hasBadge) {
-                CompactBadge(badge = item.badge!!, contentColor = contentColor, count = count)
+                CompactBadge(badge = badge, contentColor = contentColor, count = count)
             }
         }
     }

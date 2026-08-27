@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
-import com.kyant.backdrop.catalog.components.LiquidGlassButton
+import com.anto426.liquidmonet.components.internal.LiquidGlassButton
 import com.kyant.shapes.Capsule
 
 /**

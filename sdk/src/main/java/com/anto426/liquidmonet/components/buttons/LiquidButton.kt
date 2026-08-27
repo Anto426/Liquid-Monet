@@ -35,7 +35,7 @@ import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.feedback.LiquidCircularProgressIndicator
-import com.kyant.backdrop.catalog.components.LiquidGlassButton
+import com.anto426.liquidmonet.components.internal.LiquidGlassButton
 
 /**
  * LiquidButton / LiquidButton - Single Unified Liquid Glass Button Component.

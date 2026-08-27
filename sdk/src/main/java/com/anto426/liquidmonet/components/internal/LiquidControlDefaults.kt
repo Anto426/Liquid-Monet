@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.isSpecified
 import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
 import com.anto426.liquidmonet.theme.monet.blend
-import com.kyant.backdrop.catalog.utils.InteractiveHighlight
 import com.kyant.shapes.Capsule
 import kotlin.math.abs
 import kotlin.math.atan2

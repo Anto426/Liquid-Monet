@@ -1,28 +1,31 @@
-# 💧 Liquid Monet SDK
+# Liquid Monet SDK
 
-**Liquid Monet** is a cutting-edge, high-performance UI library for Jetpack Compose that seamlessly unites **Optical Liquid Glassmorphism** (AGSL Snell Refraction, Lens Physics, 3D Specular Highlights) with **Google Material 3 Expressive & Monet Dynamic Color**.
-
----
-
-## ✨ Features
-
-- 💎 **Pure Optical Liquid Glass**: Crystal-clear refraction with Snell's law, chromatic aberration, specular reflections, and realistic 3D depth shadows.
-- 🎨 **Monet Dynamic Color Theming**: Real-time palette harmonization with smooth animated transitions between seeds (`Sapphire`, `Emerald`, `Sunset`, `Violet`).
-- ⚡ **Next.js-Inspired Dynamic Backgrounds**: Synthesized canvas backgrounds including the iconic `RadiantBeam` spotlight with radial-masked sub-pixel grid, `Aurora`, `MeshGlow`, and `OrbitalPulse`.
-- 🌊 **Material 3 Expressive Components**:
-  - `LiquidTopBar` & `LiquidAnimatedSearchField`
-  - `LiquidNavigationBar` & `LiquidGlassBottomTabs`
-  - `LiquidDialog` & `LiquidSheet` (Optical crystal modal panels)
-  - `LiquidCard`, `LiquidButton`, `LiquidSwitch`, `LiquidSlider`
-  - `LiquidLinearProgressIndicator` & `LiquidCircularProgressIndicator` (Wavy & Standard)
-  - `LiquidMediaController`, `LiquidControlCenterTile`, `LiquidFilterChip`, `LiquidShimmerBox`
-  - `LiquidMonetPaletteSelector`
+**Liquid Monet** is a Jetpack Compose UI library that combines adaptive Material 3 controls,
+Monet color and real optical glass (blur, lens refraction, chromatic aberration and highlights).
+The public API lives under `com.anto426.liquidmonet`; renderer implementation details are internal.
 
 ---
 
-## 🚀 Getting Started
+## Features
 
-### 1. Setup Theme & Glass Scene
+- **Component-owned optical glass**: cards, controls, menus, bars, dialogs, sheets, toast and media surfaces sample the active scene themselves.
+- **Adaptive rendering engine**: quality, refraction and motion respond to the device/performance profile.
+- **Monet dynamic color**: real-time palette harmonization with animated seed changes.
+- **Material-style controls with liquid interaction**:
+  - `LiquidTopBar` & `LiquidSearchBar`
+  - `LiquidNavigationBar` & `LiquidTabBar`
+  - `LiquidDialog`, `LiquidSheet`, `LiquidToast` & `LiquidSnackbar`
+  - `LiquidCard`, `LiquidButton`, `LiquidFloatingActionButton`, `LiquidSwitch`, `LiquidSlider` & `LiquidRangeSlider`
+  - `LiquidLoading`, `LiquidLinearProgressIndicator` & `LiquidCircularProgressIndicator`
+  - `LiquidMediaController`, `LiquidControlCenterTile`, `LiquidChip` & `LiquidShimmerBox`
+  - `LiquidAnimatedSwitcher`, `LiquidChipSelectionGroup` & `LiquidLazyFooter`
+  - one `LiquidTextField` API with `LiquidTextFieldType` for text, email, phone, number, password and text area
+
+---
+
+## Getting started
+
+### Theme and glass scene
 
 ```kotlin
 LiquidMonetTheme(
@@ -36,36 +39,51 @@ LiquidMonetTheme(
                 effect = LiquidBackgroundEffect.RadiantBeam
             )
         }
-    ) { backdropState ->
-        // Your liquid glass UI components here
-        LiquidCard(backdropState = backdropState) {
+    ) { backdrop ->
+        LiquidCard(backdropState = backdrop) {
             Text("Powered by Liquid Monet")
         }
     }
 }
 ```
 
-### 2. Add Floating Liquid Navigation Bar
+Components inside a `LiquidGlassScene` resolve its backdrop automatically. The explicit
+`backdropState` parameter remains useful for standalone surfaces and advanced layer composition.
+
+### Floating navigation bar
 
 ```kotlin
 LiquidNavigationBar(
     selectedIndex = selectedTab,
     onItemSelected = { selectedTab = it },
     items = listOf(
-        LiquidNavItemData(LiquidIcons.Home, "Home"),
-        LiquidNavItemData(LiquidIcons.Star, "Componenti"),
-        LiquidNavItemData(LiquidIcons.Settings, "Impostazioni")
+        LiquidNavigationItem(label = "Home", icon = LiquidIcons.Home),
+        LiquidNavigationItem(label = "Componenti", icon = LiquidIcons.Star),
+        LiquidNavigationItem(label = "Impostazioni", icon = LiquidIcons.Settings)
     ),
     backdropState = backdropState
 )
 ```
 
+### Swipe-driven animated content
+
+```kotlin
+LiquidAnimatedSwitcher(
+    targetState = page,
+    transition = LiquidSwitcherTransition.LiquidMorph,
+    onSwipeForward = { page++ },
+    onSwipeBackward = { page-- }
+) { currentPage ->
+    Page(currentPage)
+}
+```
+
 ---
 
-## 🛠️ Build & Run
+## Build and run
 
 To build and install the demo showcase application:
 
 ```bash
-./gradlew :app:assembleDebug
+./gradlew :sdk:assembleDebug :app:assembleDebug
 ```

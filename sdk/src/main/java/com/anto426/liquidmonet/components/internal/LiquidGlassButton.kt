@@ -1,4 +1,4 @@
-package com.kyant.backdrop.catalog.components
+package com.anto426.liquidmonet.components.internal
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing

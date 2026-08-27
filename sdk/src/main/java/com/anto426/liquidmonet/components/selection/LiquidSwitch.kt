@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
-import com.kyant.backdrop.catalog.components.LiquidGlassToggle
+import com.anto426.liquidmonet.components.internal.LiquidGlassToggle
 
 @Composable
 fun LiquidSwitch(

@@ -1,4 +1,4 @@
-package com.kyant.backdrop.catalog.utils
+package com.anto426.liquidmonet.components.internal
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter

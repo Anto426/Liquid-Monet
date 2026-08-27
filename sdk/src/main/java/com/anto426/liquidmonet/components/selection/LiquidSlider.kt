@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
-import com.kyant.backdrop.catalog.components.LiquidGlassSlider
+import com.anto426.liquidmonet.components.internal.LiquidGlassSlider
 import kotlin.math.roundToInt
 
 /**

@@ -38,9 +38,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -61,6 +63,7 @@ import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 /** Floating bottom sheet with refractive glass and a restrained modal tone. */
 @Composable
@@ -120,11 +123,14 @@ private fun LiquidSheetLayer(
     val shape = remember { RoundedRectangle(32.dp) }
     val surfaceBackdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
+    val hapticFeedback = LocalHapticFeedback.current
     val dismissDistancePx = with(density) { 120.dp.toPx() }
     val dismissVelocityPx = with(density) { 800.dp.toPx() }
+    val upwardResistanceLimitPx = with(density) { 24.dp.toPx() }
 
     var isVisible by remember { mutableStateOf(false) }
     var isDismissing by remember { mutableStateOf(false) }
+    var dismissThresholdReached by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { isVisible = true }
 
     val coroutineScope = rememberCoroutineScope()
@@ -181,17 +187,21 @@ private fun LiquidSheetLayer(
                 modifier = Modifier
                     .graphicsLayer {
                         val predictiveOffset = predictiveBackProgress * 120.dp.toPx()
+                        val dragProgress = (dragOffsetY.value / dismissDistancePx)
+                            .coerceIn(-0.20f, 1.20f)
+                        val deformation = abs(dragProgress)
                         translationY = dragOffsetY.value + predictiveOffset
-                        scaleX = animatedScale
-                        scaleY = animatedScale
+                        transformOrigin = TransformOrigin(0.5f, 1f)
+                        scaleX = animatedScale * (1f + deformation * 0.025f)
+                        scaleY = animatedScale * (1f - dragProgress.coerceAtLeast(0f) * 0.018f)
                         alpha = 1f - predictiveBackProgress * 0.25f
                     }
                     .animateEnterExit(
                         enter = slideInVertically(
                             animationSpec = LiquidGlassMotionSpecs.spring(
                                 performance = performance,
-                                dampingRatio = 0.84f,
-                                stiffness = 400f
+                                dampingRatio = 0.72f,
+                                stiffness = 360f
                             ),
                             initialOffsetY = { it }
                         ) + fadeIn(LiquidGlassMotionSpecs.tween(performance, 150)),
@@ -213,13 +223,28 @@ private fun LiquidSheetLayer(
                         .draggable(
                             orientation = Orientation.Vertical,
                             state = rememberDraggableState { delta ->
-                                val newOffset = (dragOffsetY.value + delta).coerceAtLeast(0f)
-                                coroutineScope.launch { dragOffsetY.snapTo(newOffset) }
+                                val rawOffset = dragOffsetY.value + delta
+                                val resistedOffset = when {
+                                    rawOffset < 0f -> (rawOffset * 0.12f)
+                                        .coerceAtLeast(-upwardResistanceLimitPx)
+                                    rawOffset > dismissDistancePx -> dismissDistancePx +
+                                        (rawOffset - dismissDistancePx) * 0.28f
+                                    else -> rawOffset
+                                }
+                                val reached = resistedOffset >= dismissDistancePx
+                                if (reached && !dismissThresholdReached) {
+                                    hapticFeedback.performHapticFeedback(
+                                        HapticFeedbackType.TextHandleMove
+                                    )
+                                }
+                                dismissThresholdReached = reached
+                                coroutineScope.launch { dragOffsetY.snapTo(resistedOffset) }
                             },
                             onDragStopped = { velocity ->
                                 if (dragOffsetY.value > dismissDistancePx || velocity > dismissVelocityPx) {
                                     animateDismiss()
                                 } else {
+                                    dismissThresholdReached = false
                                     coroutineScope.launch {
                                         dragOffsetY.animateTo(
                                             targetValue = 0f,
@@ -254,8 +279,12 @@ private fun LiquidSheetLayer(
                             .padding(bottom = 12.dp)
                             .width(40.dp)
                             .height(5.dp)
-                            .clip(Capsule())
-                            .background(contentColor.copy(alpha = 0.22f))
+                            .liquidGlass(
+                                backdrop = surfaceBackdrop,
+                                shape = Capsule(),
+                                role = LiquidGlassRole.Control,
+                                containerColor = contentColor.copy(alpha = 0.16f)
+                            )
                     )
 
                     if (!title.isNullOrBlank()) {

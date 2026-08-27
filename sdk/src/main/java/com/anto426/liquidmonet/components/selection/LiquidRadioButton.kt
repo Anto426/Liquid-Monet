@@ -1,15 +1,8 @@
 package com.anto426.liquidmonet.components.selection
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -21,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
@@ -28,6 +23,8 @@ import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
+import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -45,6 +42,8 @@ fun LiquidRadioButton(
     backdropState: Backdrop = backdrop
 ) {
     val interactiveHighlight = rememberLiquidControlHighlight()
+    val hapticFeedback = LocalHapticFeedback.current
+    val performance = LocalLiquidGlassPerformance.current
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
 
@@ -52,14 +51,27 @@ fun LiquidRadioButton(
 
     val animatedContainerColor by animateColorAsState(
         targetValue = if (selected) primaryColor.copy(alpha = 0.32f) else Color.White.copy(alpha = 0.08f),
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        animationSpec = LiquidGlassMotionSpecs.tween(performance, 200),
         label = "radioContainerColor"
     )
 
     val animatedScale by animateFloatAsState(
-        targetValue = if (selected) 1.05f else 1.0f,
-        animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f),
+        targetValue = if (selected) 1.04f else 1.0f,
+        animationSpec = LiquidGlassMotionSpecs.spring(
+            performance = performance,
+            dampingRatio = 0.54f,
+            stiffness = 460f
+        ),
         label = "radioScalePop"
+    )
+    val dotProgress by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = LiquidGlassMotionSpecs.spring(
+            performance = performance,
+            dampingRatio = 0.52f,
+            stiffness = 520f
+        ),
+        label = "radioLiquidDot"
     )
 
     Box(
@@ -84,28 +96,28 @@ fun LiquidRadioButton(
                             indication = null,
                             role = Role.RadioButton,
                             enabled = enabled,
-                            onClick = onClick
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(
+                                    HapticFeedbackType.TextHandleMove
+                                )
+                                onClick()
+                            }
                         )
                         .liquidControlPressFeedback(enabled, interactiveHighlight)
                 } else Modifier
             ),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(
-            visible = selected,
-            enter = scaleIn(spring(dampingRatio = 0.60f, stiffness = 500f)) + fadeIn(tween(160)),
-            exit = scaleOut(spring(dampingRatio = 0.85f)) + fadeOut(tween(120))
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .liquidGlass(
-                        backdrop = backdropState,
-                        shape = CircleShape,
-                        role = LiquidGlassRole.Control,
-                        containerColor = primaryColor
-                    )
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .graphicsLayer {
+                    alpha = dotProgress.coerceIn(0f, 1f)
+                    // Slightly asymmetric scaling makes selection feel like a settling droplet.
+                    scaleX = (0.2f + 0.8f * dotProgress).coerceAtLeast(0f)
+                    scaleY = (0.1f + 0.9f * dotProgress).coerceAtLeast(0f)
+                }
+                .background(Color.White.copy(alpha = 0.94f), CircleShape)
+        )
     }
 }

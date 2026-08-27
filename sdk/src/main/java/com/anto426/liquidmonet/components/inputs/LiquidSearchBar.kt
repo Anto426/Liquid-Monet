@@ -32,16 +32,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
-import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
-import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
@@ -67,7 +63,6 @@ fun LiquidSearchBar(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val searchHighlight = rememberLiquidControlHighlight()
 
     val colorScheme = MaterialTheme.colorScheme
     val contentColor = colorScheme.onSurface
@@ -89,12 +84,6 @@ fun LiquidSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(54.dp)
-            .graphicsLayer(liquidControlLayerBlock(enabled, searchHighlight) ?: {})
-            .liquidControlPressFeedback(
-                enabled = enabled,
-                interactiveHighlight = searchHighlight,
-                drawHighlightOverlay = false
-            )
             .liquidGlass(
                 backdrop = effectiveBackdrop,
                 shape = shape,

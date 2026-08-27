@@ -60,19 +60,17 @@ fun LiquidLinearProgressIndicator(
     val highlightColor = colorScheme.onSurface
     val defaultTrack = trackColor ?: colorScheme.onSurface.copy(alpha = 0.18f)
     val normalizedProgress = progress?.coerceIn(0f, 1f)
-    val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else backdrop
     val semanticsModifier = if (normalizedProgress != null) {
         modifier.progressSemantics(normalizedProgress)
     } else {
         modifier.progressSemantics()
     }
-    val trackModifier = semanticsModifier.liquidGlass(
-        backdrop = effectiveBackdrop,
-        shape = RoundedRectangle(height / 2f),
-        role = LiquidGlassRole.Control,
-        preset = LiquidGlassPresets.Subtle,
-        containerColor = Color.Transparent
-    )
+
+    // The wave is the indicator itself. Applying liquidGlass to the full Canvas created a second
+    // capsule around it, which read as an unrelated container instead of free-moving liquid.
+    // Keep backdrop parameters for API compatibility; callers can still place the bare wave on a
+    // glass parent when desired.
+    val trackModifier = semanticsModifier
 
     val infiniteTransition = rememberInfiniteTransition(label = "LinearWavyProgressAnimation")
     val wavePhase by infiniteTransition.animateFloat(

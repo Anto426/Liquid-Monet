@@ -1,4 +1,4 @@
-package com.kyant.backdrop.catalog.utils
+package com.anto426.liquidmonet.components.internal
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown

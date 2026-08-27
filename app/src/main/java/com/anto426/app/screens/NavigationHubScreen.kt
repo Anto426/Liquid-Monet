@@ -163,7 +163,7 @@ fun NavigationHubScreen(
                             listOf(
                                 "Orizzontale" to LiquidSwitcherTransition.DirectionalHorizontal,
                                 "Verticale" to LiquidSwitcherTransition.DirectionalVertical,
-                                "Scale + fade" to LiquidSwitcherTransition.ScaleFade
+                                "Morfosi liquida" to LiquidSwitcherTransition.LiquidMorph
                             ).forEach { (label, transition) ->
                                 LiquidChip(
                                     label = label,
@@ -183,6 +183,14 @@ fun NavigationHubScreen(
                                     targetState = switcherPage,
                                     transition = switcherTransition,
                                     isForward = { _, _ -> switcherForward },
+                                    onSwipeForward = {
+                                        switcherForward = true
+                                        switcherPage = (switcherPage + 1) % 3
+                                    },
+                                    onSwipeBackward = {
+                                        switcherForward = false
+                                        switcherPage = (switcherPage + 2) % 3
+                                    },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .heightIn(min = 92.dp),
@@ -213,24 +221,11 @@ fun NavigationHubScreen(
                                     }
                                 }
 
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    LiquidChip(
-                                        label = "Indietro",
-                                        leadingIcon = LiquidIcons.ArrowBack,
-                                        onClick = {
-                                            switcherForward = false
-                                            switcherPage = (switcherPage + 2) % 3
-                                        }
-                                    )
-                                    LiquidChip(
-                                        label = "Avanti",
-                                        trailingIcon = LiquidIcons.ChevronRight,
-                                        onClick = {
-                                            switcherForward = true
-                                            switcherPage = (switcherPage + 1) % 3
-                                        }
-                                    )
-                                }
+                                Text(
+                                    text = "Scorri direttamente a destra o sinistra",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.68f)
+                                )
                             }
                         }
 

@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,9 +41,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
-import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
-import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
@@ -129,7 +125,6 @@ fun LiquidTextField(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val inputHighlight = rememberLiquidControlHighlight()
     var isPasswordVisible by remember(type) { mutableStateOf(false) }
 
     val isTextArea = type == LiquidTextFieldType.TextArea
@@ -180,12 +175,6 @@ fun LiquidTextField(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = minHeight)
-            .graphicsLayer(liquidControlLayerBlock(enabled, inputHighlight) ?: {})
-            .liquidControlPressFeedback(
-                enabled = enabled,
-                interactiveHighlight = inputHighlight,
-                drawHighlightOverlay = false
-            )
             .liquidGlass(
                 backdrop = effectiveBackdrop,
                 shape = shape,
