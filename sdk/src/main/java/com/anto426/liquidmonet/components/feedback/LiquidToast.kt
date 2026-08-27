@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,11 +44,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import com.anto426.liquidmonet.components.internal.LiquidGlassZIndex
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
@@ -153,6 +157,9 @@ fun LiquidToastHost(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            // Toasts are scene overlays, not navigation content. Keep them above top bars,
+            // floating controls and every ordinary interactive z-index.
+            .zIndex(LiquidGlassZIndex.Toast)
             .padding(horizontal = 20.dp, vertical = 20.dp),
         contentAlignment = alignment
     ) {
@@ -224,12 +231,7 @@ fun LiquidToast(
     }
 
     val shape = RoundedRectangle(20.dp)
-    val hostContentBackdrop = com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop.current
-    val effectiveBackdrop = when {
-        backdropState != emptyBackdrop() -> backdropState
-        hostContentBackdrop != null && hostContentBackdrop != emptyBackdrop() -> hostContentBackdrop
-        else -> backdrop
-    }
+    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
 
     val currentOffset = offsetAnim.value
     val dismissThresholdPx = with(density) { 90.dp.toPx() }
@@ -314,12 +316,9 @@ fun LiquidToast(
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .liquidGlass(
-                        backdrop = effectiveBackdrop,
-                        shape = Capsule(),
-                        role = LiquidGlassRole.Control,
-                        containerColor = accentColor.copy(alpha = 0.12f)
-                    ),
+                    // The toast shell already owns the refractive pass. The icon capsule is a
+                    // restrained tint, avoiding a recursive-looking double lens.
+                    .background(accentColor.copy(alpha = 0.12f), Capsule()),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

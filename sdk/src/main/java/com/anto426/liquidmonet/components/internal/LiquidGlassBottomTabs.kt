@@ -2,7 +2,6 @@ package com.anto426.liquidmonet.components.internal
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -72,11 +72,12 @@ internal fun LiquidGlassBottomTabs(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val accentColor = MaterialTheme.colorScheme.primary
+    val colorScheme = MaterialTheme.colorScheme
+    val isLightSurface = colorScheme.surface.luminance() > 0.5f
+    val accentColor = colorScheme.primary
     val navigationStyle = LiquidGlassStyleManager.resolve(LiquidGlassRole.Navigation)
-    val containerColor = MaterialTheme.colorScheme.surface.copy(
-        alpha = if (isLightTheme) {
+    val containerColor = colorScheme.surface.copy(
+        alpha = if (isLightSurface) {
             navigationStyle.lightSurfaceAlpha
         } else {
             navigationStyle.darkSurfaceAlpha
@@ -286,6 +287,9 @@ internal fun LiquidGlassBottomTabs(
         Box(
             modifier = Modifier
                 .padding(horizontal = 4.dp)
+                // The moving droplet is the active material, so it must remain above the static
+                // panel and tab mask throughout press, drag and the release spring.
+                .liquidInteractiveZIndex()
                 .graphicsLayer {
                     translationX = if (isLtr) {
                         dampedDragAnimation.value * tabWidth + panelOffset
@@ -336,11 +340,11 @@ internal fun LiquidGlassBottomTabs(
                     },
                     onDrawSurface = {
                         val liquidStrength = performance.liquidIntensity.coerceIn(0f, 1f)
-                        val panelTintAlpha = (if (isLightTheme) 0.07f else 0.05f) *
-                            (0.4f + 0.6f * liquidStrength)
+                        val panelTintAlpha = (if (isLightSurface) 0.03f else 0.02f) *
+                            (0.35f + 0.65f * liquidStrength)
                         val dropletTintAlpha = lerp(
                             start = panelTintAlpha,
-                            stop = (panelTintAlpha * 1.25f).coerceAtMost(0.09f),
+                            stop = (panelTintAlpha * 1.35f).coerceAtMost(0.045f),
                             fraction = dropletInteractionProgress
                         )
                         drawRect(accentColor.copy(alpha = dropletTintAlpha))

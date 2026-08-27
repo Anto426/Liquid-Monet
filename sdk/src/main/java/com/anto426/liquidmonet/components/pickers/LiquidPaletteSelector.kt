@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.glass.LiquidGlassContainer
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.internal.LiquidGlassButton
@@ -96,23 +97,29 @@ fun LiquidPaletteSelector(
             }
         }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
+        LiquidGlassContainer(
+            modifier = Modifier.fillMaxWidth(),
+            backdropState = backdropState,
+            shape = Capsule()
         ) {
-            options.forEachIndexed { index, option ->
-                val isSelected = selectedIndex == index
-                LiquidPaletteItem(
-                    color = option.color,
-                    isSelected = isSelected,
-                    onClick = { onSelectIndex(index) },
-                    backdropState = backdropState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                options.forEachIndexed { index, option ->
+                    val isSelected = selectedIndex == index
+                    LiquidPaletteItem(
+                        color = option.color,
+                        isSelected = isSelected,
+                        onClick = { onSelectIndex(index) },
+                        backdropState = backdropState,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    )
+                }
             }
         }
     }

@@ -5,13 +5,16 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPerformanceState
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPreset
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
@@ -37,6 +40,19 @@ enum class LiquidGlassRole {
     Menu,
     TopBar,
     Navigation
+}
+
+/** Shared stacking order for optical layers. It applies locally within each Compose parent. */
+internal fun LiquidGlassRole.layerZIndex(): Float = when (this) {
+    LiquidGlassRole.Surface -> 0f
+    // Controls and navigation items must keep their parent's natural order. Raising every item
+    // globally breaks AnimatedContent and can place old/new destinations over each other.
+    LiquidGlassRole.TopBar,
+    LiquidGlassRole.Control,
+    LiquidGlassRole.Navigation -> 0f
+    LiquidGlassRole.Menu -> 10f
+    LiquidGlassRole.Dialog,
+    LiquidGlassRole.Sheet -> 20f
 }
 
 /**
@@ -68,7 +84,7 @@ data class LiquidGlassSurfaceStyle(
 /** Single source of truth for the SDK's optical surface presets. */
 object LiquidGlassStyleManager {
     private val control = LiquidGlassSurfaceStyle(
-        preset = LiquidGlassPresets.Standard,
+        preset = LiquidGlassPresets.Subtle,
         lightSurfaceAlpha = 0.20f,
         darkSurfaceAlpha = 0.15f,
         lightBrightness = 0.06f,
@@ -218,10 +234,11 @@ fun Modifier.liquidGlass(
     val defaultAlpha = if (isLightSurface) style.lightSurfaceAlpha else style.darkSurfaceAlpha
     val liquidStrength = performance.liquidIntensity.coerceIn(0f, 1f)
 
-    // Ultra-subtle & crystal-clear Monet chromatic glass infusion (5% in dark, 7% in light)
+    // Keep the material optically neutral. Monet is only an ambient reflection here; explicit
+    // selected/prominent controls provide their own tint and must not have it added twice.
     val subtleMonetTint = colorScheme.primary.copy(
-        alpha = if (isLightSurface) 0.07f * (0.4f + 0.6f * liquidStrength)
-                else 0.05f * (0.4f + 0.6f * liquidStrength)
+        alpha = if (isLightSurface) 0.03f * (0.35f + 0.65f * liquidStrength)
+                else 0.02f * (0.35f + 0.65f * liquidStrength)
     )
 
     val isModalSurface = role == LiquidGlassRole.Dialog || role == LiquidGlassRole.Sheet
@@ -234,32 +251,87 @@ fun Modifier.liquidGlass(
     }
     val surfaceColor = containerColor ?: defaultSurfaceColor
 
+    // A container already paid for the optical backdrop. Keep descendants visually alive, but
+    // turn their glass into a cheap clipped tint so a row of controls does not multiply the same
+    // full-frame blur/lens work.
+    if (LocalLiquidGlassContainer.current) {
+        val groupedSurfaceColor = containerColor ?: Color.Transparent
+        return this
+            .then(if (layerBlock != null) Modifier.graphicsLayer(layerBlock) else Modifier)
+            .clip(shape)
+            .zIndex(role.layerZIndex())
+            .drawWithContent {
+                if (groupedSurfaceColor.alpha > 0f) {
+                    drawRect(groupedSurfaceColor)
+                }
+                drawContent()
+            }
+    }
+
+    // Every renderer consumes one global policy. The component contributes only its semantic
+    // role; it cannot silently select a different quality profile for itself.
+    val effectPolicy = performance.effectPolicy(
+        role = role,
+        interactive = layerBlock != null
+    )
+    val useBlur = effectPolicy.blur && tokens.blurRadius > 0.dp
+    val useRefraction = effectPolicy.refraction &&
+        tokens.refractionHeight > 0.dp && tokens.refractionAmount > 0.dp
+    val useChromaticAberration = effectPolicy.chromaticAberration &&
+        tokens.chromaticAberration >= 0.08f
+    val useHighlight = effectPolicy.highlight && style.highlightAlpha > 0f
+    val useShadow = effectPolicy.shadow && style.shadowRadius > 0.dp && style.shadowAlpha > 0f
+    val useInnerShadow = effectPolicy.innerShadow &&
+        style.innerShadowRadius > 0.dp && style.innerShadowAlpha > 0f
+
     return drawBackdrop(
         backdrop = effectiveBackdrop,
         shape = { shape },
         effects = {
+            // Like a physical lens, a larger piece of glass reads as a thicker material. Scale
+            // the optical displacement from the rendered geometry instead of assigning every
+            // capsule, toolbar and sheet the same apparent thickness.
+            val compactReference = 48.dp.toPx()
+            val largeReference = 240.dp.toPx()
+            val sizeProgress = if (size.isSpecified) {
+                ((size.minDimension - compactReference) / (largeReference - compactReference))
+                    .coerceIn(0f, 1f)
+            } else {
+                0f
+            }
+            val opticalThickness = when (role) {
+                LiquidGlassRole.Control,
+                LiquidGlassRole.Navigation -> 0.84f + 0.16f * sizeProgress
+                LiquidGlassRole.TopBar -> 0.92f + 0.16f * sizeProgress
+                LiquidGlassRole.Surface,
+                LiquidGlassRole.Menu,
+                LiquidGlassRole.Dialog,
+                LiquidGlassRole.Sheet -> 0.96f + 0.22f * sizeProgress
+            }
+
             colorControls(
                 brightness = if (isLightSurface) style.lightBrightness * liquidStrength else 0f,
                 saturation = 1f + (style.saturation - 1f) * liquidStrength
             )
-            if (tokens.blurRadius > 0.dp) {
-                blur(tokens.blurRadius.toPx())
+            if (useBlur) {
+                blur(tokens.blurRadius.toPx() * opticalThickness)
             }
             if (
+                useRefraction &&
                 size.isSpecified &&
                 size.minDimension > 0f &&
                 tokens.refractionHeight > 0.dp &&
                 tokens.refractionAmount > 0.dp
             ) {
                 lens(
-                    refractionHeight = tokens.refractionHeight.toPx(),
-                    refractionAmount = tokens.refractionAmount.toPx(),
+                    refractionHeight = tokens.refractionHeight.toPx() * opticalThickness,
+                    refractionAmount = tokens.refractionAmount.toPx() * opticalThickness,
                     depthEffect = true,
-                    chromaticAberration = tokens.chromaticAberration >= 0.08f
+                    chromaticAberration = useChromaticAberration
                 )
             }
         },
-        highlight = if (style.highlightAlpha > 0f) {
+        highlight = if (useHighlight) {
             {
                 Highlight.Plain.copy(
                     alpha = style.highlightAlpha * (0.45f + 0.55f * liquidStrength)
@@ -268,7 +340,7 @@ fun Modifier.liquidGlass(
         } else {
             null
         },
-        shadow = if (style.shadowRadius > 0.dp && style.shadowAlpha > 0f) {
+        shadow = if (useShadow) {
             {
                 Shadow(
                     radius = style.shadowRadius,
@@ -278,7 +350,7 @@ fun Modifier.liquidGlass(
         } else {
             null
         },
-        innerShadow = if (style.innerShadowRadius > 0.dp && style.innerShadowAlpha > 0f) {
+        innerShadow = if (useInnerShadow) {
             {
                 InnerShadow(
                     radius = style.innerShadowRadius,
@@ -300,5 +372,5 @@ fun Modifier.liquidGlass(
                 drawRect(subtleMonetTint)
             }
         }
-    )
+    ).zIndex(role.layerZIndex())
 }

@@ -67,24 +67,10 @@ fun StudioHubScreen(
         LiquidNavigationItem("Control Center")
     )
 
-    var isPlayingMusic by remember { mutableStateOf(true) }
-    var progressVal by remember { mutableFloatStateOf(0.35f) }
     var wifiActive by remember { mutableStateOf(true) }
     var bluetoothActive by remember { mutableStateOf(false) }
     var airplaneActive by remember { mutableStateOf(false) }
     var torchActive by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isPlayingMusic) {
-        if (isPlayingMusic) {
-            while (true) {
-                delay(60L)
-                progressVal = if (progressVal >= 1f) 0f else progressVal + 0.0025f
-            }
-        }
-    }
-
-    val elapsedSeconds = (progressVal * 225).toInt()
-    val musicCurrentTime = String.format(Locale.getDefault(), "%d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -185,39 +171,7 @@ fun StudioHubScreen(
 
                 1 -> {
                     // Sotto-Schermata 2: Media Player
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        LiquidSectionHeader(
-                            title = "Player Multimediale Liquid Glass",
-                            subtitle = "Riproduzione, avanzamento e controlli riuniti in una superficie rifrattiva."
-                        )
-                        LiquidMediaController(
-                            title = "Cosmic Aurora",
-                            artist = "Electronic Soundscape • Lossless",
-                            isPlaying = isPlayingMusic,
-                            progress = progressVal,
-                            currentTime = musicCurrentTime,
-                            totalTime = "3:45",
-                            onPlayPauseClick = { isPlayingMusic = !isPlayingMusic },
-                            onPreviousClick = { progressVal = 0.0f },
-                            onNextClick = { progressVal = (progressVal + 0.25f).coerceAtMost(0.95f) },
-                            backdropState = backdropState
-                        )
-
-                        LiquidCard(backdropState = backdropState) {
-                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                Text(
-                                    text = "Dettagli Traccia & Audio Engine",
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = Color.White
-                                )
-                                Text(
-                                    text = "Codec: FLAC 24-bit / 96 kHz • Uscita: Audio Spaziale Prismatico con riverbero in vetro liquido.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.75f)
-                                )
-                            }
-                        }
-                    }
+                    StudioMediaPlayerDemo(backdropState = backdropState)
                 }
 
                 else -> {
@@ -266,4 +220,84 @@ fun StudioHubScreen(
             }
         }
     }
+}
+
+@Composable
+private fun StudioMediaPlayerDemo(backdropState: Backdrop) {
+    var isPlayingMusic by remember { mutableStateOf(true) }
+    val progressState = remember { mutableFloatStateOf(0.35f) }
+    val currentTimeState = remember { mutableStateOf(formatMediaTime(progressState.floatValue)) }
+
+    // Keep the original smooth media-player update cadence for the demo.
+    LaunchedEffect(isPlayingMusic) {
+        if (isPlayingMusic) {
+            while (true) {
+                delay(60L)
+                progressState.floatValue =
+                    if (progressState.floatValue >= 1f) 0f else progressState.floatValue + 0.0025f
+            }
+        }
+    }
+
+    LaunchedEffect(isPlayingMusic) {
+        if (isPlayingMusic) {
+            while (true) {
+                delay(1000L)
+                currentTimeState.value = formatMediaTime(progressState.floatValue)
+            }
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LiquidSectionHeader(
+            title = "Player Multimediale Liquid Glass",
+            subtitle = "Riproduzione, avanzamento e controlli riuniti in una superficie rifrattiva."
+        )
+        LiquidMediaController(
+            title = "Cosmic Aurora",
+            artist = "Electronic Soundscape • Lossless",
+            isPlaying = isPlayingMusic,
+            progress = 0.35f,
+            currentTime = "1:18",
+            totalTime = "3:45",
+            onPlayPauseClick = { isPlayingMusic = !isPlayingMusic },
+            onPreviousClick = {
+                progressState.floatValue = 0.0f
+                currentTimeState.value = formatMediaTime(0.0f)
+            },
+            onNextClick = {
+                val nextProgress = (progressState.floatValue + 0.25f).coerceAtMost(0.95f)
+                progressState.floatValue = nextProgress
+                currentTimeState.value = formatMediaTime(nextProgress)
+            },
+            progressState = progressState,
+            currentTimeState = currentTimeState,
+            backdropState = backdropState
+        )
+
+        LiquidCard(backdropState = backdropState) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = "Dettagli Traccia & Audio Engine",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color.White
+                )
+                Text(
+                    text = "Codec: FLAC 24-bit / 96 kHz • Uscita: Audio Spaziale Prismatico con riverbero in vetro liquido.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.75f)
+                )
+            }
+        }
+    }
+}
+
+private fun formatMediaTime(progress: Float): String {
+    val elapsedSeconds = (progress * 225).toInt()
+    return String.format(
+        Locale.getDefault(),
+        "%d:%02d",
+        elapsedSeconds / 60,
+        elapsedSeconds % 60
+    )
 }

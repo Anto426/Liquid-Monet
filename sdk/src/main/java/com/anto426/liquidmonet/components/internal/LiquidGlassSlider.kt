@@ -3,7 +3,6 @@ package com.anto426.liquidmonet.components.internal
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,11 +67,9 @@ internal fun LiquidGlassSlider(
     thumbSize: Dp = 24.dp
 ) {
     requireLiquidSliderRange(valueRange)
-    val isLightTheme = !isSystemInDarkTheme()
-    val accentColor = if (tint.isSpecified) tint else MaterialTheme.colorScheme.primary
-    val trackColor =
-        if (isLightTheme) Color(0xFF787878).copy(0.2f)
-        else Color(0xFF787880).copy(0.36f)
+    val colorScheme = MaterialTheme.colorScheme
+    val accentColor = if (tint.isSpecified) tint else colorScheme.primary
+    val trackColor = colorScheme.onSurface.copy(alpha = 0.18f)
 
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop)
     val performance = LocalLiquidGlassPerformance.current
@@ -250,6 +247,7 @@ internal fun LiquidGlassSlider(
                             drawRect(accentColor.copy(alpha = lerp(0.70f, 0.18f, progress)))
                         }
                     )
+                    .liquidInteractiveZIndex(enabled)
                     .size(thumbSize)
             )
 

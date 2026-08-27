@@ -22,8 +22,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -67,7 +71,10 @@ fun LiquidMediaController(
     onContainerClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     backdrop: Backdrop = emptyBackdrop(),
-    backdropState: Backdrop = backdrop
+    backdropState: Backdrop = backdrop,
+    animatePlaybackGlow: Boolean = true,
+    progressState: State<Float>? = null,
+    currentTimeState: State<String>? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
@@ -83,17 +90,33 @@ fun LiquidMediaController(
     val albumShape = RoundedRectangle(16.dp)
     val controlShape = Capsule()
 
-    // Vibrant infinite breathing pulse while music is playing
-    val infiniteTransition = rememberInfiniteTransition(label = "MusicPlaybackPulse")
-    val playPulse by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "PlayPulse"
-    )
+    // Optional state holders let frequently changing playback values be observed only by their
+    // small visual consumers. The legacy Float/String parameters remain source-compatible.
+    val internalProgressState = remember { mutableFloatStateOf(progress) }
+    val effectiveProgressState: State<Float> = progressState ?: internalProgressState
+    if (progressState == null) {
+        LaunchedEffect(progress) {
+            internalProgressState.floatValue = progress
+        }
+    }
+    val effectiveCurrentTimeState = currentTimeState ?: rememberUpdatedState(currentTime)
+
+    // Vibrant infinite breathing pulse while music is playing.
+    val playPulse = if (animatePlaybackGlow && isPlaying) {
+        val infiniteTransition = rememberInfiniteTransition(label = "MusicPlaybackPulse")
+        val pulse by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2400, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "PlayPulse"
+        )
+        pulse
+    } else {
+        0f
+    }
 
     // Touch feedback highlights
     val containerHighlight = rememberLiquidControlHighlight()
@@ -207,34 +230,18 @@ fun LiquidMediaController(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Linear Progress Indicator
-            LiquidLinearProgressIndicator(
-                progress = progress,
+            LiquidMediaProgress(
+                progressState = effectiveProgressState,
                 backdropState = effectiveBackdrop
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                BasicText(
-                    text = currentTime,
-                    style = TextStyle(
-                        color = colorScheme.onSurface.copy(alpha = 0.65f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-                BasicText(
-                    text = totalTime,
-                    style = TextStyle(
-                        color = colorScheme.onSurface.copy(alpha = 0.65f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
+            LiquidMediaTimeLabels(
+                currentTimeState = effectiveCurrentTimeState,
+                totalTime = totalTime,
+                color = colorScheme.onSurface
+            )
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -287,7 +294,7 @@ fun LiquidMediaController(
                             drawHighlightOverlay = false
                         )
                         .drawBehind {
-                            val activePulse = if (isPlaying) playPulse else 0f
+                            val activePulse = playPulse
                             val glowRadius = size.maxDimension * (0.65f + 0.15f * activePulse)
                             drawCircle(
                                 brush = Brush.radialGradient(
@@ -368,5 +375,47 @@ fun LiquidMediaController(
             }
         }
         }
+    }
+}
+
+@Composable
+private fun LiquidMediaProgress(
+    progressState: State<Float>,
+    backdropState: Backdrop
+) {
+    val progress by progressState
+    LiquidLinearProgressIndicator(
+        progress = progress,
+        backdropState = backdropState
+    )
+}
+
+@Composable
+private fun LiquidMediaTimeLabels(
+    currentTimeState: State<String>,
+    totalTime: String,
+    color: Color
+) {
+    val currentTime by currentTimeState
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        BasicText(
+            text = currentTime,
+            style = TextStyle(
+                color = color.copy(alpha = 0.65f),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        )
+        BasicText(
+            text = totalTime,
+            style = TextStyle(
+                color = color.copy(alpha = 0.65f),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        )
     }
 }

@@ -32,7 +32,6 @@ import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
-import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
 import kotlin.math.PI
@@ -320,7 +319,6 @@ fun LiquidCircularProgressIndicator(
         backdrop = effectiveBackdrop,
         shape = Capsule(),
         role = LiquidGlassRole.Control,
-        preset = LiquidGlassPresets.Subtle,
         containerColor = Color.Transparent
     )
 

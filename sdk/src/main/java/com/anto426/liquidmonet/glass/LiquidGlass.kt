@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPreset
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -27,9 +28,9 @@ fun LiquidGlass(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
     shape: Shape = RoundedRectangle(24.dp),
-    blurRadius: Dp = 14.dp,
-    refractionHeight: Dp = 18.dp,
-    refractionAmount: Dp = 32.dp,
+    blurRadius: Dp = LiquidGlassPresets.Standard.blurRadius,
+    refractionHeight: Dp = LiquidGlassPresets.Standard.refractionHeight,
+    refractionAmount: Dp = LiquidGlassPresets.Standard.refractionAmount,
     containerColor: Color? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     backdropPolicy: LiquidGlassBackdropPolicy = LiquidGlassBackdropPolicy.SceneFirst,
@@ -47,7 +48,7 @@ fun LiquidGlass(
                     blurRadius = blurRadius,
                     refractionHeight = refractionHeight,
                     refractionAmount = refractionAmount,
-                    chromaticAberration = 0.18f
+                    chromaticAberration = LiquidGlassPresets.Standard.chromaticAberration
                 ),
                 exportedBackdrop = surfaceBackdrop,
                 backdropPolicy = backdropPolicy

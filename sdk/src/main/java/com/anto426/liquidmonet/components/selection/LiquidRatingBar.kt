@@ -30,7 +30,6 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
-import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -63,7 +62,6 @@ fun LiquidRatingBar(
                 backdrop = effectiveBackdrop,
                 shape = Capsule(),
                 role = LiquidGlassRole.Control,
-                preset = LiquidGlassPresets.Subtle
             )
             .padding(horizontal = 4.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),

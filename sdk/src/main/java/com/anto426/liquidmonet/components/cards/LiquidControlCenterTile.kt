@@ -5,8 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,14 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,6 +31,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
+import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
+import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
@@ -57,31 +60,35 @@ fun LiquidControlCenterTile(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
+    val activeContentColor = colorScheme.onPrimary
+    val inactiveContentColor = colorScheme.onSurface
 
     val shape = RoundedRectangle(22.dp)
     val iconShape = Capsule()
 
     // Smooth color interpolations between ON and OFF states
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (active) primaryColor.copy(alpha = 0.36f) else Color.White.copy(alpha = 0.08f),
+        targetValue = if (active) primaryColor.copy(alpha = 0.36f)
+        else inactiveContentColor.copy(alpha = 0.08f),
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileContainerColor"
     )
 
     val animatedIconBgColor by animateColorAsState(
-        targetValue = if (active) primaryColor else Color.White.copy(alpha = 0.16f),
+        targetValue = if (active) primaryColor else inactiveContentColor.copy(alpha = 0.14f),
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileIconBgColor"
     )
 
     val animatedIconTint by animateColorAsState(
-        targetValue = if (active) Color.White else Color.White.copy(alpha = 0.88f),
+        targetValue = if (active) activeContentColor else inactiveContentColor.copy(alpha = 0.88f),
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileIconTint"
     )
 
     val animatedSubtitleColor by animateColorAsState(
-        targetValue = if (active) primaryColor else Color.White.copy(alpha = 0.65f),
+        targetValue = if (active) activeContentColor.copy(alpha = 0.78f)
+        else inactiveContentColor.copy(alpha = 0.65f),
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileSubtitleColor"
     )
@@ -95,6 +102,8 @@ fun LiquidControlCenterTile(
     )
 
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
+    val interactionSource = remember { MutableInteractionSource() }
+    val interactiveHighlight = rememberLiquidControlHighlight()
 
     Box(
         modifier = modifier
@@ -104,15 +113,18 @@ fun LiquidControlCenterTile(
                 backdrop = effectiveBackdrop,
                 shape = shape,
                 role = LiquidGlassRole.Control,
-                containerColor = animatedContainerColor
+                containerColor = animatedContainerColor,
+                layerBlock = liquidControlLayerBlock(enabled, interactiveHighlight)
             )
-            .clickable(
-                interactionSource = null,
+            .toggleable(
+                value = active,
+                interactionSource = interactionSource,
                 indication = null,
-                role = Role.Button,
+                role = Role.Switch,
                 enabled = enabled,
-                onClick = onClick
+                onValueChange = { onClick() }
             )
+            .liquidControlPressFeedback(enabled, interactiveHighlight)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -128,17 +140,9 @@ fun LiquidControlCenterTile(
                         scaleX = animatedIconScale
                         scaleY = animatedIconScale
                     }
-                    .liquidGlass(
-                        backdrop = effectiveBackdrop,
-                        shape = iconShape,
-                        role = LiquidGlassRole.Navigation,
-                        containerColor = animatedIconBgColor
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = if (active) Color.White.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.18f),
-                        shape = iconShape
-                    ),
+                    // The tile is the optical material. The icon pod is only a chromatic tint;
+                    // refracting the same backdrop a second time creates a heavy double-lens halo.
+                    .background(animatedIconBgColor, iconShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -153,7 +157,7 @@ fun LiquidControlCenterTile(
                 BasicText(
                     text = title,
                     style = TextStyle(
-                        color = Color.White,
+                        color = if (active) activeContentColor else inactiveContentColor,
                         fontSize = 15.5.sp,
                         fontWeight = FontWeight.SemiBold
                     )

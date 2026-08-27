@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
@@ -76,22 +78,17 @@ fun LiquidChip(
     val closeHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
 
-    val hostContentBackdrop = com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop.current
-    val effectiveBackdrop = when {
-        backdropState != emptyBackdrop() -> backdropState
-        hostContentBackdrop != null && hostContentBackdrop != emptyBackdrop() -> hostContentBackdrop
-        else -> backdrop
-    }
+    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
 
     val selectedColors = liquidButtonColors(LiquidButtonVariant.Primary, tint, enabled)
     val activeMonetColor = if (selectedColors.tint.isSpecified) selectedColors.tint else colorScheme.primary
 
     val targetContentColor = if (selected) {
-        Color.White
+        selectedColors.content
     } else if (enabled) {
-        Color.White.copy(alpha = 0.88f)
+        colorScheme.onSurface.copy(alpha = 0.88f)
     } else {
-        Color.White.copy(alpha = 0.38f)
+        colorScheme.onSurface.copy(alpha = LiquidControlDefaults.disabledContentAlpha)
     }
 
     val animatedContentColor by animateColorAsState(
@@ -101,7 +98,8 @@ fun LiquidChip(
     )
 
     // Vibrant Radiant Monet Glow & Fill
-    val targetContainerColor = if (selected) activeMonetColor.copy(alpha = 0.52f) else Color.White.copy(alpha = 0.08f)
+    val targetContainerColor = if (selected) activeMonetColor.copy(alpha = 0.52f)
+    else colorScheme.onSurface.copy(alpha = 0.08f)
     val animatedContainerColor by animateColorAsState(
         targetValue = targetContainerColor,
         animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
@@ -161,11 +159,12 @@ fun LiquidChip(
             if (badge != null) {
                 Box(
                     modifier = Modifier
-                        .liquidGlass(
-                            backdrop = effectiveBackdrop,
-                            shape = Capsule(),
-                            role = LiquidGlassRole.Navigation,
-                            containerColor = if (selected) activeMonetColor.copy(alpha = 0.75f) else Color.White.copy(alpha = 0.16f)
+                        // The parent chip already owns the optical pass. A badge is a tint layer,
+                        // not another piece of glass sampling the same pixels a second time.
+                        .background(
+                            color = if (selected) activeMonetColor.copy(alpha = 0.75f)
+                            else colorScheme.onSurface.copy(alpha = 0.16f),
+                            shape = Capsule()
                         )
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                     contentAlignment = Alignment.Center
@@ -173,7 +172,7 @@ fun LiquidChip(
                     BasicText(
                         text = badge,
                         style = TextStyle(
-                            color = Color.White,
+                            color = animatedContentColor,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )

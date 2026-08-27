@@ -28,6 +28,15 @@ internal fun RowScope.LiquidGlassBottomTab(
     val scale = LocalLiquidBottomTabScale.current
     Column(
         modifier
+            // Scale outside the shape clip: the tab keeps its capsule mask, while the complete
+            // bounced result can grow over the navigation container and adjacent tab slots.
+            .graphicsLayer {
+                val s = scale()
+                scaleX = s
+                scaleY = s
+                clip = false
+            }
+            .liquidInteractiveZIndex()
             .clip(Capsule())
             .clickable(
                 interactionSource = null,
@@ -36,12 +45,7 @@ internal fun RowScope.LiquidGlassBottomTab(
                 onClick = onClick
             )
             .fillMaxHeight()
-            .weight(1f)
-            .graphicsLayer {
-                val s = scale()
-                scaleX = s
-                scaleY = s
-            },
+            .weight(1f),
         verticalArrangement = Arrangement.spacedBy(2f.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = content

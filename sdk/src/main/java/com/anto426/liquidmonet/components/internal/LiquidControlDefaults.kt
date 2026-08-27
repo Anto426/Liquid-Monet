@@ -49,7 +49,7 @@ internal fun liquidButtonColors(
         LiquidButtonVariant.Glass, LiquidButtonVariant.Text -> Color.Unspecified
     }
     val automaticContent = when (variant) {
-        LiquidButtonVariant.Primary -> Color.White
+        LiquidButtonVariant.Primary -> colorScheme.onPrimary
         else -> colorScheme.onSurface
     }
 
@@ -113,12 +113,13 @@ internal fun Modifier.liquidControlPressFeedback(
     drawHighlightOverlay: Boolean = true,
     highlightColor: Color = Color.Unspecified
 ): Modifier = if (enabled) {
+    val elevatedModifier = this.liquidInteractiveZIndex()
     if (drawHighlightOverlay) {
-        this
+        elevatedModifier
             .then(interactiveHighlight.modifier(highlightColor))
             .then(interactiveHighlight.gestureModifier)
     } else {
-        this.then(interactiveHighlight.gestureModifier)
+        elevatedModifier.then(interactiveHighlight.gestureModifier)
     }
 } else {
     this

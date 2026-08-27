@@ -103,6 +103,7 @@ fun LiquidMorphingAction(
     val performance = LocalLiquidGlassPerformance.current
     val contentColor = MaterialTheme.colorScheme.onSurface
     val anchorShape = remember { Capsule() }
+    val interactiveHighlight = rememberLiquidControlHighlight()
     val isMorphing = expanded && action.subItems.isNotEmpty()
 
     val buttonAlpha by animateFloatAsState(
@@ -155,7 +156,8 @@ fun LiquidMorphingAction(
                 .liquidGlass(
                     backdrop = backdropState,
                     shape = anchorShape,
-                    role = LiquidGlassRole.Navigation
+                    role = LiquidGlassRole.Navigation,
+                    layerBlock = liquidControlLayerBlock(true, interactiveHighlight)
                 )
                 .clickable {
                     if (action.subItems.isEmpty()) {
@@ -207,7 +209,11 @@ fun LiquidMorphingAction(
                             expanded = true
                         }
                     }
-                },
+                }
+                .liquidControlPressFeedback(
+                    enabled = true,
+                    interactiveHighlight = interactiveHighlight
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(

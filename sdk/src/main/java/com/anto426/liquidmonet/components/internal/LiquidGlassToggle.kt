@@ -1,6 +1,5 @@
 package com.anto426.liquidmonet.components.internal
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -34,9 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.lerp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
+import com.anto426.liquidmonet.glass.effectPolicy
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
-import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
+import com.anto426.liquidmonet.glass.effectTokens
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -61,16 +61,13 @@ internal fun LiquidGlassToggle(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val accentColor = MaterialTheme.colorScheme.primary
-    val trackColor = if (isLightTheme) {
-        Color(0xFF787878).copy(alpha = 0.20f)
-    } else {
-        Color(0xFF787880).copy(alpha = 0.36f)
-    }
+    val colorScheme = MaterialTheme.colorScheme
+    val accentColor = colorScheme.primary
+    val trackColor = colorScheme.onSurface.copy(alpha = 0.18f)
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop)
     val performance = LocalLiquidGlassPerformance.current
-    val glassTokens = LiquidGlassPresets.Interactive.resolve(performance)
+    val glassTokens = performance.effectTokens(LiquidGlassRole.Control, interactive = true)
+    val effectPolicy = performance.effectPolicy(LiquidGlassRole.Control, interactive = true)
     val currentChecked by rememberUpdatedState(checked)
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
 
@@ -133,7 +130,7 @@ internal fun LiquidGlassToggle(
     )
     // Material-like checked state keeps a white thumb; the optical renderer below still lets
     // the refracted track come through while pressed, so it does not become a flat white disk.
-    val thumbColor = Color.White.copy(alpha = if (isLightTheme) 0.94f else 0.88f)
+    val thumbColor = colorScheme.onSurface.copy(alpha = 0.90f)
 
     Box(
         modifier = modifier
@@ -158,7 +155,6 @@ internal fun LiquidGlassToggle(
                     shape = Capsule(),
                     role = LiquidGlassRole.Control,
                     containerColor = resolvedTrackColor,
-                    preset = LiquidGlassPresets.Subtle
                 )
         )
 
@@ -190,36 +186,46 @@ internal fun LiquidGlassToggle(
                     effects = {
                         val progress = dampedDragAnimation.pressProgress
                         val blurRadius = glassTokens.blurRadius * (1f - progress)
-                        if (blurRadius > 0.dp) blur(blurRadius.toPx())
-                        val refractionHeight = glassTokens.refractionHeight * 0.5f * progress
-                        val refractionAmount = glassTokens.refractionAmount * (10f / 14f) * progress
+                        if (effectPolicy.blur && blurRadius > 0.dp) {
+                            blur(blurRadius.toPx())
+                        }
+                        val refractionHeight = glassTokens.refractionHeight *
+                            effectPolicy.toggleRefractionHeightScale * progress
+                        val refractionAmount = glassTokens.refractionAmount *
+                            effectPolicy.toggleRefractionAmountScale * progress
                         if (
                             size.minDimension > 0f &&
                             refractionHeight > 0.dp &&
                             refractionAmount > 0.dp
                         ) {
-                            lens(
-                                refractionHeight.toPx(),
-                                refractionAmount.toPx(),
-                                chromaticAberration = glassTokens.chromaticAberration >= 0.08f
-                            )
+                            if (effectPolicy.refraction) {
+                                lens(
+                                    refractionHeight.toPx(),
+                                    refractionAmount.toPx(),
+                                    chromaticAberration = effectPolicy.chromaticAberration
+                                )
+                            }
                         }
                     },
-                    highlight = {
+                    highlight = if (effectPolicy.highlight) {
+                        {
                         val progress = dampedDragAnimation.pressProgress
                         Highlight.Ambient.copy(
-                            width = Highlight.Ambient.width / 1.5f,
-                            blurRadius = Highlight.Ambient.blurRadius / 1.5f,
+                            width = Highlight.Ambient.width / effectPolicy.toggleHighlightScale,
+                            blurRadius = Highlight.Ambient.blurRadius / effectPolicy.toggleHighlightScale,
                             alpha = progress
                         )
-                    },
-                    shadow = {
-                        Shadow(radius = 4.dp, color = Color.Black.copy(alpha = 0.05f))
-                    },
-                    innerShadow = {
-                        val progress = dampedDragAnimation.pressProgress
-                        InnerShadow(radius = 4.dp * progress, alpha = progress)
-                    },
+                        }
+                    } else null,
+                    shadow = if (effectPolicy.shadow) {
+                        { Shadow(radius = 4.dp, color = Color.Black.copy(alpha = 0.05f)) }
+                    } else null,
+                    innerShadow = if (effectPolicy.innerShadow) {
+                        {
+                            val progress = dampedDragAnimation.pressProgress
+                            InnerShadow(radius = 4.dp * progress, alpha = progress)
+                        }
+                    } else null,
                     layerBlock = {
                         scaleX = dampedDragAnimation.scaleX
                         scaleY = dampedDragAnimation.scaleY
@@ -236,6 +242,7 @@ internal fun LiquidGlassToggle(
                         )
                     }
                 )
+                .liquidInteractiveZIndex(enabled)
                 .size(24.dp)
         )
     }

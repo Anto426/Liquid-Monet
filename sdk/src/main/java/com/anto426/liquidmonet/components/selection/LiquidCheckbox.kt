@@ -55,7 +55,7 @@ fun LiquidCheckbox(
     val shape = RoundedRectangle(8.dp)
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (checked) primaryColor else Color.White.copy(alpha = 0.08f),
+        targetValue = if (checked) primaryColor else colorScheme.onSurface.copy(alpha = 0.08f),
         animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
         label = "checkboxContainerColor"
     )
@@ -110,7 +110,7 @@ fun LiquidCheckbox(
                 }
                 drawPath(
                     path = checkPath,
-                    color = Color.White,
+                    color = colorScheme.onPrimary,
                     style = Stroke(
                         width = 2.4.dp.toPx(),
                         cap = StrokeCap.Round,

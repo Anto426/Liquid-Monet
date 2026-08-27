@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
-import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -294,7 +293,6 @@ private fun LiquidLoadingDots(
                             backdrop = backdropState,
                             shape = Capsule(),
                             role = LiquidGlassRole.Control,
-                            preset = LiquidGlassPresets.Interactive,
                             containerColor = dotColor.copy(alpha = 0.08f + 0.10f * phase)
                         )
                 )
@@ -371,7 +369,6 @@ private fun LiquidLoadingPulse(
                         backdrop = backdropState,
                         shape = Capsule(),
                         role = LiquidGlassRole.Control,
-                        preset = LiquidGlassPresets.Interactive,
                         containerColor = primaryColor.copy(alpha = 0.16f)
                     )
             )

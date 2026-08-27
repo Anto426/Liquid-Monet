@@ -61,7 +61,10 @@ fun LiquidGlassScene(
                     }
                 )
         ) {
-            Box(modifier = Modifier.fillMaxSize().layerBackdrop(modalBackdrop)) {
+            // A third full-screen recording is needed only while a dialog/sheet exists. Avoiding
+            // it on the normal path matters because the animated background invalidates layers
+            // continuously, even when no modal is visible.
+            val sceneContent: @Composable BoxScope.() -> Unit = {
                 Box(modifier = Modifier.fillMaxSize().layerBackdrop(contentBackdrop)) {
                     Box(modifier = Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
                         background()
@@ -69,11 +72,29 @@ fun LiquidGlassScene(
                     content(backgroundBackdrop)
                 }
                 CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides contentBackdrop) {
-                    topBar?.invoke(this@Box, contentBackdrop)
-                    bottomBar?.invoke(this@Box, contentBackdrop)
-                    overlay?.invoke(this@Box, contentBackdrop)
+                    topBar?.invoke(this, contentBackdrop)
+                    bottomBar?.invoke(this, contentBackdrop)
+                    overlay?.invoke(this, contentBackdrop)
                     LiquidGlassOverlayHost(overlayState)
                 }
+            }
+
+            // Keep sceneContent at one stable composition call site. Moving it between two
+            // branches when a modal opens disposes the whole screen, resets the caller's
+            // `isDialogOpen`/`isSheetOpen` state and immediately removes the portal entry.
+            // Only the recording modifier is conditional; the UI tree keeps its identity.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (modalOverlayState.activeEntry != null) {
+                            Modifier.layerBackdrop(modalBackdrop)
+                        } else {
+                            Modifier
+                        }
+                    )
+            ) {
+                sceneContent()
             }
 
             // Keep the modal host outside the recorded layer to prevent recursive sampling.

@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -22,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
+import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -60,6 +63,18 @@ fun LiquidBackground(
     intensity: Float = 1.0f,
     showVignette: Boolean = true
 ) {
+    val performance = LocalLiquidGlassPerformance.current
+    val normalizedSpeed = if (speedFactor.isFinite()) {
+        speedFactor.coerceIn(0.05f, 10f)
+    } else {
+        1f
+    }
+    val normalizedIntensity = if (intensity.isFinite()) intensity.coerceIn(0f, 1f) else 1f
+    // HIGH is intentionally a two-dimensional background: it keeps the main glow but drops
+    // secondary lobes/grid work. The full multi-lobe composition is reserved for ULTRA.
+    val drawDetailedBackground = performance.renderDetailedBackground
+    val drawBackgroundMotion = performance.animateBackground
+
     // 1. Resolve colors from MonetSeed, overrides, or active Material 3 ColorScheme
     val rawPrimary = primaryOverride
         ?: monetSeed?.let { if (isDark) it.darkPrimary else it.lightPrimary }
@@ -86,57 +101,73 @@ fun LiquidBackground(
     // 3. Aperiodic oscillators for natural, slow, serene, non-repeating organic motion
     val infiniteTransition = rememberInfiniteTransition(label = "LiquidBackgroundMotion")
 
-    val t1 by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween((24000 / speedFactor).toInt(), easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "t1"
-    )
-
-    val t2 by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween((34000 / speedFactor).toInt(), easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "t2"
-    )
-
-    val t3 by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween((46000 / speedFactor).toInt(), easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "t3"
-    )
-
-    // 4. Base background gradient (Deep pitch black for Vercel/Next aesthetic)
-    val baseBackgroundColors = if (isDark) {
-        listOf(
-            Color(0xFF020306),
-            Color(0xFF07080F),
-            Color(0xFF030408)
+    val t1 by if (drawBackgroundMotion) {
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween((24000 / normalizedSpeed).toInt(), easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "t1"
         )
     } else {
-        listOf(
-            Color(0xFFF7F8FC),
-            Color(0xFFEDEBF5),
-            Color(0xFFF3F5FA)
+        remember { mutableFloatStateOf(0f) }
+    }
+
+    val t2 by if (drawDetailedBackground) {
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween((34000 / normalizedSpeed).toInt(), easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "t2"
+        )
+    } else {
+        remember { mutableFloatStateOf(0f) }
+    }
+
+    val t3 by if (drawDetailedBackground) {
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween((46000 / normalizedSpeed).toInt(), easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "t3"
+        )
+    } else {
+        remember { mutableFloatStateOf(0f) }
+    }
+
+    // 4. Base background gradient (Deep pitch black for Vercel/Next aesthetic)
+    val baseBackgroundBrush = remember(isDark) {
+        Brush.verticalGradient(
+            if (isDark) {
+                listOf(
+                    Color(0xFF020306),
+                    Color(0xFF07080F),
+                    Color(0xFF030408)
+                )
+            } else {
+                listOf(
+                    Color(0xFFF7F8FC),
+                    Color(0xFFEDEBF5),
+                    Color(0xFFF3F5FA)
+                )
+            }
         )
     }
 
-    val alphaMultiplier = if (isDark) intensity else intensity * 0.70f
+    val alphaMultiplier = if (isDark) normalizedIntensity else normalizedIntensity * 0.70f
 
     Canvas(
         modifier = modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(baseBackgroundColors))
+            .background(baseBackgroundBrush)
     ) {
         val w = size.width
         val h = size.height
@@ -152,35 +183,25 @@ fun LiquidBackground(
                 val baseGridAlpha = if (isDark) 0.08f else 0.06f
                 val maxMaskDist = w * 0.90f
 
-                var curX = 0f
-                while (curX <= w) {
-                    var curY = 0f
-                    while (curY <= h) {
-                        val dx = curX - apexX
-                        val dy = curY - apexY
-                        val dist = kotlin.math.sqrt(dx * dx + dy * dy)
-                        val mask = (1f - dist / maxMaskDist).coerceIn(0f, 1f)
-                        if (mask > 0.01f) {
-                            val alpha = baseGridAlpha * mask * mask
-                            val lineColor = if (isDark) Color.White.copy(alpha = alpha) else Color.Black.copy(alpha = alpha)
-                            // Draw horizontal segment
-                            drawLine(
-                                color = lineColor,
-                                start = Offset(curX, curY),
-                                end = Offset((curX + gridStep).coerceAtMost(w), curY),
-                                strokeWidth = 1f
-                            )
-                            // Draw vertical segment
-                            drawLine(
-                                color = lineColor,
-                                start = Offset(curX, curY),
-                                end = Offset(curX, (curY + gridStep).coerceAtMost(h)),
-                                strokeWidth = 1f
-                            )
+                if (drawDetailedBackground) {
+                    var curX = 0f
+                    while (curX <= w) {
+                        var curY = 0f
+                        while (curY <= h) {
+                            val dx = curX - apexX
+                            val dy = curY - apexY
+                            val dist = kotlin.math.sqrt(dx * dx + dy * dy)
+                            val mask = (1f - dist / maxMaskDist).coerceIn(0f, 1f)
+                            if (mask > 0.01f) {
+                                val alpha = baseGridAlpha * mask * mask
+                                val lineColor = if (isDark) Color.White.copy(alpha = alpha) else Color.Black.copy(alpha = alpha)
+                                drawLine(color = lineColor, start = Offset(curX, curY), end = Offset((curX + gridStep).coerceAtMost(w), curY), strokeWidth = 1f)
+                                drawLine(color = lineColor, start = Offset(curX, curY), end = Offset(curX, (curY + gridStep).coerceAtMost(h)), strokeWidth = 1f)
+                            }
+                            curY += gridStep
                         }
-                        curY += gridStep
+                        curX += gridStep
                     }
-                    curX += gridStep
                 }
 
                 // 2. Next.js Conic Light Rays (Radial Ray Burst from Apex)
@@ -221,7 +242,7 @@ fun LiquidBackground(
 
                 // 4. Secondary Chromatic Flare (Right-offset ambient glow)
                 val flareX = w * (0.62f - 0.08f * cos(t2 * PI.toFloat() * 2f))
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             secondary.copy(alpha = 0.28f * alphaMultiplier),
@@ -252,7 +273,7 @@ fun LiquidBackground(
 
                 // 6. Subtle Ambient Horizon Glow at Bottom
                 val horizonY = h * (0.90f + 0.03f * sin(t3 * PI.toFloat() * 2f))
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             tertiary.copy(alpha = 0.20f * alphaMultiplier),
@@ -304,7 +325,7 @@ fun LiquidBackground(
                 // Aurora Lobe 3 (Bottom-Right Tertiary)
                 val p3X = w * (0.68f - 0.14f * sin(t2 * PI.toFloat() * 2f))
                 val p3Y = h * (0.80f - 0.08f * cos(t1 * PI.toFloat() * 2f))
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             tertiary.copy(alpha = 0.28f * alphaMultiplier),
@@ -321,7 +342,7 @@ fun LiquidBackground(
                 // Aurora Lobe 4 (Focal Accent Center-Bottom)
                 val p4X = w * (0.35f + 0.10f * sin(t3 * PI.toFloat() * 2f))
                 val p4Y = h * (0.72f + 0.08f * cos(t3 * PI.toFloat() * 2f))
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             accent.copy(alpha = 0.22f * alphaMultiplier),
@@ -363,7 +384,7 @@ fun LiquidBackground(
 
                 // Bottom-Left (Tertiary)
                 val bl = Offset(w * (0.20f + 0.06f * sin(t3 * PI.toFloat() * 2f)), h * (0.85f - 0.06f * cos(t2 * PI.toFloat() * 2f)))
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(tertiary.copy(alpha = 0.30f * alphaMultiplier), Color.Transparent),
                         center = bl,
@@ -375,7 +396,7 @@ fun LiquidBackground(
 
                 // Bottom-Right (Accent)
                 val br = Offset(w * (0.80f - 0.06f * cos(t1 * PI.toFloat() * 2f)), h * (0.80f - 0.06f * sin(t3 * PI.toFloat() * 2f)))
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(accent.copy(alpha = 0.28f * alphaMultiplier), Color.Transparent),
                         center = br,
@@ -409,7 +430,7 @@ fun LiquidBackground(
                 val angle2 = angle1 + (PI.toFloat() * 2f / 3f)
                 val o2X = cx + orbitRadius * cos(angle2)
                 val o2Y = cy + orbitRadius * 0.7f * sin(angle2)
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(secondary.copy(alpha = 0.34f * alphaMultiplier), Color.Transparent),
                         center = Offset(o2X, o2Y),
@@ -423,7 +444,7 @@ fun LiquidBackground(
                 val angle3 = angle1 + (PI.toFloat() * 4f / 3f)
                 val o3X = cx + orbitRadius * cos(angle3)
                 val o3Y = cy + orbitRadius * 0.7f * sin(angle3)
-                drawCircle(
+                if (drawDetailedBackground) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(tertiary.copy(alpha = 0.32f * alphaMultiplier), Color.Transparent),
                         center = Offset(o3X, o3Y),

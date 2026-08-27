@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +68,7 @@ fun InputsScreen(
     var switchVal by remember { mutableStateOf(true) }
     var checkboxVal by remember { mutableStateOf(true) }
     var radioVal by remember { mutableIntStateOf(0) }
-    var sliderVal by remember { mutableStateOf(0.60f) }
+    var sliderVal by remember { mutableFloatStateOf(0.60f) }
     var rangeSliderVal by remember { mutableStateOf(0.20f..0.80f) }
     var colorPickerVal by remember { mutableStateOf(Color(0xFF2979FF)) }
 

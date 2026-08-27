@@ -31,7 +31,6 @@ import com.anto426.liquidmonet.components.cards.LiquidStatusType
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.kyant.backdrop.Backdrop
-import java.util.Locale
 import kotlinx.coroutines.delay
 
 @Composable
@@ -58,7 +57,7 @@ fun HomeScreen(
     }
 
     val elapsedSeconds = (progressVal * 225).toInt()
-    val musicCurrentTime = String.format(Locale.getDefault(), "%d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
+    val musicCurrentTime = "${elapsedSeconds / 60}:${(elapsedSeconds % 60).toString().padStart(2, '0')}"
 
     Column(
         modifier = modifier.fillMaxWidth(),

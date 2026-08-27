@@ -49,6 +49,7 @@ import androidx.compose.ui.util.lerp
 import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
+import com.anto426.liquidmonet.components.internal.liquidTopBarZIndex
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.LocalLiquidGlassTopBarScrollBehavior
@@ -126,6 +127,7 @@ fun LiquidTopBar(
                 containerColor = Color.Transparent,
                 exportedBackdrop = surfaceBackdrop
             )
+            .liquidTopBarZIndex()
             .background(surfaceBrush)
     ) {
         CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {

@@ -50,7 +50,8 @@ fun LiquidRadioButton(
     val shape = Capsule()
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (selected) primaryColor.copy(alpha = 0.32f) else Color.White.copy(alpha = 0.08f),
+        targetValue = if (selected) primaryColor.copy(alpha = 0.32f)
+        else colorScheme.onSurface.copy(alpha = 0.08f),
         animationSpec = LiquidGlassMotionSpecs.tween(performance, 200),
         label = "radioContainerColor"
     )
@@ -117,7 +118,7 @@ fun LiquidRadioButton(
                     scaleX = (0.2f + 0.8f * dotProgress).coerceAtLeast(0f)
                     scaleY = (0.1f + 0.9f * dotProgress).coerceAtLeast(0f)
                 }
-                .background(Color.White.copy(alpha = 0.94f), CircleShape)
+                .background(colorScheme.onPrimary.copy(alpha = 0.94f), CircleShape)
         )
     }
 }

@@ -1,7 +1,6 @@
 package com.anto426.liquidmonet.components.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +26,7 @@ import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTab
 import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTabs
+import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.kyant.shapes.Capsule
 
 /**
@@ -41,10 +42,8 @@ fun LiquidTabBar(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val contentColor = if (isLightTheme) Color.Black.copy(alpha = 0.85f) else Color.White.copy(alpha = 0.85f)
-    val hostContentBackdrop = com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop.current
-    val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else (hostContentBackdrop ?: backdrop)
+    val contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+    val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
 
     LiquidGlassBottomTabs(
         selectedTabIndex = { selectedIndex },

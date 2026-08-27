@@ -17,7 +17,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
-import kotlin.math.min
 
 /**
  * Observes device capability and transient system pressure, then exposes a Compose [State].
@@ -38,6 +37,9 @@ class LiquidGlassPerformanceManager(
     private val powerManager = applicationContext.getSystemService(PowerManager::class.java)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val deviceProfile = readDeviceProfile()
+    // Hardware capabilities are process-stable for this manager. Cache the choice so a refresh
+    // can never accidentally select a different visual profile during the current session.
+    private val selectedQualityTier = selectQualityTier(deviceProfile)
     private val thermalMonitor = createThermalMonitor(powerManager)
 
     private var normalizedLiquidIntensity = normalizeIntensity(liquidIntensity)
@@ -47,7 +49,7 @@ class LiquidGlassPerformanceManager(
 
     private val mutableState = mutableStateOf(readState())
 
-    /** The latest capability and pressure-adjusted glass profile. */
+    /** The hardware-selected glass profile plus current pressure diagnostics. */
     val state: State<LiquidGlassPerformanceState>
         get() = mutableState
 
@@ -118,7 +120,6 @@ class LiquidGlassPerformanceManager(
             if (!observing) return@runOnMain
             observing = false
             mainHandler.removeCallbacks(refreshRunnable)
-
             thermalMonitor?.close()
 
             if (powerReceiverRegistered) {
@@ -175,18 +176,15 @@ class LiquidGlassPerformanceManager(
         val powerSaveMode = powerManager?.isPowerSaveMode ?: false
         val thermalStatus = thermalMonitor?.currentStatus() ?: LiquidGlassThermalStatus.UNKNOWN
 
-        val qualityTier = selectQualityTier(
-            device = deviceProfile,
-            memoryPressureHigh = memoryPressureHigh,
-            powerSaveMode = powerSaveMode,
-            thermalStatus = thermalStatus
-        )
-        val baseScales = scalesFor(qualityTier)
+        // The visual profile is selected from stable hardware capabilities only. Thermal and
+        // memory values remain available as diagnostics, but must not make the UI switch profile
+        // while the device is running.
+        val baseScales = scalesFor(selectedQualityTier)
         val intensity = normalizedLiquidIntensity
 
         return LiquidGlassPerformanceState(
             device = deviceProfile,
-            qualityTier = qualityTier,
+            qualityTier = selectedQualityTier,
             thermalStatus = thermalStatus,
             isPowerSaveMode = powerSaveMode,
             isMemoryPressureHigh = memoryPressureHigh,
@@ -214,53 +212,27 @@ class LiquidGlassPerformanceManager(
 
     private companion object {
         private const val GIB = 1024L * 1024L * 1024L
-
         private fun normalizeIntensity(value: Float): Float =
             if (value.isFinite()) value.coerceIn(0f, 1f) else 1f
 
-        private fun selectQualityTier(
-            device: LiquidGlassDeviceProfile,
-            memoryPressureHigh: Boolean,
-            powerSaveMode: Boolean,
-            thermalStatus: LiquidGlassThermalStatus
-        ): LiquidGlassQualityTier {
-            var tier = when {
-                !device.supportsRenderEffect ||
-                    device.isLowRamDevice ||
-                    device.cpuCoreCount <= 2 ||
-                    device.totalMemoryBytes in 1L until 2L * GIB -> LiquidGlassQualityTier.MINIMAL
+        private fun selectQualityTier(device: LiquidGlassDeviceProfile): LiquidGlassQualityTier = when {
+            !device.supportsRenderEffect ||
+                device.isLowRamDevice ||
+                device.cpuCoreCount <= 2 ||
+                device.totalMemoryBytes in 1L until 2L * GIB -> LiquidGlassQualityTier.MINIMAL
 
-                device.supportsRuntimeShader &&
-                    device.cpuCoreCount >= 8 &&
-                    device.totalMemoryBytes >= 8 * GIB -> LiquidGlassQualityTier.ULTRA
+            device.supportsRuntimeShader &&
+                device.is64Bit &&
+                device.cpuCoreCount >= 8 &&
+                device.totalMemoryBytes >= 8 * GIB &&
+                device.appMemoryClassMb >= 256 -> LiquidGlassQualityTier.ULTRA
 
-                device.supportsRuntimeShader &&
-                    device.cpuCoreCount >= 4 &&
-                    device.totalMemoryBytes >= 4 * GIB -> LiquidGlassQualityTier.HIGH
+            device.supportsRuntimeShader &&
+                device.cpuCoreCount >= 4 &&
+                device.totalMemoryBytes >= 4 * GIB -> LiquidGlassQualityTier.HIGH
 
-                else -> LiquidGlassQualityTier.BALANCED
-            }
-
-            if (powerSaveMode) tier = minTier(tier, LiquidGlassQualityTier.BALANCED)
-            if (memoryPressureHigh) tier = LiquidGlassQualityTier.MINIMAL
-            tier = when (thermalStatus) {
-                LiquidGlassThermalStatus.LIGHT -> minTier(tier, LiquidGlassQualityTier.HIGH)
-                LiquidGlassThermalStatus.MODERATE -> minTier(tier, LiquidGlassQualityTier.BALANCED)
-                LiquidGlassThermalStatus.SEVERE,
-                LiquidGlassThermalStatus.CRITICAL,
-                LiquidGlassThermalStatus.EMERGENCY,
-                LiquidGlassThermalStatus.SHUTDOWN -> LiquidGlassQualityTier.MINIMAL
-
-                LiquidGlassThermalStatus.UNKNOWN,
-                LiquidGlassThermalStatus.NONE -> tier
-            }
-            return tier
+            else -> LiquidGlassQualityTier.BALANCED
         }
-
-        private fun minTier(
-            first: LiquidGlassQualityTier,
-            maximum: LiquidGlassQualityTier
-        ): LiquidGlassQualityTier = LiquidGlassQualityTier.entries[min(first.ordinal, maximum.ordinal)]
 
         private fun scalesFor(tier: LiquidGlassQualityTier): PerformanceScales = when (tier) {
             LiquidGlassQualityTier.MINIMAL -> PerformanceScales(
