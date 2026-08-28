@@ -55,6 +55,9 @@ import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * LiquidColorPicker - Optical Liquid Glass Color Spectrum & Palette Selector.
@@ -80,11 +83,21 @@ fun LiquidColorPicker(
 
     // Synchronize initial HSL with selectedColor when it changes externally
     LaunchedEffect(selectedColor) {
-        val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(selectedColor.toArgb(), hsv)
-        hue = hsv[0]
-        saturation = hsv[1]
-        lightness = hsv[2] * (1f - hsv[1] / 2f)
+        val red = selectedColor.red
+        val green = selectedColor.green
+        val blue = selectedColor.blue
+        val maximum = max(red, max(green, blue))
+        val minimum = min(red, min(green, blue))
+        val delta = maximum - minimum
+
+        hue = when {
+            delta == 0f -> 0f
+            maximum == red -> 60f * (((green - blue) / delta) % 6f)
+            maximum == green -> 60f * (((blue - red) / delta) + 2f)
+            else -> 60f * (((red - green) / delta) + 4f)
+        }.let { if (it < 0f) it + 360f else it }
+        saturation = if (maximum == 0f) 0f else delta / maximum
+        lightness = maximum * (1f - saturation / 2f)
     }
 
     val currentColor = remember(hue, saturation, lightness) {
@@ -95,7 +108,7 @@ fun LiquidColorPicker(
         val r = (currentColor.red * 255).toInt().coerceIn(0, 255)
         val g = (currentColor.green * 255).toInt().coerceIn(0, 255)
         val b = (currentColor.blue * 255).toInt().coerceIn(0, 255)
-        String.format("#%02X%02X%02X", r, g, b)
+        "#${r.toHexByte()}${g.toHexByte()}${b.toHexByte()}"
     }
 
     val interactiveHighlight = rememberLiquidControlHighlight()
@@ -358,3 +371,5 @@ fun LiquidColorPicker(
         }
     }
 }
+
+private fun Int.toHexByte(): String = toString(16).uppercase().padStart(2, '0')

@@ -8,7 +8,10 @@ import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
 import com.anto426.liquidmonet.components.feedback.LiquidDialog
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
-import java.util.Calendar
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 /**
  * LiquidDatePickerDialog - Dedicated Optical Liquid Glass Modal Calendar Dialog Component.
@@ -17,8 +20,8 @@ import java.util.Calendar
 fun LiquidDatePickerDialog(
     isOpen: Boolean,
     onDismissRequest: () -> Unit,
-    onDateSelected: (Calendar) -> Unit,
-    initialDate: Calendar = Calendar.getInstance(),
+    onDateSelected: (LocalDate) -> Unit,
+    initialDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {

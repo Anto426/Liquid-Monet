@@ -1,12 +1,11 @@
 package com.anto426.liquidmonet.theme.monet
 
-import android.content.Context
-import android.os.Build
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.runtime.Composable
 
 internal val White = Color(0xFFFFFFFF)
 internal val Black = Color(0xFF000000)
@@ -75,46 +74,18 @@ object LiquidMonetPresets {
 
 object LiquidMonetEngine {
 
+    @Composable
     fun generateColorScheme(
-        context: Context,
         darkTheme: Boolean,
         useSystemDynamic: Boolean = true,
         customSeed: LiquidMonetSeed = LiquidMonetPresets.Sapphire
     ): ColorScheme {
-        val seed = if (useSystemDynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            extractSystemMonetSeed(context, customSeed)
+        val seed = if (useSystemDynamic) {
+            platformMonetSeed(customSeed)
         } else {
             customSeed
         }
         return seed.toMaterial3ExpressiveScheme(darkTheme)
-    }
-
-    private fun extractSystemMonetSeed(context: Context, fallback: LiquidMonetSeed): LiquidMonetSeed {
-        val lightPrimary = getSystemColor(context, "system_accent1_600", fallback.lightPrimary)
-        val darkPrimary = getSystemColor(context, "system_accent1_200", fallback.darkPrimary)
-        val lightSecondary = getSystemColor(context, "system_accent2_600", fallback.lightSecondary)
-        val darkSecondary = getSystemColor(context, "system_accent2_200", fallback.darkSecondary)
-        val lightTertiary = getSystemColor(context, "system_accent3_600", fallback.lightTertiary)
-        val darkTertiary = getSystemColor(context, "system_accent3_200", fallback.darkTertiary)
-
-        return LiquidMonetSeed(
-            lightPrimary = lightPrimary,
-            darkPrimary = darkPrimary,
-            lightSecondary = lightSecondary,
-            darkSecondary = darkSecondary,
-            lightTertiary = lightTertiary,
-            darkTertiary = darkTertiary
-        )
-    }
-
-    private fun getSystemColor(context: Context, name: String, fallback: Color): Color {
-        val id = context.resources.getIdentifier(name, "color", "android")
-        if (id == 0) return fallback
-        return try {
-            Color(context.getColor(id))
-        } catch (_: Exception) {
-            fallback
-        }
     }
 
     private fun LiquidMonetSeed.toMaterial3ExpressiveScheme(darkTheme: Boolean): ColorScheme {
@@ -221,3 +192,6 @@ object LiquidMonetEngine {
         }
     }
 }
+
+@Composable
+internal expect fun platformMonetSeed(fallback: LiquidMonetSeed): LiquidMonetSeed

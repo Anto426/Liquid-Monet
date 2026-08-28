@@ -6,14 +6,10 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.annotation.FloatRange
-import androidx.compose.ui.platform.LocalContext
-import com.anto426.liquidmonet.glass.runtime.LiquidGlassPerformanceManager
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.glass.runtime.rememberLiquidGlassPerformanceState
 import com.anto426.liquidmonet.theme.monet.LiquidMonetEngine
 import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
@@ -35,30 +31,13 @@ fun LiquidMonetTheme(
     glassColors: LiquidGlassColors? = null,
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
-    val applicationContext = context.applicationContext
     val colorScheme = LiquidMonetEngine.generateColorScheme(
-        context = context,
         darkTheme = darkTheme,
         useSystemDynamic = useMonetEngine,
         customSeed = customMonetSeed
     )
 
-    val performanceManager = remember(applicationContext) {
-        LiquidGlassPerformanceManager(
-            context = applicationContext,
-            liquidIntensity = liquidIntensity
-        )
-    }
-    DisposableEffect(performanceManager) {
-        performanceManager.start()
-        onDispose(performanceManager::close)
-    }
-    LaunchedEffect(performanceManager, liquidIntensity) {
-        performanceManager.setLiquidIntensity(liquidIntensity)
-    }
-
-    val glassPerformance by performanceManager.state
+    val glassPerformance by rememberLiquidGlassPerformanceState(liquidIntensity)
     val resolvedGlassColors = glassColors ?: LiquidGlassDefaults.colors(colorScheme)
     CompositionLocalProvider(
         LocalLiquidGlassPerformance provides glassPerformance,

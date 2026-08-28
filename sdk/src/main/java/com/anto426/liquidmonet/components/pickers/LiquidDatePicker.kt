@@ -49,54 +49,40 @@ import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
-import java.util.Calendar
-import java.util.Locale
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 /**
  * State holder for LiquidDatePicker.
  */
 @Stable
 class LiquidDatePickerState(
-    initialDate: Calendar = Calendar.getInstance()
+    initialDate: LocalDate = currentLocalDate()
 ) {
-    var selectedDate: Calendar? by mutableStateOf(initialDate.clone() as Calendar)
-    var displayedYear: Int by mutableIntStateOf(initialDate.get(Calendar.YEAR))
-    var displayedMonth: Int by mutableIntStateOf(initialDate.get(Calendar.MONTH))
+    var selectedDate: LocalDate? by mutableStateOf(initialDate)
+    var displayedYear: Int by mutableIntStateOf(initialDate.year)
+    var displayedMonth: Int by mutableIntStateOf(initialDate.monthNumber)
 
     val monthName: String
         get() {
-            val cal = Calendar.getInstance().apply {
-                set(Calendar.YEAR, displayedYear)
-                set(Calendar.MONTH, displayedMonth)
-            }
-            val name = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) ?: ""
-            return "${name.replaceFirstChar { it.uppercase() }} $displayedYear"
+            return "${monthNames[displayedMonth - 1]} $displayedYear"
         }
 
     val daysInMonth: Int
         get() {
-            val cal = Calendar.getInstance().apply {
-                set(Calendar.YEAR, displayedYear)
-                set(Calendar.MONTH, displayedMonth)
-                set(Calendar.DAY_OF_MONTH, 1)
-            }
-            return cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            return daysInMonth(displayedYear, displayedMonth)
         }
 
     val firstDayOffset: Int
         get() {
-            val cal = Calendar.getInstance().apply {
-                set(Calendar.YEAR, displayedYear)
-                set(Calendar.MONTH, displayedMonth)
-                set(Calendar.DAY_OF_MONTH, 1)
-            }
-            // European week: Monday is 0
-            return (cal.get(Calendar.DAY_OF_WEEK) + 5) % 7
+            return LocalDate(displayedYear, displayedMonth, 1).dayOfWeek.ordinal
         }
 
     fun previousMonth() {
-        if (displayedMonth == 0) {
-            displayedMonth = 11
+        if (displayedMonth == 1) {
+            displayedMonth = 12
             displayedYear--
         } else {
             displayedMonth--
@@ -104,8 +90,8 @@ class LiquidDatePickerState(
     }
 
     fun nextMonth() {
-        if (displayedMonth == 11) {
-            displayedMonth = 0
+        if (displayedMonth == 12) {
+            displayedMonth = 1
             displayedYear++
         } else {
             displayedMonth++
@@ -113,32 +99,27 @@ class LiquidDatePickerState(
     }
 
     fun selectDay(day: Int) {
-        val newCal = Calendar.getInstance().apply {
-            set(Calendar.YEAR, displayedYear)
-            set(Calendar.MONTH, displayedMonth)
-            set(Calendar.DAY_OF_MONTH, day)
-        }
-        selectedDate = newCal
+        selectedDate = LocalDate(displayedYear, displayedMonth, day)
     }
 
     fun isSelected(day: Int): Boolean {
         val current = selectedDate ?: return false
-        return current.get(Calendar.YEAR) == displayedYear &&
-                current.get(Calendar.MONTH) == displayedMonth &&
-                current.get(Calendar.DAY_OF_MONTH) == day
+        return current.year == displayedYear &&
+                current.monthNumber == displayedMonth &&
+                current.dayOfMonth == day
     }
 
     fun isToday(day: Int): Boolean {
-        val today = Calendar.getInstance()
-        return today.get(Calendar.YEAR) == displayedYear &&
-                today.get(Calendar.MONTH) == displayedMonth &&
-                today.get(Calendar.DAY_OF_MONTH) == day
+        val today = currentLocalDate()
+        return today.year == displayedYear &&
+                today.monthNumber == displayedMonth &&
+                today.dayOfMonth == day
     }
 }
 
 @Composable
 fun rememberLiquidDatePickerState(
-    initialDate: Calendar = Calendar.getInstance()
+    initialDate: LocalDate = currentLocalDate()
 ): LiquidDatePickerState {
     return remember { LiquidDatePickerState(initialDate) }
 }
@@ -285,7 +266,7 @@ fun LiquidDatePicker(
  */
 @Composable
 fun LiquidDatePickerField(
-    selectedDate: Calendar?,
+    selectedDate: LocalDate?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     label: String = "Seleziona Data",
@@ -296,10 +277,8 @@ fun LiquidDatePickerField(
 ) {
     val formattedDate = remember(selectedDate) {
         if (selectedDate != null) {
-            val day = selectedDate.get(Calendar.DAY_OF_MONTH)
-            val month = selectedDate.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) ?: ""
-            val year = selectedDate.get(Calendar.YEAR)
-            "$day ${month.replaceFirstChar { it.uppercase() }} $year"
+            val month = monthNames[selectedDate.monthNumber - 1]
+            "${selectedDate.dayOfMonth} $month ${selectedDate.year}"
         } else null
     }
 
@@ -373,4 +352,17 @@ fun LiquidDatePickerField(
             )
         }
     }
+}
+
+private val monthNames = listOf(
+    "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+    "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+)
+
+private fun currentLocalDate(): LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+private fun daysInMonth(year: Int, month: Int): Int = when (month) {
+    2 -> if (year % 400 == 0 || year % 4 == 0 && year % 100 != 0) 29 else 28
+    4, 6, 9, 11 -> 30
+    else -> 31
 }

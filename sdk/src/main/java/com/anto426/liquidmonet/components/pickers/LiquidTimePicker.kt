@@ -34,7 +34,6 @@ import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
-import java.util.Locale
 
 /**
  * State holder for LiquidTimePicker.
@@ -48,7 +47,7 @@ class LiquidTimePickerState(
     var minute: Int by mutableIntStateOf(initialMinute)
 
     val formattedTime: String
-        get() = String.format(Locale.ROOT, "%02d:%02d", hour, minute)
+        get() = "${hour.twoDigits()}:${minute.twoDigits()}"
 
     fun incrementHour() {
         hour = (hour + 1) % 24
@@ -149,7 +148,7 @@ private fun LiquidTimeNumberColumn(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = String.format(Locale.ROOT, "%02d", value),
+                text = value.twoDigits(),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -169,6 +168,8 @@ private fun LiquidTimeNumberColumn(
     }
 }
 
+private fun Int.twoDigits(): String = toString().padStart(2, '0')
+
 /**
  * LiquidTimePickerField - Liquid Glass Time Input Trigger Field.
  */
@@ -186,7 +187,7 @@ fun LiquidTimePickerField(
 ) {
     val formattedTime = remember(selectedHour, selectedMinute) {
         if (selectedHour != null && selectedMinute != null) {
-            String.format(Locale.ROOT, "%02d:%02d", selectedHour, selectedMinute)
+            "${selectedHour.twoDigits()}:${selectedMinute.twoDigits()}"
         } else null
     }
 

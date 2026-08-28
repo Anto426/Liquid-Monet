@@ -290,8 +290,8 @@ private fun LiquidRangeSliderImpl(
                 enabled = enabled,
                 valueRange = valueRange,
                 steps = steps,
-                startThumbInteractionSource = startInteractionSource,
-                endThumbInteractionSource = endInteractionSource,
+                startInteractionSource = startInteractionSource,
+                endInteractionSource = endInteractionSource,
                 startThumb = { Box(Modifier.size(48.dp)) },
                 endThumb = { Box(Modifier.size(48.dp)) },
                 track = { Box(Modifier.fillMaxWidth().height(1.dp)) }

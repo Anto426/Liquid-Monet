@@ -1,6 +1,6 @@
 package com.anto426.liquidmonet.components.feedback
 
-import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing

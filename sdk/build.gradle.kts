@@ -1,51 +1,75 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.compose)
 }
 
-android {
-    namespace = "com.anto426.liquidmonet.sdk"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+kotlin {
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-Xexpect-actual-classes",
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+                "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi"
+            )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        compose = true
-    }
-}
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        freeCompilerArgs.addAll(
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
-        )
-    }
-}
+    android {
+        namespace = "com.anto426.liquidmonet.sdk"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
 
-dependencies {
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.graphics)
-    implementation(libs.androidx.compose.preview)
-    implementation(libs.androidx.material3)
-    api(libs.haze)
-    api(libs.haze.materials)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "LiquidMonet"
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        commonMain {
+            kotlin.srcDir("src/main/java")
+            // The bundled Kyant renderer is part of this SDK. Only its four Android-backed
+            // bridges are replaced by expect/actual implementations for KMP.
+            kotlin.exclude("com/kyant/backdrop/Platform.kt")
+            kotlin.exclude("com/kyant/backdrop/RuntimeShader.kt")
+            kotlin.exclude("com/kyant/backdrop/internal/Paint.kt")
+            kotlin.exclude("com/kyant/backdrop/internal/RenderEffect.kt")
+            kotlin.exclude("com/anto426/liquidmonet/glass/runtime/LiquidGlassPerformanceManager.kt")
+
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(libs.compose.material3.multiplatform)
+                implementation(compose.ui)
+                implementation(libs.compose.ui.backhandler)
+                api(libs.kotlinx.datetime)
+            }
+        }
+
+        androidMain {
+            kotlin.srcDir("src/main/java")
+            kotlin.include("**/*.android.kt")
+            kotlin.include("com/anto426/liquidmonet/glass/runtime/LiquidGlassPerformanceManager.kt")
+
+            dependencies {
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.activity.compose)
+            }
+        }
+    }
 }
