@@ -25,6 +25,7 @@ import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -52,14 +53,15 @@ fun LiquidStatusCard(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
+    val glassColors = LiquidGlassTheme.colors
     val statusColor = when (statusType) {
         LiquidStatusType.Info -> MaterialTheme.colorScheme.primary
-        LiquidStatusType.Success -> Color(0xFF00C853)
-        LiquidStatusType.Warning -> Color(0xFFFFAB00)
-        LiquidStatusType.Error -> MaterialTheme.colorScheme.error
+        LiquidStatusType.Success -> glassColors.success
+        LiquidStatusType.Warning -> glassColors.warning
+        LiquidStatusType.Error -> glassColors.error
     }
 
-    val contentColor = MaterialTheme.colorScheme.onSurface
+    val contentColor = glassColors.content
     val iconHighlight = rememberLiquidControlHighlight()
     val hostContentBackdrop = com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
@@ -123,7 +125,7 @@ fun LiquidStatusCard(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = contentColor.copy(alpha = 0.72f),
+                    color = glassColors.secondaryContent,
                     modifier = Modifier.padding(top = 2.dp)
                 )
                 if (!supportingText.isNullOrBlank()) {

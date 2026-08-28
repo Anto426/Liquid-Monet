@@ -13,6 +13,8 @@ internal object LiquidGlassZIndex {
     const val Interactive = 1f
     const val TopBar = 2f
     const val Toast = 100f
+    const val Menu = 1_000_000f
+    const val Modal = 2_000_000f
 }
 
 internal fun Modifier.liquidInteractiveZIndex(enabled: Boolean = true): Modifier =

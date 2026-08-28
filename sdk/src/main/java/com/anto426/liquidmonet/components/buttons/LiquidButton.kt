@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.feedback.LiquidCircularProgressIndicator
@@ -74,11 +75,12 @@ fun LiquidButton(
 ) {
     val isInteractive = enabled && !isLoading
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val targetTint = when {
-        tint.isSpecified -> tint.copy(alpha = tint.alpha.coerceAtMost(0.28f))
-        variant == LiquidButtonVariant.Primary -> colorScheme.primary.copy(alpha = 0.22f)
-        variant == LiquidButtonVariant.Secondary -> colorScheme.secondary.copy(alpha = 0.14f)
-        variant == LiquidButtonVariant.Tonal -> colorScheme.tertiary.copy(alpha = 0.16f)
+        tint.isSpecified -> tint.copy(alpha = tint.alpha.coerceAtMost(glassColors.selectedContainer.alpha))
+        variant == LiquidButtonVariant.Primary -> glassColors.accentContainer
+        variant == LiquidButtonVariant.Secondary -> colorScheme.secondary.copy(alpha = glassColors.accentContainer.alpha * 0.72f)
+        variant == LiquidButtonVariant.Tonal -> colorScheme.tertiary.copy(alpha = glassColors.accentContainer.alpha * 0.80f)
         else -> Color.Transparent
     }
     val targetContentColor = when (variant) {
@@ -87,9 +89,9 @@ fun LiquidButton(
         LiquidButtonVariant.Primary,
         LiquidButtonVariant.Secondary,
         LiquidButtonVariant.Tonal,
-        LiquidButtonVariant.Glass -> colorScheme.onSurface
+        LiquidButtonVariant.Glass -> glassColors.content
     }.let { contentColor ->
-        if (enabled) contentColor else contentColor.copy(alpha = LiquidControlDefaults.disabledContentAlpha)
+        if (enabled) contentColor else glassColors.disabledContent
     }
 
     val animatedContentColor by animateColorAsState(
@@ -125,7 +127,7 @@ fun LiquidButton(
     val border: BorderStroke? = if (variant == LiquidButtonVariant.Outlined) {
         BorderStroke(
             1.dp,
-            colorScheme.primary.copy(alpha = if (enabled) 0.48f else 0.18f)
+            if (enabled) glassColors.focusIndicator else glassColors.outline.copy(alpha = 0.45f)
         )
     } else null
 

@@ -42,6 +42,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -157,7 +158,7 @@ fun LiquidEmptyState(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                    color = colorScheme.onSurface.copy(alpha = 0.70f),
+                    color = LiquidGlassTheme.colors.secondaryContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

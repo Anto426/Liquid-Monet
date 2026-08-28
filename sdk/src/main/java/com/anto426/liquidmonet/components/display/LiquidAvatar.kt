@@ -30,10 +30,13 @@ import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
+import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -71,11 +74,17 @@ fun LiquidAvatar(
 
     val interactiveHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
+    val resolvedContainerColor = containerColor ?: glassColors.accentContainer
+    val avatarContentColor = LiquidGlassDefaults.contentColorFor(
+        resolvedContainerColor,
+        colorScheme
+    )
     val presenceColor = when (presence) {
-        LiquidAvatarPresence.Online -> Color(0xFF34C759)
-        LiquidAvatarPresence.Away -> Color(0xFFFF9500)
-        LiquidAvatarPresence.Busy -> Color(0xFFFF3B30)
-        LiquidAvatarPresence.Offline -> Color(0xFF8E8E93)
+        LiquidAvatarPresence.Online -> glassColors.success
+        LiquidAvatarPresence.Away -> glassColors.warning
+        LiquidAvatarPresence.Busy -> glassColors.error
+        LiquidAvatarPresence.Offline -> glassColors.secondaryContent
         LiquidAvatarPresence.None -> Color.Transparent
     }
 
@@ -105,12 +114,12 @@ fun LiquidAvatar(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .border(1.5.dp, Color.White.copy(alpha = 0.30f), CircleShape)
+                .border(1.5.dp, glassColors.outline, CircleShape)
                 .liquidGlass(
                     backdrop = effectiveBackdrop,
                     shape = Capsule(),
                     role = LiquidGlassRole.Navigation,
-                    containerColor = containerColor ?: colorScheme.primary.copy(alpha = 0.20f)
+                    containerColor = resolvedContainerColor
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -121,13 +130,13 @@ fun LiquidAvatar(
                         fontWeight = FontWeight.Bold,
                         fontSize = (size.value * 0.38f).sp
                     ),
-                    color = colorScheme.onSurface
+                    color = avatarContentColor
                 )
             } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = colorScheme.onSurface,
+                    tint = avatarContentColor,
                     modifier = Modifier.size(size * 0.55f)
                 )
             }
@@ -143,7 +152,7 @@ fun LiquidAvatar(
                     .offset(x = 1.dp, y = 1.dp)
                     .clip(CircleShape)
                     .background(presenceColor)
-                    .border(2.dp, Color.White, CircleShape)
+                    .border(2.dp, colorScheme.surface, CircleShape)
             )
         }
     }
@@ -163,6 +172,7 @@ fun LiquidAvatarGroup(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
+    val glassColors = LiquidGlassTheme.colors
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
@@ -206,12 +216,16 @@ fun LiquidAvatarGroup(
                         role = Role.Button,
                         onClick = { onOverflowClick?.invoke() }
                     )
-                    .border(1.5.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                    .border(
+                        1.5.dp,
+                        glassColors.outline,
+                        CircleShape
+                    )
                     .liquidGlass(
                         backdrop = effectiveBackdrop,
                         shape = Capsule(),
                         role = LiquidGlassRole.Navigation,
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                        containerColor = glassColors.selectedContainer
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -221,7 +235,7 @@ fun LiquidAvatarGroup(
                         fontWeight = FontWeight.Bold,
                         fontSize = (size.value * 0.34f).sp
                     ),
-                    color = Color.White
+                    color = glassColors.content
                 )
             }
         }

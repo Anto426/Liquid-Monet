@@ -41,6 +41,7 @@ import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.glass.overlay.liquidGlassOverlayAnchor
 import com.anto426.liquidmonet.glass.overlay.rememberLiquidGlassOverlayAnchorState
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -129,7 +130,7 @@ fun <T> LiquidSelect(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.onSurface.copy(alpha = 0.65f),
+                            color = LiquidGlassTheme.colors.secondaryContent,
                             fontSize = 11.sp
                         )
                         Text(
@@ -142,7 +143,7 @@ fun <T> LiquidSelect(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.45f)
+                            color = LiquidGlassTheme.colors.secondaryContent
                         )
                     }
                 }
@@ -151,7 +152,7 @@ fun <T> LiquidSelect(
             Icon(
                 imageVector = LiquidIcons.KeyboardArrowDown,
                 contentDescription = if (isExpanded) "Chiudi" else "Espandi",
-                tint = colorScheme.onSurface.copy(alpha = 0.50f),
+                tint = LiquidGlassTheme.colors.secondaryContent,
                 modifier = Modifier
                     .size(20.dp)
                     .graphicsLayer { rotationZ = chevronRotation }

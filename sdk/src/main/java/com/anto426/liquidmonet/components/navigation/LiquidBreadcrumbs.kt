@@ -27,6 +27,7 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -82,7 +83,7 @@ fun LiquidBreadcrumbs(
                 Icon(
                     imageVector = LiquidIcons.ChevronRight,
                     contentDescription = null,
-                    tint = colorScheme.onSurface.copy(alpha = 0.40f),
+                    tint = LiquidGlassTheme.colors.secondaryContent,
                     modifier = Modifier.size(13.dp)
                 )
             }
@@ -127,7 +128,7 @@ private fun LiquidBreadcrumbItemView(
                 fontWeight = if (isLast) FontWeight.Bold else FontWeight.Medium,
                 fontSize = 13.5.sp
             ),
-            color = if (isLast) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.72f)
+            color = if (isLast) colorScheme.primary else LiquidGlassTheme.colors.secondaryContent
         )
     }
 }

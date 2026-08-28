@@ -30,6 +30,7 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -53,7 +54,11 @@ fun LiquidRatingBar(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val resolvedActiveColor = if (activeColor.isSpecified) activeColor else colorScheme.primary
-    val resolvedInactiveColor = if (inactiveColor.isSpecified) inactiveColor else colorScheme.onSurface.copy(alpha = 0.22f)
+    val resolvedInactiveColor = if (inactiveColor.isSpecified) {
+        inactiveColor
+    } else {
+        LiquidGlassTheme.colors.inactiveTrack
+    }
     val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else backdrop
 
     Row(

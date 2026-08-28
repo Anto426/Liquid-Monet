@@ -18,6 +18,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -40,6 +41,7 @@ fun LiquidStepper(
     backdropState: Backdrop = backdrop
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
 
     Row(
         modifier = modifier
@@ -64,7 +66,7 @@ fun LiquidStepper(
                     Text(
                         text = "Unità: $unit",
                         style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.onSurface.copy(alpha = 0.55f)
+                        color = glassColors.secondaryContent
                     )
                 }
             }
@@ -91,7 +93,7 @@ fun LiquidStepper(
                         backdrop = backdropState,
                         shape = RoundedRectangle(12.dp),
                         role = LiquidGlassRole.Control,
-                        containerColor = colorScheme.primary.copy(alpha = 0.16f)
+                        containerColor = glassColors.accentContainer
                     ),
                 contentAlignment = Alignment.Center
             ) {

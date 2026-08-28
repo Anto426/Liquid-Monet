@@ -121,7 +121,7 @@ object LiquidMonetEngine {
         val primary = (if (darkTheme) darkPrimary else lightPrimary).copy(alpha = 1f)
         val secondary = (if (darkTheme) darkSecondary else lightSecondary).copy(alpha = 1f)
         val tertiary = (if (darkTheme) darkTertiary else lightTertiary).copy(alpha = 1f)
-        val error = Color(0xFFFFB4AB)
+        val error = if (darkTheme) Color(0xFFFFB4AB) else Color(0xFFBA1A1A)
         val target = if (darkTheme) Black else White
 
         val primaryContainer = blend(primary, target, if (darkTheme) 0.42f else 0.78f)
@@ -201,17 +201,17 @@ object LiquidMonetEngine {
                 onBackground = neutralOnSurface,
                 surface = neutralSurface,
                 onSurface = neutralOnSurface,
-                surfaceDim = Color(0xFFDED8E1),
-                surfaceBright = Color(0xFFFEF7FF),
+                surfaceDim = Color(0xFFE2E2E2),
+                surfaceBright = Color(0xFFFFFFFF),
                 surfaceContainerLowest = Color(0xFFFFFFFF),
-                surfaceContainerLow = Color(0xFFF7F2FA),
-                surfaceContainer = Color(0xFFF3EDF7),
-                surfaceContainerHigh = Color(0xFFECE6F0),
-                surfaceContainerHighest = Color(0xFFE6E0E9),
-                surfaceVariant = Color(0xFFE7E0EC),
+                surfaceContainerLow = Color(0xFFF7F7F7),
+                surfaceContainer = Color(0xFFF2F2F2),
+                surfaceContainerHigh = Color(0xFFEBEBEB),
+                surfaceContainerHighest = Color(0xFFE3E3E3),
+                surfaceVariant = Color(0xFFE7E7E7),
                 onSurfaceVariant = neutralOnSurfaceVariant,
-                outline = Color(0xFF79747E),
-                outlineVariant = Color(0xFFCAC4D0),
+                outline = Color(0xFF747474),
+                outlineVariant = Color(0xFFC7C7C7),
                 inverseSurface = Color(0xFF313033),
                 inverseOnSurface = Color(0xFFF4EFF4),
                 inversePrimary = blend(primary, Black, 0.22f),

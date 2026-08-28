@@ -70,7 +70,6 @@ fun HomeScreen(
                 Text(
                     text = "Armonie Cromatiche Monet",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface
                 )
                 LiquidPaletteSelector(
                     options = listOf(
@@ -91,8 +90,8 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Intensità Vetro Liquido", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
-                    Text("${(sliderVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("Intensità Vetro Liquido", style = MaterialTheme.typography.bodyMedium)
+                    Text("${(sliderVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
                 }
                 LiquidSlider(
                     value = sliderVal,

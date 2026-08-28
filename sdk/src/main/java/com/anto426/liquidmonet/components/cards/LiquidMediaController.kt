@@ -40,13 +40,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.feedback.LiquidLinearProgressIndicator
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
+import com.anto426.liquidmonet.glass.animateBackground
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
+import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -78,6 +82,8 @@ fun LiquidMediaController(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
+    val glassColors = LiquidGlassTheme.colors
+    val performance = LocalLiquidGlassPerformance.current
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
@@ -102,7 +108,7 @@ fun LiquidMediaController(
     val effectiveCurrentTimeState = currentTimeState ?: rememberUpdatedState(currentTime)
 
     // Vibrant infinite breathing pulse while music is playing.
-    val playPulse = if (animatePlaybackGlow && isPlaying) {
+    val playPulse = if (animatePlaybackGlow && isPlaying && performance.animateBackground) {
         val infiniteTransition = rememberInfiniteTransition(label = "MusicPlaybackPulse")
         val pulse by infiniteTransition.animateFloat(
             initialValue = 0f,
@@ -171,7 +177,7 @@ fun LiquidMediaController(
                             drawCircle(
                                 brush = Brush.radialGradient(
                                     colors = listOf(
-                                        primaryColor.copy(alpha = 0.45f),
+                                        primaryColor.copy(alpha = 0.24f),
                                         primaryColor.copy(alpha = 0f)
                                     ),
                                     center = center,
@@ -192,14 +198,14 @@ fun LiquidMediaController(
                             backdrop = effectiveBackdrop,
                             shape = albumShape,
                             role = LiquidGlassRole.Navigation,
-                            containerColor = primaryColor.copy(alpha = 0.32f)
+                            containerColor = primaryColor.copy(alpha = glassColors.accentContainer.alpha)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = LiquidIcons.MusicNote,
                         contentDescription = "Album",
-                        tint = Color.White,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -218,7 +224,7 @@ fun LiquidMediaController(
                     BasicText(
                         text = artist,
                         style = TextStyle(
-                            color = colorScheme.onSurface.copy(alpha = 0.70f),
+                            color = glassColors.secondaryContent,
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Medium
                         ),
@@ -299,7 +305,7 @@ fun LiquidMediaController(
                             drawCircle(
                                 brush = Brush.radialGradient(
                                     colors = listOf(
-                                        primaryColor.copy(alpha = 0.50f + 0.18f * activePulse),
+                                        primaryColor.copy(alpha = 0.28f + 0.10f * activePulse),
                                         primaryColor.copy(alpha = 0f)
                                     ),
                                     center = center,
@@ -320,7 +326,7 @@ fun LiquidMediaController(
                             backdrop = effectiveBackdrop,
                             shape = controlShape,
                             role = LiquidGlassRole.Navigation,
-                            containerColor = primaryColor.copy(alpha = 0.44f)
+                            containerColor = primaryColor.copy(alpha = glassColors.selectedContainer.alpha)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -328,14 +334,14 @@ fun LiquidMediaController(
                         Icon(
                             imageVector = LiquidIcons.Pause,
                             contentDescription = "Pausa",
-                            tint = Color.White,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(28.dp)
                         )
                     } else {
                         Icon(
                             imageVector = LiquidIcons.PlayArrow,
                             contentDescription = "Play",
-                            tint = Color.White,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(32.dp)
                         )
                     }

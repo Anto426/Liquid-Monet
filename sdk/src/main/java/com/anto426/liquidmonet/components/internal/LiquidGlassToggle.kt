@@ -38,6 +38,7 @@ import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.glass.effectTokens
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberBackdrop
@@ -63,7 +64,8 @@ internal fun LiquidGlassToggle(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val accentColor = colorScheme.primary
-    val trackColor = colorScheme.onSurface.copy(alpha = 0.18f)
+    val glassColors = LiquidGlassTheme.colors
+    val trackColor = glassColors.inactiveTrack
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop)
     val performance = LocalLiquidGlassPerformance.current
     val glassTokens = performance.effectTokens(LiquidGlassRole.Control, interactive = true)
@@ -125,12 +127,12 @@ internal fun LiquidGlassToggle(
     val trackBackdrop = rememberLayerBackdrop()
     val resolvedTrackColor = lerp(
         trackColor,
-        accentColor.copy(alpha = 0.48f),
+        glassColors.focusIndicator,
         dampedDragAnimation.value
     )
     // Material-like checked state keeps a white thumb; the optical renderer below still lets
     // the refracted track come through while pressed, so it does not become a flat white disk.
-    val thumbColor = colorScheme.onSurface.copy(alpha = 0.90f)
+    val thumbColor = glassColors.content.copy(alpha = 0.90f)
 
     Box(
         modifier = modifier

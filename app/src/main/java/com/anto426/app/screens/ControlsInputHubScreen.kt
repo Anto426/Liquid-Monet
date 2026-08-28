@@ -1,9 +1,5 @@
 package com.anto426.app.screens
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,8 +38,6 @@ import com.anto426.liquidmonet.components.selection.LiquidRadioButton
 import com.anto426.liquidmonet.components.selection.LiquidRangeSlider
 import com.anto426.liquidmonet.components.selection.LiquidRatingBar
 import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
-import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
-import com.anto426.liquidmonet.motion.LiquidNavTransition
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.selection.LiquidStepper
 import com.anto426.liquidmonet.components.selection.LiquidSwitch
@@ -110,12 +104,7 @@ fun ControlsInputHubScreen(
             backdropState = backdropState
         )
 
-        LiquidAnimatedNavContent(
-            targetState = currentSubTab,
-            transition = LiquidNavTransition.AutoDirectional,
-            label = "controlsSubTabTransition"
-        ) { tab ->
-            when (tab) {
+        when (currentSubTab) {
                 0 -> {
                     // Sotto-Schermata 1: Pulsanti & Azioni
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -125,7 +114,7 @@ fun ControlsInputHubScreen(
                         )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("Varianti Vetro Liquido", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f))
+                                Text("Varianti Vetro Liquido", style = MaterialTheme.typography.labelMedium)
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                                     LiquidButton(text = "Primary", onClick = { }, variant = LiquidButtonVariant.Primary, backdropState = backdropState, modifier = Modifier.weight(1f))
                                     LiquidButton(text = "Secondary", onClick = { }, variant = LiquidButtonVariant.Secondary, backdropState = backdropState, modifier = Modifier.weight(1f))
@@ -151,12 +140,12 @@ fun ControlsInputHubScreen(
                                 horizontalArrangement = Arrangement.SpaceAround,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                LiquidIconButton(icon = LiquidIcons.PlayArrow, onClick = { }, size = 46.dp, iconSize = 22.dp, backdropState = backdropState)
-                                LiquidIconButton(icon = LiquidIcons.Star, onClick = { }, size = 46.dp, iconSize = 22.dp, backdropState = backdropState)
-                                LiquidIconButton(icon = LiquidIcons.Share, onClick = { }, size = 46.dp, iconSize = 22.dp, backdropState = backdropState)
-                                LiquidIconButton(icon = LiquidIcons.Settings, onClick = { }, size = 46.dp, iconSize = 22.dp, backdropState = backdropState)
-                                LiquidFloatingActionButton(onClick = { }, size = 46.dp, backdropState = backdropState) {
-                                    Icon(imageVector = LiquidIcons.Add, contentDescription = "Nuovo", tint = Color.White, modifier = Modifier.size(22.dp))
+                                LiquidIconButton(icon = LiquidIcons.PlayArrow, onClick = { }, backdropState = backdropState)
+                                LiquidIconButton(icon = LiquidIcons.Star, onClick = { }, backdropState = backdropState)
+                                LiquidIconButton(icon = LiquidIcons.Share, onClick = { }, backdropState = backdropState)
+                                LiquidIconButton(icon = LiquidIcons.Settings, onClick = { }, backdropState = backdropState)
+                                LiquidFloatingActionButton(onClick = { }, backdropState = backdropState) {
+                                    Icon(imageVector = LiquidIcons.Add, contentDescription = "Nuovo", modifier = Modifier.size(22.dp))
                                 }
                             }
                         }
@@ -172,7 +161,7 @@ fun ControlsInputHubScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 LiquidRatingBar(rating = starRating, onRatingChanged = { starRating = it }, backdropState = backdropState)
-                                Text(text = "$starRating stelle su 5", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.70f))
+                                Text(text = "$starRating stelle su 5", style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -265,7 +254,7 @@ fun ControlsInputHubScreen(
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 LiquidStepper(value = stepperVal, onValueChange = { stepperVal = it }, label = "Quantità Elementi", unit = "pz", minValue = 1, maxValue = 20, backdropState = backdropState)
                                 LiquidHorizontalDivider()
-                                Text("Codice di Verifica OTP (4 Cifre)", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                                Text("Codice di Verifica OTP (4 Cifre)", style = MaterialTheme.typography.labelMedium)
                                 LiquidOtpInput(otpValue = otpCode, onOtpChange = { otpCode = it }, length = 4, backdropState = backdropState, modifier = Modifier.fillMaxWidth())
                             }
                         }
@@ -277,21 +266,21 @@ fun ControlsInputHubScreen(
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Interruttore Liquid Switch", color = Color.White)
+                                    Text("Interruttore Liquid Switch")
                                     LiquidSwitch(checked = switchVal, onCheckedChange = { switchVal = it }, backdropState = backdropState)
                                 }
                                 LiquidHorizontalDivider()
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Checkbox Sincronizzazione", color = Color.White)
+                                    Text("Checkbox Sincronizzazione")
                                     LiquidCheckbox(checked = checkboxVal, onCheckedChange = { checkboxVal = it }, backdropState = backdropState)
                                 }
                                 LiquidHorizontalDivider()
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Opzione Radio 1", color = Color.White)
+                                    Text("Opzione Radio 1")
                                     LiquidRadioButton(selected = radioVal == 0, onClick = { radioVal = 0 }, backdropState = backdropState)
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Opzione Radio 2", color = Color.White)
+                                    Text("Opzione Radio 2")
                                     LiquidRadioButton(selected = radioVal == 1, onClick = { radioVal = 1 }, backdropState = backdropState)
                                 }
                             }
@@ -303,16 +292,15 @@ fun ControlsInputHubScreen(
                         )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                Text("Slider Singolo: ${(sliderVal * 100).toInt()}%", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                Text("Slider Singolo: ${(sliderVal * 100).toInt()}%", style = MaterialTheme.typography.bodyMedium)
                                 LiquidSlider(value = sliderVal, onValueChange = { sliderVal = it }, valueRange = 0f..1f, backdropState = backdropState)
                                 LiquidHorizontalDivider()
-                                Text("Range Slider: ${(rangeSliderVal.start * 100).toInt()}€ - ${(rangeSliderVal.endInclusive * 100).toInt()}€", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                Text("Range Slider: ${(rangeSliderVal.start * 100).toInt()}€ - ${(rangeSliderVal.endInclusive * 100).toInt()}€", style = MaterialTheme.typography.bodyMedium)
                                 LiquidRangeSlider(value = rangeSliderVal, onValueChange = { rangeSliderVal = it }, backdropState = backdropState)
                             }
                         }
                     }
                 }
-            }
         }
     }
 

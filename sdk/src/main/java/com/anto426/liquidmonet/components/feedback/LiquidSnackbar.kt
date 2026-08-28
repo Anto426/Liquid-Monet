@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -72,7 +73,8 @@ fun LiquidSnackbar(
     val dismissThresholdPx = with(density) { 96.dp.toPx() }
 
     val colorScheme = MaterialTheme.colorScheme
-    val contentColor = colorScheme.onSurface
+    val glassColors = LiquidGlassTheme.colors
+    val contentColor = glassColors.content
     val icon: ImageVector = when (type) {
         LiquidSnackbarType.Info -> LiquidIcons.Info
         LiquidSnackbarType.Success -> LiquidIcons.Check
@@ -81,9 +83,9 @@ fun LiquidSnackbar(
     }
     val accentColor = when (type) {
         LiquidSnackbarType.Info -> colorScheme.primary
-        LiquidSnackbarType.Success -> colorScheme.tertiary
-        LiquidSnackbarType.Warning -> colorScheme.secondary
-        LiquidSnackbarType.Error -> colorScheme.error
+        LiquidSnackbarType.Success -> glassColors.success
+        LiquidSnackbarType.Warning -> glassColors.warning
+        LiquidSnackbarType.Error -> glassColors.error
     }
 
     val shape = RoundedRectangle(16.dp)
@@ -137,7 +139,7 @@ fun LiquidSnackbar(
                     backdrop = backdropState,
                     shape = shape,
                     role = LiquidGlassRole.Surface,
-                    containerColor = accentColor.copy(alpha = 0.07f)
+                    containerColor = accentColor.copy(alpha = glassColors.neutralContainer.alpha)
                 )
                 .defaultMinSize(minHeight = 56.dp)
                 .padding(start = 12.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
@@ -154,7 +156,9 @@ fun LiquidSnackbar(
                             backdrop = backdropState,
                             shape = Capsule(),
                             role = LiquidGlassRole.Control,
-                            containerColor = accentColor.copy(alpha = 0.10f)
+                            containerColor = accentColor.copy(
+                                alpha = (glassColors.neutralContainer.alpha * 1.8f).coerceAtMost(1f)
+                            )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -206,7 +210,7 @@ fun LiquidSnackbar(
                         Icon(
                             imageVector = LiquidIcons.Close,
                             contentDescription = "Chiudi",
-                            tint = contentColor.copy(alpha = 0.64f),
+                            tint = glassColors.secondaryContent,
                             modifier = Modifier.size(18.dp)
                         )
                     }

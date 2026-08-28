@@ -1,9 +1,5 @@
 package com.anto426.app.screens
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,8 +37,6 @@ import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.cards.LiquidStatusCard
 import com.anto426.liquidmonet.components.cards.LiquidStatusType
 import com.anto426.liquidmonet.glass.LiquidBackgroundEffect
-import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
-import com.anto426.liquidmonet.motion.LiquidNavTransition
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.kyant.backdrop.Backdrop
@@ -84,12 +78,7 @@ fun StudioHubScreen(
             backdropState = backdropState
         )
 
-        LiquidAnimatedNavContent(
-            targetState = currentSubTab,
-            transition = LiquidNavTransition.AutoDirectional,
-            label = "studioSubTabTransition"
-        ) { tab ->
-            when (tab) {
+        when (currentSubTab) {
                 0 -> {
                     // Sotto-Schermata 1: Panoramica & Monet
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -102,7 +91,6 @@ fun StudioHubScreen(
                                 Text(
                                     text = "Armonie Cromatiche di Sistema",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 LiquidPaletteSelector(
                                     options = listOf(
@@ -123,8 +111,8 @@ fun StudioHubScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Intensità Vetro Rifrattivo", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
-                                    Text("${(sliderVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                    Text("Intensità Vetro Rifrattivo", style = MaterialTheme.typography.bodyMedium)
+                                    Text("${(sliderVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
                                 }
                                 LiquidSlider(
                                     value = sliderVal,
@@ -138,7 +126,6 @@ fun StudioHubScreen(
                                 Text(
                                     text = "Sfondo Ottico Dinamico",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 LiquidBackgroundSelector(
                                     selectedEffect = selectedEffect,
@@ -217,7 +204,6 @@ fun StudioHubScreen(
                         }
                     }
                 }
-            }
         }
     }
 }
@@ -280,12 +266,10 @@ private fun StudioMediaPlayerDemo(backdropState: Backdrop) {
                 Text(
                     text = "Dettagli Traccia & Audio Engine",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color.White
                 )
                 Text(
                     text = "Codec: FLAC 24-bit / 96 kHz • Uscita: Audio Spaziale Prismatico con riverbero in vetro liquido.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.75f)
                 )
             }
         }

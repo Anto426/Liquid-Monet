@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.kyant.backdrop.Backdrop
@@ -33,7 +34,7 @@ fun LiquidShimmerBox(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
-    val highlightColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
+    val highlightColor = LiquidGlassTheme.colors.neutralContainer
 
     val infiniteTransition = rememberInfiniteTransition(label = "glassShimmer")
     val translateAnim by infiniteTransition.animateFloat(

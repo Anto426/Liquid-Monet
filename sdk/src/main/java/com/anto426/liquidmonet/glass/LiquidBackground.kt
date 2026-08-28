@@ -9,7 +9,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -22,6 +21,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
@@ -53,7 +53,7 @@ enum class LiquidBackgroundEffect {
 fun LiquidBackground(
     modifier: Modifier = Modifier,
     effect: LiquidBackgroundEffect = LiquidBackgroundEffect.Aurora,
-    isDark: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = MaterialTheme.colorScheme.surface.luminance() < 0.5f,
     monetSeed: LiquidMonetSeed? = null,
     primaryOverride: Color? = null,
     secondaryOverride: Color? = null,

@@ -1,7 +1,6 @@
 package com.anto426.liquidmonet.components.navigation
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -36,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,6 +43,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.util.lerp
 import com.anto426.liquidmonet.components.inputs.LiquidSearchBar
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
@@ -92,126 +94,123 @@ fun LiquidTopBar(
     onQueryChange: (String) -> Unit = {},
     onSearchActiveChange: ((Boolean) -> Unit)? = null,
     searchPlaceholder: String = "Cerca...",
+    onHeightChanged: ((Dp) -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
     val surfaceBackdrop = rememberLayerBackdrop()
     val effectiveScrollBehavior = scrollBehavior ?: LocalLiquidGlassTopBarScrollBehavior.current
+    val density = LocalDensity.current
+    val currentOnHeightChanged by rememberUpdatedState(onHeightChanged)
 
     val collapsedFraction = effectiveScrollBehavior?.state?.collapsedFraction ?: 0f
-    val isScrolled = (effectiveScrollBehavior?.state?.contentOffset ?: 0f) < -1f || collapsedFraction > 0.01f
-    val animatedScrolledAlpha by animateFloatAsState(
-        targetValue = if (isScrolled) 1f else 0f,
-        animationSpec = tween(durationMillis = 260),
-        label = "topBarRefractionAlpha"
-    )
-
-    val topBarTintAlpha = lerp(0.05f, 0.12f, animatedScrolledAlpha)
-    val surfaceBrush = Brush.verticalGradient(
-        colorStops = arrayOf(
-            0f to colorScheme.surface.copy(alpha = topBarTintAlpha),
-            0.36f to colorScheme.surface.copy(alpha = topBarTintAlpha * 0.72f),
-            0.72f to colorScheme.surface.copy(alpha = topBarTintAlpha * 0.18f),
-            1f to Color.Transparent
-        )
-    )
-
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .liquidGlass(
-                backdrop = effectiveBackdrop,
-                shape = RectangleShape,
-                role = LiquidGlassRole.TopBar,
-                containerColor = Color.Transparent,
-                exportedBackdrop = surfaceBackdrop
-            )
+            .onSizeChanged { size ->
+                currentOnHeightChanged?.invoke(with(density) { size.height.toDp() })
+            }
             .liquidTopBarZIndex()
-            .background(surfaceBrush)
     ) {
-        CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {
-            LargeTopAppBar(
-            modifier = Modifier.fillMaxWidth(),
-            title = {
-                Column {
-                    LiquidTopBarTitle(
-                        title = title,
-                        statusBadge = statusBadge,
-                        compactTitle = compactTitle,
-                        collapsedFraction = collapsedFraction
-                    )
-                    if (!subtitle.isNullOrBlank()) {
-                        val subtitleAlpha = (1f - (collapsedFraction * 2.5f)).coerceIn(0f, 1f)
-                        if (subtitleAlpha > 0.01f) {
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = subtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.graphicsLayer { alpha = subtitleAlpha }
+        // Keep the glass clipped, not the controls. Top-bar actions can now overshoot their
+        // nominal bounds during elastic feedback without being eaten by the bar container.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .liquidGlass(
+                    backdrop = effectiveBackdrop,
+                    shape = RectangleShape,
+                    role = LiquidGlassRole.TopBar,
+                    exportedBackdrop = surfaceBackdrop
+                )
+        )
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {
+                LargeTopAppBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = {
+                        Column {
+                            LiquidTopBarTitle(
+                                title = title,
+                                statusBadge = statusBadge,
+                                compactTitle = compactTitle,
+                                collapsedFraction = collapsedFraction
+                            )
+                            if (!subtitle.isNullOrBlank()) {
+                                val subtitleAlpha =
+                                    (1f - (collapsedFraction * 2.5f)).coerceIn(0f, 1f)
+                                if (subtitleAlpha > 0.01f) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = subtitle,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.graphicsLayer { alpha = subtitleAlpha }
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        if (showNavigationIcon && onNavigationClick != null) {
+                            LiquidBackButton(
+                                onClick = onNavigationClick,
+                                backdropState = surfaceBackdrop
+                            )
+                        } else {
+                            navigationIcon()
+                        }
+                    },
+                    actions = {
+                        actionItems.forEachIndexed { index, action ->
+                            LiquidMorphingAction(
+                                action = action,
+                                isLastItem = index == actionItems.lastIndex,
+                                backdropState = surfaceBackdrop
                             )
                         }
+                        actions?.invoke(this)
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent
+                    ),
+                    scrollBehavior = effectiveScrollBehavior
+                )
+
+                // Expandable Liquid Glass Search Bar (Appears below the TopBar smoothly without hiding the TopBar!)
+                AnimatedVisibility(
+                    visible = isSearchActive,
+                    enter = expandVertically(
+                        animationSpec = spring(
+                            dampingRatio = 0.75f,
+                            stiffness = 380f
+                        )
+                    ) + fadeIn(tween(220)),
+                    exit = shrinkVertically(
+                        animationSpec = spring(
+                            dampingRatio = 0.85f,
+                            stiffness = 450f
+                        )
+                    ) + fadeOut(tween(180))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                    ) {
+                        LiquidSearchBar(
+                            query = searchQuery,
+                            onQueryChange = onQueryChange,
+                            placeholderText = searchPlaceholder,
+                            backdropState = surfaceBackdrop,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
-            },
-            navigationIcon = {
-                if (showNavigationIcon && onNavigationClick != null) {
-                    LiquidBackButton(
-                        onClick = onNavigationClick,
-                        backdropState = backdropState
-                    )
-                } else {
-                    navigationIcon()
-                }
-            },
-            actions = {
-                actionItems.forEachIndexed { index, action ->
-                    LiquidMorphingAction(
-                        action = action,
-                        isLastItem = index == actionItems.lastIndex,
-                        backdropState = backdropState
-                    )
-                }
-                actions?.invoke(this)
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Transparent
-            ),
-            scrollBehavior = effectiveScrollBehavior
-            )
 
-            // Expandable Liquid Glass Search Bar (Appears below the TopBar smoothly without hiding the TopBar!)
-            AnimatedVisibility(
-            visible = isSearchActive,
-            enter = expandVertically(
-                animationSpec = spring(
-                    dampingRatio = 0.75f,
-                    stiffness = 380f
-                )
-            ) + fadeIn(tween(220)),
-            exit = shrinkVertically(
-                animationSpec = spring(
-                    dampingRatio = 0.85f,
-                    stiffness = 450f
-                )
-            ) + fadeOut(tween(180))
-            ) {
-                Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
-                ) {
-                    LiquidSearchBar(
-                    query = searchQuery,
-                    onQueryChange = onQueryChange,
-                    placeholderText = searchPlaceholder,
-                    backdropState = backdropState,
-                    modifier = Modifier.fillMaxWidth()
-                    )
-                }
             }
         }
     }

@@ -34,6 +34,8 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
+import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -60,6 +62,7 @@ fun LiquidFloatingActionButton(
 ) {
     val interactiveHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val hostContentBackdrop = com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
@@ -85,7 +88,7 @@ fun LiquidFloatingActionButton(
         animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
         label = "fabHorizontalPadding"
     )
-    val resolvedContainerColor = containerColor ?: colorScheme.primaryContainer.copy(alpha = 0.18f)
+    val resolvedContainerColor = containerColor ?: glassColors.accentContainer
     val animatedContainerColor by androidx.compose.animation.animateColorAsState(
         targetValue = if (enabled) {
             resolvedContainerColor
@@ -96,9 +99,9 @@ fun LiquidFloatingActionButton(
     )
     val animatedContentColor by androidx.compose.animation.animateColorAsState(
         targetValue = if (enabled) {
-            colorScheme.onSurface
+            LiquidGlassDefaults.contentColorFor(resolvedContainerColor, colorScheme)
         } else {
-            colorScheme.onSurface.copy(alpha = LiquidControlDefaults.disabledContentAlpha)
+            glassColors.disabledContent
         },
         label = "fabContentColor"
     )

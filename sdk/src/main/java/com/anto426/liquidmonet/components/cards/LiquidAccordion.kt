@@ -43,6 +43,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -94,7 +95,7 @@ fun LiquidAccordionItem(
     )
 
     val chevronColor by animateColorAsState(
-        targetValue = if (isExpanded) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.65f),
+        targetValue = if (isExpanded) colorScheme.primary else LiquidGlassTheme.colors.secondaryContent,
         animationSpec = tween(durationMillis = 200),
         label = "accordionChevronColor"
     )
@@ -161,7 +162,7 @@ fun LiquidAccordionItem(
                             Text(
                                 text = subtitle,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onSurface.copy(alpha = 0.60f)
+                                color = LiquidGlassTheme.colors.secondaryContent
                             )
                         }
                     }

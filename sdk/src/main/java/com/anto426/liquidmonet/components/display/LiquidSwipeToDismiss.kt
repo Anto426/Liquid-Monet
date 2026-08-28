@@ -34,6 +34,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.monet.contentColorFor
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -225,7 +226,10 @@ fun LiquidSwipeToDismissBox(
                         )
                         drawPath(
                             path = specularPath,
-                            color = Color.White.copy(alpha = if (isPastThreshold) 0.85f else 0.45f * dragFraction.coerceAtMost(1f)),
+                            color = contentColorFor(actionColor).copy(
+                                alpha = if (isPastThreshold) 0.85f
+                                else 0.45f * dragFraction.coerceAtMost(1f)
+                            ),
                             style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.6.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                         )
                     }
@@ -255,7 +259,7 @@ fun LiquidSwipeToDismissBox(
                     Icon(
                         imageVector = actionIcon,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = contentColorFor(actionColor),
                         modifier = Modifier
                             .size(26.dp)
                             .graphicsLayer {

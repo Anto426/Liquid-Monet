@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 
 /**
  * LiquidSectionTitle - Standardized Section Header for Liquid Monet interfaces.
@@ -33,7 +34,7 @@ fun LiquidSectionTitle(
         if (subtitle != null) {
             Text(
                 text = subtitle,
-                color = colorScheme.onSurface.copy(alpha = 0.65f),
+                color = LiquidGlassTheme.colors.secondaryContent,
                 style = MaterialTheme.typography.bodySmall
             )
         }

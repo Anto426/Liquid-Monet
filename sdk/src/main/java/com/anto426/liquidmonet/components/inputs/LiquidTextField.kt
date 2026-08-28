@@ -41,9 +41,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -150,10 +152,13 @@ fun LiquidTextField(
     val colorScheme = MaterialTheme.colorScheme
     val contentColor = colorScheme.onSurface
     val primaryColor = colorScheme.primary
-    val placeholderColor = contentColor.copy(alpha = 0.45f)
+    val glassColors = LiquidGlassTheme.colors
+    val placeholderColor = glassColors.secondaryContent
 
     val animatedBorderColor by animateColorAsState(
-        targetValue = if (isFocused) primaryColor.copy(alpha = 0.55f) else Color.Transparent,
+        targetValue = if (isFocused) {
+            glassColors.focusIndicator
+        } else Color.Transparent,
         animationSpec = tween(durationMillis = 200),
         label = "inputBorderColor"
     )

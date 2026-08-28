@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +31,8 @@ import com.anto426.liquidmonet.components.display.LiquidAvatarGroup
 import com.anto426.liquidmonet.components.display.LiquidAvatarPresence
 import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.layout.LiquidAnimatedSwitcher
+import com.anto426.liquidmonet.components.layout.LiquidLazyColumn
+import com.anto426.liquidmonet.components.layout.LiquidLazyRow
 import com.anto426.liquidmonet.components.layout.LiquidLazyFooter
 import com.anto426.liquidmonet.components.layout.LiquidLazyFooterOrientation
 import com.anto426.liquidmonet.components.layout.LiquidLazyFooterState
@@ -55,8 +55,6 @@ import com.anto426.liquidmonet.components.selection.LiquidSwitch
 import com.anto426.liquidmonet.components.feedback.LiquidToastState
 import com.anto426.liquidmonet.components.feedback.LiquidToastType
 import com.anto426.liquidmonet.icons.LiquidIcons
-import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
-import com.anto426.liquidmonet.motion.LiquidNavTransition
 import com.kyant.backdrop.Backdrop
 
 @Composable
@@ -107,12 +105,7 @@ fun NavigationHubScreen(
             backdropState = backdropState
         )
 
-        LiquidAnimatedNavContent(
-            targetState = currentSubTab,
-            transition = LiquidNavTransition.AutoDirectional,
-            label = "navigationSubTabTransition"
-        ) { tab ->
-            when (tab) {
+        when (currentSubTab) {
                 0 -> {
                     // Sotto-Schermata 1: Nav, Paginazione & Chip
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -140,7 +133,7 @@ fun NavigationHubScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
-                                Text("Indicatore a Goccia Fluida (Worm Droplet)", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                                Text("Indicatore a Goccia Fluida (Worm Droplet)", style = MaterialTheme.typography.labelMedium)
                                 LiquidPageIndicator(
                                     pageCount = 5,
                                     currentPage = pagerIndicatorPage,
@@ -149,7 +142,7 @@ fun NavigationHubScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 LiquidHorizontalDivider()
-                                Text("Paginazione Numerata in Vetro", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                                Text("Paginazione Numerata in Vetro", style = MaterialTheme.typography.labelMedium)
                                 LiquidPagination(
                                     currentPage = paginationPage,
                                     totalPages = 5,
@@ -201,6 +194,10 @@ fun NavigationHubScreen(
                                         switcherForward = false
                                         switcherPage = (switcherPage + 2) % 3
                                     },
+                                    onPredictiveBack = {
+                                        switcherForward = false
+                                        switcherPage = (switcherPage + 2) % 3
+                                    },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .heightIn(min = 92.dp),
@@ -216,8 +213,7 @@ fun NavigationHubScreen(
                                                 1 -> LiquidIcons.Star
                                                 else -> LiquidIcons.Settings
                                             },
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
+                                            contentDescription = null
                                         )
                                         Text(
                                             text = when (page) {
@@ -225,16 +221,14 @@ fun NavigationHubScreen(
                                                 1 -> "Preferiti in vetro"
                                                 else -> "Impostazioni ottiche"
                                             },
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            style = MaterialTheme.typography.titleMedium
                                         )
                                     }
                                 }
 
                                 Text(
                                     text = "Scorri direttamente a destra o sinistra",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.68f)
+                                    style = MaterialTheme.typography.labelMedium
                                 )
                             }
                         }
@@ -289,7 +283,6 @@ fun NavigationHubScreen(
                                 Text(
                                     text = "Lo shader AGSL campiona il backdrop calcolando la dispersione cromatica e le ombre interne per simulare un vetro reale senza gravare sulla CPU.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.80f)
                                 )
                             }
 
@@ -304,7 +297,6 @@ fun NavigationHubScreen(
                                 Text(
                                     text = "Ogni componente adatta la trasparenza del vetro e la specular highlight al tema di sistema Material 3 attivo.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.80f)
                                 )
                             }
                         }
@@ -385,10 +377,9 @@ fun NavigationHubScreen(
 
                         Text(
                             text = "LazyColumn: scorri il riquadro fino al footer",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
+                            style = MaterialTheme.typography.labelMedium
                         )
-                        LazyColumn(
+                        LiquidLazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(220.dp),
@@ -402,10 +393,7 @@ fun NavigationHubScreen(
                                     backdropState = backdropState,
                                     contentPadding = 12.dp
                                 ) {
-                                    Text(
-                                        text = "Elemento verticale ${index + 1}",
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    Text(text = "Elemento verticale ${index + 1}")
                                 }
                             }
                             item(key = "vertical-liquid-footer") {
@@ -423,10 +411,9 @@ fun NavigationHubScreen(
 
                         Text(
                             text = "LazyRow: scorri orizzontalmente fino al footer",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
+                            style = MaterialTheme.typography.labelMedium
                         )
-                        LazyRow(
+                        LiquidLazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(112.dp),
@@ -441,10 +428,7 @@ fun NavigationHubScreen(
                                     backdropState = backdropState,
                                     contentPadding = 12.dp
                                 ) {
-                                    Text(
-                                        text = "Elemento orizzontale ${index + 1}",
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    Text(text = "Elemento orizzontale ${index + 1}")
                                 }
                             }
                             item(key = "horizontal-liquid-footer") {
@@ -470,8 +454,8 @@ fun NavigationHubScreen(
                             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 LiquidAvatar(initials = "AU", presence = LiquidAvatarPresence.Online, size = 54.dp, backdropState = backdropState)
                                 Column {
-                                    Text(text = "Anto Developer", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
-                                    Text(text = "anto@liquidui.com • Pro Tier", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.70f))
+                                    Text(text = "Anto Developer", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                                    Text(text = "anto@liquidui.com • Pro Tier", style = MaterialTheme.typography.bodySmall)
                                 }
                             }
                         }
@@ -521,21 +505,20 @@ fun NavigationHubScreen(
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                    Text("Luminosità Schermo", color = Color.White)
-                                    Text("${(brightnessVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                    Text("Luminosità Schermo")
+                                    Text("${(brightnessVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
                                 }
                                 LiquidSlider(value = brightnessVal, onValueChange = { brightnessVal = it }, valueRange = 0f..1f, backdropState = backdropState)
                                 LiquidHorizontalDivider()
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                    Text("Volume Audio", color = Color.White)
-                                    Text("${(volumeVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                    Text("Volume Audio")
+                                    Text("${(volumeVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
                                 }
                                 LiquidSlider(value = volumeVal, onValueChange = { volumeVal = it }, valueRange = 0f..1f, backdropState = backdropState)
                             }
                         }
                     }
                 }
-            }
         }
     }
 }

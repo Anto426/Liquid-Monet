@@ -195,7 +195,7 @@ fun InputsScreen(
 
                 LiquidHorizontalDivider()
 
-                Text("Codice di Verifica OTP (4 Cifre)", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                Text("Codice di Verifica OTP (4 Cifre)", style = MaterialTheme.typography.labelMedium)
                 LiquidOtpInput(
                     otpValue = otpCode,
                     onOtpChange = { otpCode = it },
@@ -215,7 +215,7 @@ fun InputsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Interruttore Liquid Switch", color = Color.White)
+                    Text("Interruttore Liquid Switch")
                     LiquidSwitch(
                         checked = switchVal,
                         onCheckedChange = { switchVal = it },
@@ -230,7 +230,7 @@ fun InputsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Sincronizzazione Automatica", color = Color.White)
+                    Text("Sincronizzazione Automatica")
                     LiquidCheckbox(
                         checked = checkboxVal,
                         onCheckedChange = { checkboxVal = it },
@@ -245,7 +245,7 @@ fun InputsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Opzione Radio 1", color = Color.White)
+                    Text("Opzione Radio 1")
                     LiquidRadioButton(
                         selected = radioVal == 0,
                         onClick = { radioVal = 0 },
@@ -258,7 +258,7 @@ fun InputsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Opzione Radio 2", color = Color.White)
+                    Text("Opzione Radio 2")
                     LiquidRadioButton(
                         selected = radioVal == 1,
                         onClick = { radioVal = 1 },
@@ -274,7 +274,6 @@ fun InputsScreen(
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
                     text = "Slider Singolo: ${(sliderVal * 100).toInt()}%",
-                    color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 LiquidSlider(
@@ -288,7 +287,6 @@ fun InputsScreen(
 
                 Text(
                     text = "Range Slider: ${(rangeSliderVal.start * 100).toInt()}€ - ${(rangeSliderVal.endInclusive * 100).toInt()}€",
-                    color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 LiquidRangeSlider(

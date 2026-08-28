@@ -27,6 +27,7 @@ import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTab
 import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTabs
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.shapes.Capsule
 
 /**
@@ -42,7 +43,7 @@ fun LiquidTabBar(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
-    val contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+    val contentColor = LiquidGlassTheme.colors.content
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
 
     LiquidGlassBottomTabs(
@@ -186,6 +187,7 @@ private fun CompactBadge(
     contentColor: Color,
     count: Int
 ) {
+    val glassColors = LiquidGlassTheme.colors
     val hPad = if (count <= 3) 6.dp else 4.dp
     val vPad = if (count <= 3) 2.dp else 1.dp
     val fSize = if (count <= 3) 10.sp else 9.sp
@@ -193,7 +195,7 @@ private fun CompactBadge(
     Box(
         modifier = Modifier
             .clip(Capsule())
-            .background(contentColor.copy(alpha = 0.15f))
+            .background(glassColors.neutralContainer)
             .padding(horizontal = hPad, vertical = vPad),
         contentAlignment = Alignment.Center
     ) {

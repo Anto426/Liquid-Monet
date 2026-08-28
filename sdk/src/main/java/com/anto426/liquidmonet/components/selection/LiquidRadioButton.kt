@@ -21,10 +21,12 @@ import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -46,12 +48,16 @@ fun LiquidRadioButton(
     val performance = LocalLiquidGlassPerformance.current
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
+    val glassColors = LiquidGlassTheme.colors
 
     val shape = Capsule()
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (selected) primaryColor.copy(alpha = 0.32f)
-        else colorScheme.onSurface.copy(alpha = 0.08f),
+        targetValue = if (selected) {
+            glassColors.accentContainer
+        } else {
+            glassColors.neutralContainer
+        },
         animationSpec = LiquidGlassMotionSpecs.tween(performance, 200),
         label = "radioContainerColor"
     )
@@ -118,7 +124,7 @@ fun LiquidRadioButton(
                     scaleX = (0.2f + 0.8f * dotProgress).coerceAtLeast(0f)
                     scaleY = (0.1f + 0.9f * dotProgress).coerceAtLeast(0f)
                 }
-                .background(colorScheme.onPrimary.copy(alpha = 0.94f), CircleShape)
+                .background(primaryColor, CircleShape)
         )
     }
 }

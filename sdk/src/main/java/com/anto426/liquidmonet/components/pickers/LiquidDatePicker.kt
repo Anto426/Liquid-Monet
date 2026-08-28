@@ -39,9 +39,11 @@ import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
@@ -201,7 +203,7 @@ fun LiquidDatePicker(
                 Text(
                     text = day,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = colorScheme.onSurface.copy(alpha = 0.50f),
+                    color = LiquidGlassTheme.colors.secondaryContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.width(36.dp)
                 )
@@ -244,7 +246,9 @@ fun LiquidDatePicker(
                                         backdrop = backdropState,
                                         shape = Capsule(),
                                         role = LiquidGlassRole.Control,
-                                        containerColor = if (isSelected) primaryColor.copy(alpha = 0.40f) else if (isToday) primaryColor.copy(alpha = 0.12f) else null
+                                        containerColor = if (isSelected) {
+                                            LiquidGlassTheme.colors.selectedContainer
+                                        } else if (isToday) primaryColor.copy(alpha = 0.12f) else null
                                     )
                                     .border(
                                         width = if (isSelected) 1.5.dp else if (isToday) 1.dp else 0.dp,
@@ -260,7 +264,7 @@ fun LiquidDatePicker(
                                         fontWeight = if (isSelected) FontWeight.Bold else if (isToday) FontWeight.SemiBold else FontWeight.Normal
                                     ),
                                     color = when {
-                                        isSelected -> Color.White
+                                        isSelected -> colorScheme.onSurface
                                         isToday -> primaryColor
                                         else -> colorScheme.onSurface
                                     }
@@ -344,7 +348,7 @@ fun LiquidDatePickerField(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.onSurface.copy(alpha = 0.65f)
+                            color = LiquidGlassTheme.colors.secondaryContent
                         )
                         Text(
                             text = formattedDate,
@@ -355,7 +359,7 @@ fun LiquidDatePickerField(
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.45f)
+                            color = LiquidGlassTheme.colors.secondaryContent.copy(alpha = 0.72f)
                         )
                     }
                 }
@@ -364,7 +368,7 @@ fun LiquidDatePickerField(
             Icon(
                 imageVector = LiquidIcons.ChevronRight,
                 contentDescription = null,
-                tint = colorScheme.onSurface.copy(alpha = 0.40f),
+                tint = LiquidGlassTheme.colors.secondaryContent,
                 modifier = Modifier.size(20.dp)
             )
         }

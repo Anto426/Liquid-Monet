@@ -1,9 +1,5 @@
 package com.anto426.app.screens
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,8 +41,6 @@ import com.anto426.liquidmonet.glass.overlay.LiquidGlassDropdownPlacement
 import com.anto426.liquidmonet.glass.overlay.liquidGlassOverlayAnchor
 import com.anto426.liquidmonet.glass.overlay.rememberLiquidGlassOverlayAnchorState
 import com.anto426.liquidmonet.icons.LiquidIcons
-import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
-import com.anto426.liquidmonet.motion.LiquidNavTransition
 import com.kyant.backdrop.Backdrop
 
 @Composable
@@ -95,12 +89,7 @@ fun ModalsFeedbackHubScreen(
             backdropState = backdropState
         )
 
-        LiquidAnimatedNavContent(
-            targetState = currentSubTab,
-            transition = LiquidNavTransition.AutoDirectional,
-            label = "modalsSubTabTransition"
-        ) { tab ->
-            when (tab) {
+        when (currentSubTab) {
                 0 -> {
                     // Sotto-Schermata 1: Dialog & Sheet
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -110,7 +99,7 @@ fun ModalsFeedbackHubScreen(
                         )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("Finestre in Vetro Ottico con Rifrazione Snell", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                                Text("Finestre in Vetro Ottico con Rifrazione Snell", style = MaterialTheme.typography.labelMedium)
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                                     LiquidButton(text = "Apri Dialog", onClick = { isDialogOpen = true }, variant = LiquidButtonVariant.Primary, backdropState = backdropState, modifier = Modifier.weight(1f))
                                     LiquidButton(text = "Apri Sheet", onClick = { isSheetOpen = true }, variant = LiquidButtonVariant.Secondary, backdropState = backdropState, modifier = Modifier.weight(1f))
@@ -129,7 +118,7 @@ fun ModalsFeedbackHubScreen(
                         )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("Direzione Verticale", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                                Text("Direzione Verticale", style = MaterialTheme.typography.labelMedium)
                                 LiquidTabBar(
                                     items = listOf(
                                         LiquidNavigationItem("Sotto"),
@@ -142,7 +131,7 @@ fun ModalsFeedbackHubScreen(
                                 )
 
                                 if (menuVerticalDir != 2) {
-                                    Text("Allineamento Orizzontale", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.70f))
+                                    Text("Allineamento Orizzontale", style = MaterialTheme.typography.labelMedium)
                                     LiquidTabBar(
                                         items = listOf(
                                             LiquidNavigationItem("Destra"),
@@ -196,7 +185,7 @@ fun ModalsFeedbackHubScreen(
                         )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                Text("Tocca un pulsante per mostrare un Toast in puro vetro liquido:", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f), style = MaterialTheme.typography.bodySmall)
+                                Text("Tocca un pulsante per mostrare un Toast in puro vetro liquido:", style = MaterialTheme.typography.bodySmall)
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                                     LiquidButton(
                                         text = "Successo",
@@ -250,27 +239,26 @@ fun ModalsFeedbackHubScreen(
                                 LiquidLoading(style = LiquidLoadingStyle.Linear, progress = 0.68f, message = "Avanzamento ondulatorio fluido (68%)", backdropState = backdropState)
                                 LiquidHorizontalDivider()
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Spinner Circolare Monet", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                    Text("Spinner Circolare Monet", style = MaterialTheme.typography.bodyMedium)
                                     LiquidLoading(style = LiquidLoadingStyle.Circular, backdropState = backdropState)
                                 }
                                 LiquidHorizontalDivider()
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Gocce di Cristallo Liquide", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                    Text("Gocce di Cristallo Liquide", style = MaterialTheme.typography.bodyMedium)
                                     LiquidLoading(style = LiquidLoadingStyle.Dots, backdropState = backdropState)
                                 }
                                 LiquidHorizontalDivider()
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                    Text("Impulso Radiale Prismatico", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                    Text("Impulso Radiale Prismatico", style = MaterialTheme.typography.bodyMedium)
                                     LiquidLoading(style = LiquidLoadingStyle.Pulse, backdropState = backdropState)
                                 }
                                 LiquidHorizontalDivider()
-                                Text("Scheletro Shimmer in Vetro", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                Text("Scheletro Shimmer in Vetro", style = MaterialTheme.typography.bodyMedium)
                                 LiquidLoading(style = LiquidLoadingStyle.Shimmer, modifier = Modifier.fillMaxWidth().height(36.dp), backdropState = backdropState)
                             }
                         }
                     }
                 }
-            }
         }
     }
 

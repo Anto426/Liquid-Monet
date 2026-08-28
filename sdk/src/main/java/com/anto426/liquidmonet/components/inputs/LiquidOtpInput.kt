@@ -50,6 +50,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -88,6 +89,7 @@ fun LiquidOtpInput(
     val hapticFeedback = LocalHapticFeedback.current
     val performance = LocalLiquidGlassPerformance.current
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val cellShape = remember { RoundedRectangle(16.dp) }
 
     var isFocused by remember { mutableStateOf(false) }
@@ -200,16 +202,18 @@ fun LiquidOtpInput(
                     val borderColor by animateColorAsState(
                         targetValue = when {
                             isCurrent -> colorScheme.primary
-                            isFilled -> colorScheme.primary.copy(alpha = 0.35f)
-                            else -> Color.White.copy(alpha = 0.12f)
+                            isFilled -> colorScheme.primary.copy(
+                                alpha = glassColors.focusIndicator.alpha * 0.72f
+                            )
+                            else -> glassColors.outline
                         },
                         animationSpec = LiquidGlassMotionSpecs.tween(performance, 200),
                         label = "otpBorder_$i"
                     )
 
                     val targetContainerColor = when {
-                        isCurrent -> colorScheme.primary.copy(alpha = 0.18f)
-                        isFilled -> colorScheme.primary.copy(alpha = 0.08f)
+                        isCurrent -> glassColors.accentContainer
+                        isFilled -> colorScheme.primary.copy(alpha = glassColors.neutralContainer.alpha)
                         else -> Color.Transparent
                     }
                     val containerColor by animateColorAsState(

@@ -32,6 +32,7 @@ fun LiquidMonetTheme(
     customMonetSeed: LiquidMonetSeed = LiquidMonetPresets.Sapphire,
     @FloatRange(from = 0.0, to = 1.0)
     liquidIntensity: Float = 1f,
+    glassColors: LiquidGlassColors? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -58,8 +59,10 @@ fun LiquidMonetTheme(
     }
 
     val glassPerformance by performanceManager.state
+    val resolvedGlassColors = glassColors ?: LiquidGlassDefaults.colors(colorScheme)
     CompositionLocalProvider(
-        LocalLiquidGlassPerformance provides glassPerformance
+        LocalLiquidGlassPerformance provides glassPerformance,
+        LocalLiquidGlassColors provides resolvedGlassColors
     ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,

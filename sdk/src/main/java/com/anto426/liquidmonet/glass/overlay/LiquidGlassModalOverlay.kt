@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.zIndex
+import com.anto426.liquidmonet.components.internal.LiquidGlassZIndex
 
 /**
  * Scene-local portal for modal glass.
@@ -57,7 +58,7 @@ internal fun BoxScope.LiquidGlassModalOverlayHost(state: LiquidGlassModalOverlay
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .zIndex(2_000_000f)
+                .zIndex(LiquidGlassZIndex.Modal)
         ) {
             entry.content()
         }

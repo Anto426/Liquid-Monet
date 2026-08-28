@@ -35,6 +35,7 @@ import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPresets
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassTokens
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -42,6 +43,7 @@ import com.kyant.backdrop.backdrops.rememberBackdrop
 import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.anto426.liquidmonet.components.internal.DampedDragAnimation
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.components.internal.liquidInteractiveZIndex
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -108,7 +110,8 @@ private fun LiquidRangeSliderImpl(
     }
     val colorScheme = MaterialTheme.colorScheme
     val accentColor = if (tint.isSpecified) tint else colorScheme.primary
-    val trackColor = colorScheme.onSurface.copy(alpha = 0.18f)
+    val glassColors = LiquidGlassTheme.colors
+    val trackColor = glassColors.inactiveTrack
 
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
     val performance = LocalLiquidGlassPerformance.current
@@ -243,7 +246,7 @@ private fun LiquidRangeSliderImpl(
                                 backdrop = effectiveBackdrop,
                                 shape = Capsule(),
                                 role = LiquidGlassRole.Control,
-                                containerColor = accentColor.copy(alpha = 0.68f),
+                                containerColor = accentColor.copy(alpha = glassColors.activeTrack.alpha),
                                 preset = LiquidGlassPresets.Subtle
                             )
                     )

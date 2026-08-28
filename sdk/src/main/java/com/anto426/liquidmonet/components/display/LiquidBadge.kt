@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -39,7 +40,10 @@ fun LiquidBadge(
 ) {
     val defaultFill = MaterialTheme.colorScheme.error
     val effectiveContainerColor = containerColor ?: defaultFill
-    val effectiveContentColor = contentColor ?: MaterialTheme.colorScheme.onError
+    val effectiveContentColor = contentColor ?: LiquidGlassDefaults.contentColorFor(
+        effectiveContainerColor,
+        MaterialTheme.colorScheme
+    )
     val shape = Capsule()
 
     if (text == null) {

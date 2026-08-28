@@ -23,6 +23,7 @@ import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -45,17 +46,19 @@ fun LiquidIconButton(
 ) {
     val interactiveHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val contentColor by animateColorAsState(
         targetValue = if (enabled) {
-            colorScheme.onSurface
+            glassColors.content
         } else {
-            colorScheme.onSurface.copy(alpha = LiquidControlDefaults.disabledContentAlpha)
+            glassColors.disabledContent
         },
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
         label = "iconButtonContentColor"
     )
     val containerColor by animateColorAsState(
-        targetValue = colorScheme.primary.copy(alpha = if (enabled) 0.08f else 0.03f),
+        targetValue = if (enabled) glassColors.neutralContainer
+        else glassColors.neutralContainer.copy(alpha = glassColors.neutralContainer.alpha * 0.45f),
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
         label = "iconButtonContainerColor"
     )

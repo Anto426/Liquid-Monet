@@ -32,6 +32,7 @@ import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
 import kotlin.math.PI
@@ -57,7 +58,7 @@ fun LiquidLinearProgressIndicator(
     val activePrimary = progressColor ?: colorScheme.primary
     val activeSecondary = colorScheme.tertiary
     val highlightColor = colorScheme.onSurface
-    val defaultTrack = trackColor ?: colorScheme.onSurface.copy(alpha = 0.18f)
+    val defaultTrack = trackColor ?: LiquidGlassTheme.colors.inactiveTrack
     val normalizedProgress = progress?.coerceIn(0f, 1f)
     val semanticsModifier = if (normalizedProgress != null) {
         modifier.progressSemantics(normalizedProgress)
@@ -307,7 +308,7 @@ fun LiquidCircularProgressIndicator(
     val activePrimary = color ?: progressColor ?: colorScheme.primary
     val activeSecondary = colorScheme.tertiary
     val highlightColor = colorScheme.onSurface
-    val defaultTrack = trackColor ?: colorScheme.onSurface.copy(alpha = 0.14f)
+    val defaultTrack = trackColor ?: LiquidGlassTheme.colors.inactiveTrack
     val normalizedProgress = progress?.coerceIn(0f, 1f)
     val effectiveBackdrop = if (backdropState != emptyBackdrop()) backdropState else backdrop
     val semanticsModifier = if (normalizedProgress != null) {

@@ -1,6 +1,5 @@
 package com.anto426.liquidmonet.components.selection
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -12,8 +11,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
-import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.icons.LiquidIcons
 
 /**
@@ -44,19 +41,15 @@ fun <T> LiquidChipSelectionGroup(
 ) {
     require(maxItemsInEachRow > 0) { "maxItemsInEachRow must be greater than zero" }
 
-    val performance = LocalLiquidGlassPerformance.current
     val distinctItems = items.distinct()
     val enabledItems = if (enabled) distinctItems.filter(itemEnabled) else emptyList()
     val allSelected = enabledItems.isNotEmpty() && enabledItems.all(selectedItems::contains)
 
     FlowRow(
-        modifier = modifier.animateContentSize(
-            animationSpec = LiquidGlassMotionSpecs.spring(
-                performance = performance,
-                dampingRatio = 0.78f,
-                stiffness = 360f
-            )
-        ),
+        // animateContentSize clips to its animated bounds internally. That cuts the elastic
+        // scale of first/last-row chips, so selection motion stays on each chip and this host
+        // deliberately remains an unclipped layout container.
+        modifier = modifier,
         horizontalArrangement = horizontalArrangement,
         verticalArrangement = verticalArrangement,
         maxItemsInEachRow = maxItemsInEachRow

@@ -50,6 +50,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -77,6 +78,7 @@ fun LiquidChip(
     val interactiveHighlight = rememberLiquidControlHighlight()
     val closeHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
 
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
 
@@ -86,9 +88,9 @@ fun LiquidChip(
     val targetContentColor = if (selected) {
         selectedColors.content
     } else if (enabled) {
-        colorScheme.onSurface.copy(alpha = 0.88f)
+        glassColors.content
     } else {
-        colorScheme.onSurface.copy(alpha = LiquidControlDefaults.disabledContentAlpha)
+        glassColors.disabledContent
     }
 
     val animatedContentColor by animateColorAsState(
@@ -98,8 +100,11 @@ fun LiquidChip(
     )
 
     // Vibrant Radiant Monet Glow & Fill
-    val targetContainerColor = if (selected) activeMonetColor.copy(alpha = 0.52f)
-    else colorScheme.onSurface.copy(alpha = 0.08f)
+    val targetContainerColor = if (selected) {
+        activeMonetColor.copy(alpha = glassColors.selectedContainer.alpha)
+    } else {
+        glassColors.neutralContainer
+    }
     val animatedContainerColor by animateColorAsState(
         targetValue = targetContainerColor,
         animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
@@ -162,8 +167,10 @@ fun LiquidChip(
                         // The parent chip already owns the optical pass. A badge is a tint layer,
                         // not another piece of glass sampling the same pixels a second time.
                         .background(
-                            color = if (selected) activeMonetColor.copy(alpha = 0.75f)
-                            else colorScheme.onSurface.copy(alpha = 0.16f),
+                            color = if (selected) activeMonetColor.copy(alpha = 0.44f)
+                            else glassColors.neutralContainer.copy(
+                                alpha = (glassColors.neutralContainer.alpha * 1.8f).coerceAtMost(1f)
+                            ),
                             shape = Capsule()
                         )
                         .padding(horizontal = 6.dp, vertical = 2.dp),

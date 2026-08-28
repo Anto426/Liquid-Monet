@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -51,11 +53,16 @@ fun LiquidCheckbox(
     val interactiveHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
+    val glassColors = LiquidGlassTheme.colors
 
     val shape = RoundedRectangle(8.dp)
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (checked) primaryColor else colorScheme.onSurface.copy(alpha = 0.08f),
+        targetValue = if (checked) {
+            glassColors.accentContainer
+        } else {
+            glassColors.neutralContainer
+        },
         animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
         label = "checkboxContainerColor"
     )
@@ -110,7 +117,7 @@ fun LiquidCheckbox(
                 }
                 drawPath(
                     path = checkPath,
-                    color = colorScheme.onPrimary,
+                    color = primaryColor,
                     style = Stroke(
                         width = 2.4.dp.toPx(),
                         cap = StrokeCap.Round,

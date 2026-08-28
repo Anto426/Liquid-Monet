@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.isSpecified
 import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.anto426.liquidmonet.theme.monet.blend
 import com.kyant.shapes.Capsule
 import kotlin.math.abs
@@ -26,6 +27,11 @@ internal object LiquidControlDefaults {
     const val pressedScale: Float = 0.96f
     const val disabledContentAlpha: Float = 0.38f
     const val tintedContainerAlpha: Float = 0.06f
+    const val inactiveContainerAlpha: Float = 0.08f
+    const val accentContainerAlpha: Float = 0.22f
+    const val selectedContainerAlpha: Float = 0.28f
+    const val activeTrackAlpha: Float = 0.52f
+    const val focusIndicatorAlpha: Float = 0.40f
 }
 
 @Immutable
@@ -41,24 +47,24 @@ internal fun liquidButtonColors(
     enabled: Boolean
 ): LiquidControlColors {
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val automaticTint = when (variant) {
-        LiquidButtonVariant.Primary -> colorScheme.primary.copy(alpha = 0.36f)
-        LiquidButtonVariant.Secondary -> colorScheme.secondary.copy(alpha = 0.24f)
-        LiquidButtonVariant.Tonal -> colorScheme.tertiary.copy(alpha = 0.24f)
+        LiquidButtonVariant.Primary -> glassColors.accentContainer
+        LiquidButtonVariant.Secondary -> colorScheme.secondary.copy(alpha = glassColors.accentContainer.alpha * 0.72f)
+        LiquidButtonVariant.Tonal -> colorScheme.tertiary.copy(alpha = glassColors.accentContainer.alpha * 0.80f)
         LiquidButtonVariant.Outlined -> colorScheme.primary.copy(alpha = 0.10f)
         LiquidButtonVariant.Glass, LiquidButtonVariant.Text -> Color.Unspecified
     }
-    val automaticContent = when (variant) {
-        LiquidButtonVariant.Primary -> colorScheme.onPrimary
-        else -> colorScheme.onSurface
-    }
+    // Every variant remains translucent, so an opaque Material `onPrimary` pairing would not
+    // guarantee contrast against the sampled backdrop beneath the glass.
+    val automaticContent = glassColors.content
 
     return LiquidControlColors(
         tint = if (tint.isSpecified) tint else automaticTint,
         content = if (enabled) {
             automaticContent
         } else {
-            automaticContent.copy(alpha = LiquidControlDefaults.disabledContentAlpha)
+            glassColors.disabledContent
         }
     )
 }

@@ -53,6 +53,7 @@ import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -212,14 +213,15 @@ fun LiquidToast(
     val coroutineScope = rememberCoroutineScope()
     val offsetAnim = remember(data.id) { Animatable(0f) }
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val toastHighlight = rememberLiquidControlHighlight()
 
     val accentColor = when (data.type) {
-        LiquidToastType.Success -> colorScheme.tertiary
+        LiquidToastType.Success -> glassColors.success
         LiquidToastType.Info -> colorScheme.primary
-        LiquidToastType.Warning -> colorScheme.secondary
-        LiquidToastType.Error -> colorScheme.error
-        LiquidToastType.Neutral -> colorScheme.onSurfaceVariant
+        LiquidToastType.Warning -> glassColors.warning
+        LiquidToastType.Error -> glassColors.error
+        LiquidToastType.Neutral -> glassColors.secondaryContent
     }
 
     val iconVector: ImageVector = data.icon ?: when (data.type) {
@@ -292,7 +294,7 @@ fun LiquidToast(
                 backdrop = effectiveBackdrop,
                 shape = shape,
                 role = LiquidGlassRole.Navigation,
-                containerColor = accentColor.copy(alpha = 0.07f),
+                containerColor = accentColor.copy(alpha = glassColors.neutralContainer.alpha),
                 layerBlock = liquidControlLayerBlock(true, toastHighlight)
             )
             .liquidControlPressFeedback(
@@ -318,7 +320,12 @@ fun LiquidToast(
                     .size(36.dp)
                     // The toast shell already owns the refractive pass. The icon capsule is a
                     // restrained tint, avoiding a recursive-looking double lens.
-                    .background(accentColor.copy(alpha = 0.12f), Capsule()),
+                    .background(
+                        accentColor.copy(
+                            alpha = (glassColors.neutralContainer.alpha * 1.8f).coerceAtMost(1f)
+                        ),
+                        Capsule()
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -335,13 +342,13 @@ fun LiquidToast(
                 Text(
                     text = data.message,
                     style = MaterialTheme.typography.labelLarge,
-                    color = colorScheme.onSurface
+                    color = glassColors.content
                 )
                 if (data.subtitle != null) {
                     Text(
                         text = data.subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.82f)
+                        color = glassColors.secondaryContent
                     )
                 }
             }

@@ -79,8 +79,7 @@ fun ModalsFeedbackScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Finestre in Vetro Ottico con Rifrazione Snell",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.70f)
+                    style = MaterialTheme.typography.labelMedium
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -110,8 +109,7 @@ fun ModalsFeedbackScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Posizionamento Verticale",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.70f)
+                    style = MaterialTheme.typography.labelMedium
                 )
                 LiquidTabBar(
                     items = listOf(
@@ -127,8 +125,7 @@ fun ModalsFeedbackScreen(
                 if (menuVerticalDir != 2) {
                     Text(
                         text = "Allineamento Orizzontale",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.White.copy(alpha = 0.70f)
+                        style = MaterialTheme.typography.labelMedium
                     )
                     LiquidTabBar(
                         items = listOf(
@@ -199,7 +196,6 @@ fun ModalsFeedbackScreen(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
                     text = "Tocca per attivare i Toast in puro cristallo ottico:",
-                    color = Color.White.copy(alpha = 0.70f),
                     style = MaterialTheme.typography.bodySmall
                 )
                 Row(
@@ -290,7 +286,7 @@ fun ModalsFeedbackScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Spinner Circolare Monet", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                    Text("Spinner Circolare Monet", style = MaterialTheme.typography.bodyMedium)
                     LiquidLoading(style = LiquidLoadingStyle.Circular, backdropState = backdropState)
                 }
 
@@ -301,7 +297,7 @@ fun ModalsFeedbackScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Gocce di Cristallo Liquide", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                    Text("Gocce di Cristallo Liquide", style = MaterialTheme.typography.bodyMedium)
                     LiquidLoading(style = LiquidLoadingStyle.Dots, backdropState = backdropState)
                 }
 
@@ -312,13 +308,13 @@ fun ModalsFeedbackScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Impulso Radiale Prismatico", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                    Text("Impulso Radiale Prismatico", style = MaterialTheme.typography.bodyMedium)
                     LiquidLoading(style = LiquidLoadingStyle.Pulse, backdropState = backdropState)
                 }
 
                 LiquidHorizontalDivider()
 
-                Text("Scheletro Shimmer in Vetro", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                Text("Scheletro Shimmer in Vetro", style = MaterialTheme.typography.bodyMedium)
                 LiquidLoading(
                     style = LiquidLoadingStyle.Shimmer,
                     modifier = Modifier

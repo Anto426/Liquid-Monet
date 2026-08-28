@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 
 /**
  * Lightweight heading for a related group of Liquid Monet components.
@@ -26,8 +27,8 @@ fun LiquidSectionHeader(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f),
-    subtitleColor: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f)
+    titleColor: Color = LiquidGlassTheme.colors.content,
+    subtitleColor: Color = LiquidGlassTheme.colors.secondaryContent
 ) {
     Column(
         modifier = modifier

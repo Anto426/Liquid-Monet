@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.icons.LiquidIcons
@@ -34,6 +35,8 @@ import com.anto426.liquidmonet.glass.LiquidGlassContainer
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.internal.LiquidGlassButton
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.shapes.Capsule
 
 /**
@@ -137,6 +140,7 @@ private fun LiquidPaletteItem(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
+    val glassColors = LiquidGlassTheme.colors
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.04f else 1.0f,
         animationSpec = spring(dampingRatio = 0.65f, stiffness = 420f),
@@ -147,7 +151,11 @@ private fun LiquidPaletteItem(
         onClick = onClick,
         backdrop = backdropState,
         tint = color,
-        surfaceColor = if (isSelected) color.copy(alpha = 0.55f) else color.copy(alpha = 0.22f),
+        surfaceColor = if (isSelected) {
+            color.copy(alpha = glassColors.selectedContainer.alpha)
+        } else {
+            color.copy(alpha = glassColors.neutralContainer.alpha)
+        },
         modifier = modifier
             .graphicsLayer {
                 scaleX = scale
@@ -167,7 +175,7 @@ private fun LiquidPaletteItem(
                 Icon(
                     imageVector = LiquidIcons.Check,
                     contentDescription = "Selezionato",
-                    tint = Color.White,
+                    tint = if (color.luminance() > 0.48f) Color.Black else Color.White,
                     modifier = Modifier.size(18.dp)
                 )
             }

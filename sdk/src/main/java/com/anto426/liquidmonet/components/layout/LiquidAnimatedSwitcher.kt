@@ -32,6 +32,7 @@ import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.motion.liquidLiquidSpring
 import com.anto426.liquidmonet.motion.liquidSharedAxisHorizontal
 import com.anto426.liquidmonet.motion.liquidSharedAxisVertical
+import com.anto426.liquidmonet.motion.rememberLiquidPredictiveBackState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -66,6 +67,7 @@ fun <T> LiquidAnimatedSwitcher(
     swipeThreshold: Dp = 48.dp,
     contentAlignment: Alignment = Alignment.Center,
     label: String = "LiquidAnimatedSwitcher",
+    onPredictiveBack: (() -> Unit)? = null,
     content: @Composable AnimatedContentScope.(targetState: T) -> Unit
 ) {
     require(swipeThreshold > 0.dp) { "LiquidAnimatedSwitcher swipeThreshold must be positive." }
@@ -77,6 +79,7 @@ fun <T> LiquidAnimatedSwitcher(
     val scope = rememberCoroutineScope()
     val forwardAction by rememberUpdatedState(onSwipeForward)
     val backwardAction by rememberUpdatedState(onSwipeBackward)
+    val predictiveBack = rememberLiquidPredictiveBackState(onPredictiveBack)
     val thresholdPx = with(density) { swipeThreshold.toPx() }
     var rawDragOffsetPx by remember { mutableFloatStateOf(0f) }
     var dragOffsetPx by remember { mutableFloatStateOf(0f) }
@@ -161,9 +164,13 @@ fun <T> LiquidAnimatedSwitcher(
                 val axisSize = size.width.coerceAtLeast(1f)
                 val deformation = (abs(dragOffsetPx) / axisSize).coerceIn(0f, 0.22f)
                 transformOrigin = TransformOrigin.Center
-                translationX = dragOffsetPx * 0.42f
-                scaleX = 1f + deformation * 0.28f
-                scaleY = 1f - deformation * 0.16f
+                translationX = dragOffsetPx * 0.42f +
+                    axisSize * 0.16f * predictiveBack.progress * predictiveBack.edgeDirection
+                scaleX = (1f + deformation * 0.28f) *
+                    (1f - predictiveBack.progress * 0.025f)
+                scaleY = (1f - deformation * 0.16f) *
+                    (1f - predictiveBack.progress * 0.025f)
+                alpha = 1f - predictiveBack.progress * 0.08f
             },
         transitionSpec = {
             val forward = isForward?.invoke(initialState, targetState)

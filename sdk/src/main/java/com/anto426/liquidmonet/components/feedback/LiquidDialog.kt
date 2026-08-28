@@ -4,6 +4,7 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -27,17 +28,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,13 +61,15 @@ import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassModalOverlayState
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
+import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,7 +89,7 @@ fun LiquidDialog(
     val modalOverlayState = LocalLiquidGlassModalOverlayState.current
     val effectiveBackdrop = LocalLiquidGlassContentBackdrop.current ?: backdropState
     val dialogContent: @Composable () -> Unit = content ?: {
-        val contentColor = MaterialTheme.colorScheme.onSurface
+        val contentColor = LocalContentColor.current
         BasicText(
             text = text.orEmpty(),
             modifier = Modifier
@@ -141,28 +145,27 @@ private fun LiquidDialogLayer(
 ) {
     val performance = LocalLiquidGlassPerformance.current
     val effectiveBackdrop = LocalLiquidGlassContentBackdrop.current ?: backdropState
-    val colorScheme = MaterialTheme.colorScheme
-    val isLightSurface = colorScheme.surface.luminance() > 0.5f
-    val defaultDim = Color.Black.copy(alpha = if (isLightSurface) 0.22f else 0.32f)
-    val dimColor = scrimColor ?: defaultDim
+    val dimColor = scrimColor ?: LiquidGlassTheme.colors.scrim
 
-    var isVisible by remember { mutableStateOf(false) }
+    val visibilityState = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
     var isDismissing by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { isVisible = true }
 
     val coroutineScope = rememberCoroutineScope()
     val animateDismiss: () -> Unit = dismiss@{
         if (isDismissing) return@dismiss
         isDismissing = true
-        isVisible = false
+        visibilityState.targetState = false
         coroutineScope.launch {
-            delay(LiquidGlassMotionSpecs.durationMillis(performance, 180).toLong())
+            snapshotFlow { visibilityState.isIdle && !visibilityState.currentState }
+                .first { it }
             onDismissRequest()
         }
     }
 
     var predictiveBackProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler(enabled = isVisible) { progressFlow ->
+    PredictiveBackHandler(enabled = visibilityState.targetState) { progressFlow ->
         try {
             progressFlow.collect { backEvent -> predictiveBackProgress = backEvent.progress }
             animateDismiss()
@@ -182,7 +185,7 @@ private fun LiquidDialogLayer(
     )
 
     AnimatedVisibility(
-        visible = isVisible,
+        visibleState = visibilityState,
         enter = fadeIn(LiquidGlassMotionSpecs.tween(performance, 180)),
         exit = fadeOut(LiquidGlassMotionSpecs.tween(performance, 140))
     ) {
@@ -275,7 +278,10 @@ private fun LiquidDialogPanel(
     dismissButton: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val contentColor = MaterialTheme.colorScheme.onSurface
+    val contentColor = LiquidGlassDefaults.contentColorFor(
+        containerColor,
+        MaterialTheme.colorScheme
+    )
     val shape = remember { RoundedRectangle(32.dp) }
     val surfaceBackdrop = rememberLayerBackdrop()
 
@@ -294,7 +300,10 @@ private fun LiquidDialogPanel(
             .padding(horizontal = 20.dp, vertical = 22.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {
+        CompositionLocalProvider(
+            LocalLiquidGlassContentBackdrop provides surfaceBackdrop,
+            LocalContentColor provides contentColor
+        ) {
         // Centered Title
         BasicText(
             text = title,

@@ -38,6 +38,7 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -98,6 +99,7 @@ fun LiquidPreferenceItem(
     val interactiveHighlight = rememberLiquidControlHighlight()
     val iconHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
 
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
@@ -145,7 +147,13 @@ fun LiquidPreferenceItem(
                         backdrop = effectiveBackdrop,
                         shape = Capsule(),
                         role = LiquidGlassRole.Navigation,
-                        containerColor = colorScheme.primary.copy(alpha = if (isPressed && isInteractive) 0.22f else 0.14f)
+                        containerColor = colorScheme.primary.copy(
+                            alpha = if (isPressed && isInteractive) {
+                                glassColors.accentContainer.alpha
+                            } else {
+                                glassColors.neutralContainer.alpha * 1.8f
+                            }
+                        )
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -164,13 +172,13 @@ fun LiquidPreferenceItem(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (isPressed && onClick != null) FontWeight.SemiBold else FontWeight.Medium,
-                color = colorScheme.onSurface
+                    color = glassColors.content
             )
             if (!subtitle.isNullOrBlank()) {
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurface.copy(alpha = 0.65f)
+                    color = glassColors.secondaryContent
                 )
             }
         }

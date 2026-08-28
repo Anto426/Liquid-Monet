@@ -4,12 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,8 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
@@ -42,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.navigation.LiquidTopBar
 import com.anto426.liquidmonet.components.buttons.LiquidFloatingActionButton
@@ -57,8 +48,6 @@ import com.anto426.liquidmonet.glass.LiquidBackgroundEffect
 import com.anto426.liquidmonet.glass.LiquidGlassScene
 import com.anto426.liquidmonet.glass.LiquidBackground
 import com.anto426.liquidmonet.icons.LiquidIcons
-import com.anto426.liquidmonet.motion.LiquidAnimatedNavContent
-import com.anto426.liquidmonet.motion.LiquidNavTransition
 import com.anto426.liquidmonet.theme.LiquidMonetTheme
 import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
@@ -126,11 +115,7 @@ class MainActivity : ComponentActivity() {
                 // La demo è organizzata in quattro aree principali; ogni hub
                 // contiene le proprie sotto-schermate e non duplica la shell.
                 val pageTitles = listOf("Studio", "Controlli", "Feedback", "Navigazione")
-                val searchBarInset by animateDpAsState(
-                    targetValue = if (isSearchOpen) 68.dp else 0.dp,
-                    animationSpec = spring(dampingRatio = 0.75f, stiffness = 380f),
-                    label = "demoTopBarSearchInset"
-                )
+                var topBarHeight by remember { mutableStateOf(152.dp) }
 
                 LiquidGlassScene(
                     modifier = Modifier.fillMaxSize(),
@@ -152,6 +137,7 @@ class MainActivity : ComponentActivity() {
                             onQueryChange = { searchQuery = it },
                             onSearchActiveChange = { isSearchOpen = it },
                             searchPlaceholder = "Cerca componenti, controlli, gesture...",
+                            onHeightChanged = { topBarHeight = it },
                             actionItems = listOf(
                                 LiquidTopBarAction(
                                     icon = LiquidIcons.Search,
@@ -241,7 +227,6 @@ class MainActivity : ComponentActivity() {
                             Icon(
                                 imageVector = LiquidIcons.Add,
                                 contentDescription = "Nuovo",
-                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -263,19 +248,7 @@ class MainActivity : ComponentActivity() {
                                 .nestedScroll(navBarScrollConnection),
                             containerColor = Color.Transparent,
                             topBar = {
-                                Column(
-                                    modifier = Modifier.clearAndSetSemantics { }
-                                ) {
-                                    LargeTopAppBar(
-                                        title = {},
-                                        colors = TopAppBarDefaults.topAppBarColors(
-                                            containerColor = Color.Transparent,
-                                            scrolledContainerColor = Color.Transparent
-                                        ),
-                                        scrollBehavior = scrollBehavior
-                                    )
-                                    Spacer(modifier = Modifier.height(searchBarInset))
-                                }
+                                Spacer(modifier = Modifier.height(topBarHeight))
                             }
                         ) { innerPadding ->
                             Box(
@@ -290,13 +263,7 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
 
-                                    // Hub Content Switcher with Expressive Directional Transitions
-                                    LiquidAnimatedNavContent(
-                                        targetState = currentTab,
-                                        transition = LiquidNavTransition.AutoDirectional,
-                                        label = "mainScreenTransition"
-                                    ) { tab ->
-                                        when (tab) {
+                                    when (currentTab) {
                                             0 -> StudioHubScreen(
                                                 selectedPresetIndex = selectedPresetIndex,
                                                 onSelectPreset = { selectedPresetIndex = it },
@@ -317,7 +284,6 @@ class MainActivity : ComponentActivity() {
                                                 toastState = toastState,
                                                 backdropState = backdropState
                                             )
-                                        }
                                     }
 
                                     Spacer(modifier = Modifier.height(115.dp))

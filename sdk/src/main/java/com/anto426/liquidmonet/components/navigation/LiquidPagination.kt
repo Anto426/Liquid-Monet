@@ -1,7 +1,7 @@
 package com.anto426.liquidmonet.components.navigation
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.selection.selectable
@@ -17,14 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -37,7 +36,10 @@ import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
+import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -56,7 +58,8 @@ fun LiquidPageIndicator(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
-    val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
+    val performance = LocalLiquidGlassPerformance.current
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
@@ -66,6 +69,19 @@ fun LiquidPageIndicator(
 
     val safePageCount = pageCount.coerceAtLeast(1)
     val safeCurrentPage = currentPage.coerceIn(0, safePageCount - 1)
+    val movementImpulse = remember { Animatable(0f) }
+
+    LaunchedEffect(safeCurrentPage) {
+        movementImpulse.snapTo(1f)
+        movementImpulse.animateTo(
+            targetValue = 0f,
+            animationSpec = LiquidGlassMotionSpecs.spring(
+                performance = performance,
+                dampingRatio = 0.72f,
+                stiffness = 430f
+            )
+        )
+    }
 
     Box(
         modifier = modifier
@@ -74,7 +90,7 @@ fun LiquidPageIndicator(
                 backdrop = effectiveBackdrop,
                 shape = Capsule(),
                 role = LiquidGlassRole.Navigation,
-                containerColor = colorScheme.primary.copy(alpha = 0.08f)
+                containerColor = LiquidGlassTheme.colors.neutralContainer
             )
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
@@ -88,9 +104,10 @@ fun LiquidPageIndicator(
 
             val slidingOffset by animateDpAsState(
                 targetValue = slotWidth * safeCurrentPage + (slotWidth - activeWidth) / 2f,
-                animationSpec = spring(
-                    dampingRatio = 0.65f,
-                    stiffness = 320f
+                animationSpec = LiquidGlassMotionSpecs.spring(
+                    performance = performance,
+                    dampingRatio = 0.74f,
+                    stiffness = 410f
                 ),
                 label = "pageIndicatorDropletOffset"
             )
@@ -127,7 +144,7 @@ fun LiquidPageIndicator(
                             modifier = Modifier
                                 .size(dotSize)
                                 .clip(Capsule())
-                                .background(colorScheme.onSurface.copy(alpha = 0.24f))
+                                .background(LiquidGlassTheme.colors.inactiveTrack)
                         )
                     }
                 }
@@ -140,31 +157,12 @@ fun LiquidPageIndicator(
                     .offset(x = slidingOffset)
                     .zIndex(1f)
                     .size(width = activeWidth, height = dotSize)
-                    .drawBehind {
-                        val glowRadius = size.maxDimension * 2.2f
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    colorScheme.primary.copy(alpha = 0.65f),
-                                    colorScheme.primary.copy(alpha = 0.25f),
-                                    colorScheme.primary.copy(alpha = 0f)
-                                ),
-                                center = center,
-                                radius = glowRadius
-                            ),
-                            radius = glowRadius,
-                            center = center
-                        )
+                    .graphicsLayer {
+                        scaleX = 1f + movementImpulse.value * 0.26f
+                        scaleY = 1f - movementImpulse.value * 0.10f
                     }
                     .clip(Capsule())
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                colorScheme.primary,
-                                colorScheme.tertiary.copy(alpha = 0.90f)
-                            )
-                        )
-                    )
+                    .background(glassColors.accentContainer)
             )
         }
     }
@@ -182,7 +180,8 @@ fun LiquidPagination(
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
-    val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
+    val performance = LocalLiquidGlassPerformance.current
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
         backdropState != emptyBackdrop() -> backdropState
@@ -202,7 +201,7 @@ fun LiquidPagination(
                 backdrop = effectiveBackdrop,
                 shape = Capsule(),
                 role = LiquidGlassRole.Navigation,
-                containerColor = colorScheme.primary.copy(alpha = 0.08f)
+                containerColor = LiquidGlassTheme.colors.neutralContainer
             )
             .padding(horizontal = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -228,9 +227,10 @@ fun LiquidPagination(
 
             val selectedPillOffset by animateDpAsState(
                 targetValue = slotWidth * (safeCurrentPage - 1) + (slotWidth - buttonSize) / 2f,
-                animationSpec = spring(
-                    dampingRatio = 0.68f,
-                    stiffness = 340f
+                animationSpec = LiquidGlassMotionSpecs.spring(
+                    performance = performance,
+                    dampingRatio = 0.76f,
+                    stiffness = 420f
                 ),
                 label = "paginationPillOffset"
             )
@@ -240,31 +240,8 @@ fun LiquidPagination(
                 modifier = Modifier
                     .offset(x = selectedPillOffset)
                     .size(buttonSize)
-                    .drawBehind {
-                        val glowRadius = size.maxDimension * 1.8f
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    colorScheme.primary.copy(alpha = 0.55f),
-                                    colorScheme.primary.copy(alpha = 0.15f),
-                                    colorScheme.primary.copy(alpha = 0f)
-                                ),
-                                center = center,
-                                radius = glowRadius
-                            ),
-                            radius = glowRadius,
-                            center = center
-                        )
-                    }
                     .clip(Capsule())
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                colorScheme.primary,
-                                colorScheme.primary.copy(alpha = 0.85f)
-                            )
-                        )
-                    )
+                    .background(glassColors.accentContainer)
             )
 
             // Equal-Width Number Buttons
@@ -294,7 +271,7 @@ fun LiquidPagination(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 fontSize = 14.sp
                             ),
-                            color = if (isSelected) Color.White else colorScheme.onSurface
+                            color = if (isSelected) glassColors.content else glassColors.secondaryContent
                         )
                     }
                 }

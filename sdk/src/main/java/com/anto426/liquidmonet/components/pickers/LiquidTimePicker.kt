@@ -29,6 +29,7 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.anto426.liquidmonet.components.buttons.LiquidIconButton
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
@@ -143,7 +144,7 @@ private fun LiquidTimeNumberColumn(
                     backdrop = backdropState,
                     shape = RoundedRectangle(16.dp),
                     role = LiquidGlassRole.Control,
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+                    containerColor = LiquidGlassTheme.colors.accentContainer
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -163,7 +164,7 @@ private fun LiquidTimeNumberColumn(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
+            color = LiquidGlassTheme.colors.secondaryContent
         )
     }
 }
@@ -234,7 +235,7 @@ fun LiquidTimePickerField(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.onSurface.copy(alpha = 0.65f)
+                            color = LiquidGlassTheme.colors.secondaryContent
                         )
                         Text(
                             text = formattedTime,
@@ -245,7 +246,7 @@ fun LiquidTimePickerField(
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.45f)
+                            color = LiquidGlassTheme.colors.secondaryContent.copy(alpha = 0.72f)
                         )
                     }
                 }
@@ -254,7 +255,7 @@ fun LiquidTimePickerField(
             Icon(
                 imageVector = LiquidIcons.ChevronRight,
                 contentDescription = null,
-                tint = colorScheme.onSurface.copy(alpha = 0.40f),
+                tint = LiquidGlassTheme.colors.secondaryContent,
                 modifier = Modifier.size(20.dp)
             )
         }

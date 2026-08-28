@@ -8,7 +8,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
@@ -94,6 +94,7 @@ fun LiquidLoading(
     backdropState: Backdrop = backdrop
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
     val primaryColor = if (tint.isSpecified) tint else colorScheme.primary
     val secondaryColor = colorScheme.tertiary
 
@@ -131,7 +132,7 @@ fun LiquidLoading(
                         } else {
                             MaterialTheme.typography.bodyMedium
                         },
-                        color = colorScheme.onSurface.copy(alpha = 0.88f)
+                        color = glassColors.content
                     )
                 }
             } else {
@@ -157,7 +158,7 @@ fun LiquidLoading(
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurface.copy(alpha = 0.88f),
+                        color = glassColors.content,
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
@@ -302,7 +303,7 @@ private fun LiquidLoadingDots(
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f)
+                color = LiquidGlassTheme.colors.secondaryContent
             )
         }
     }
@@ -369,7 +370,7 @@ private fun LiquidLoadingPulse(
                         backdrop = backdropState,
                         shape = Capsule(),
                         role = LiquidGlassRole.Control,
-                        containerColor = primaryColor.copy(alpha = 0.16f)
+                        containerColor = LiquidGlassTheme.colors.accentContainer
                     )
             )
         }
@@ -377,7 +378,7 @@ private fun LiquidLoadingPulse(
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f)
+                color = LiquidGlassTheme.colors.secondaryContent
             )
         }
     }
@@ -399,7 +400,7 @@ private fun LiquidLoadingOverlay(
                 backdrop = backdropState,
                 shape = RoundedRectangle(28.dp),
                 role = LiquidGlassRole.Dialog,
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.08f)
+                containerColor = LiquidGlassTheme.colors.neutralContainer
             )
             .padding(horizontal = 24.dp, vertical = 20.dp),
         contentAlignment = Alignment.Center

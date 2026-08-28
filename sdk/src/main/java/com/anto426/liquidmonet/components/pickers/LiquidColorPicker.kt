@@ -49,6 +49,8 @@ import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
+import com.anto426.liquidmonet.theme.monet.contentColorFor
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -98,6 +100,7 @@ fun LiquidColorPicker(
 
     val interactiveHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
 
     val presetColors = remember {
         listOf(
@@ -173,7 +176,7 @@ fun LiquidColorPicker(
                     Text(
                         text = "Colore Selezionato",
                         style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.onSurface.copy(alpha = 0.65f),
+                        color = glassColors.secondaryContent,
                         fontSize = 11.5.sp
                     )
                     // Monospace Hex Pill Badge
@@ -212,7 +215,7 @@ fun LiquidColorPicker(
                 Text(
                     text = "L: ${(lightness * 100).toInt()}%",
                     style = MaterialTheme.typography.labelSmall,
-                    color = colorScheme.onSurface.copy(alpha = 0.55f),
+                    color = glassColors.secondaryContent,
                     fontSize = 11.sp
                 )
             }
@@ -235,12 +238,11 @@ fun LiquidColorPicker(
                     label = "dropletScale"
                 )
 
-                val checkTint = if (isLightPreset) Color(0xFF1E1E1E) else Color.White
+                val checkTint = contentColorFor(preset)
                 val borderColor = when {
                     isPresetSelected && isLightPreset -> colorScheme.primary
-                    isPresetSelected -> Color.White
-                    isLightPreset -> Color.White.copy(alpha = 0.60f)
-                    else -> Color.White.copy(alpha = 0.40f)
+                    isPresetSelected -> contentColorFor(preset)
+                    else -> glassColors.outline
                 }
 
                 Box(
@@ -282,7 +284,7 @@ fun LiquidColorPicker(
             Text(
                 text = "Spettro Cromatico (Tonalità)",
                 style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.onSurface.copy(alpha = 0.70f),
+                color = glassColors.secondaryContent,
                 fontWeight = FontWeight.Medium
             )
             val hueGradient = remember {
@@ -304,7 +306,7 @@ fun LiquidColorPicker(
                     .height(14.dp)
                     .clip(Capsule())
                     .background(hueGradient)
-                    .border(1.dp, Color.White.copy(alpha = 0.35f), Capsule())
+                    .border(1.dp, glassColors.outline, Capsule())
             )
             LiquidSlider(
                 value = hue,
@@ -323,7 +325,7 @@ fun LiquidColorPicker(
             Text(
                 text = "Luminosità Rifrattiva",
                 style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.onSurface.copy(alpha = 0.70f),
+                color = glassColors.secondaryContent,
                 fontWeight = FontWeight.Medium
             )
             val lightnessGradient = remember(hue, saturation) {
@@ -341,7 +343,7 @@ fun LiquidColorPicker(
                     .height(14.dp)
                     .clip(Capsule())
                     .background(lightnessGradient)
-                    .border(1.dp, Color.White.copy(alpha = 0.35f), Capsule())
+                    .border(1.dp, glassColors.outline, Capsule())
             )
             LiquidSlider(
                 value = lightness,

@@ -4,12 +4,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.animation.core.MutableTransitionState
@@ -34,12 +32,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPerformanceState
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.components.internal.LiquidGlassZIndex
 import com.kyant.backdrop.Backdrop
 import kotlin.math.roundToInt
 
@@ -188,7 +186,7 @@ internal fun BoxScope.LiquidGlassOverlayHost(state: LiquidGlassOverlayState) {
     Box(
         modifier = Modifier
             .matchParentSize()
-            .zIndex(1_000_000f)
+            .zIndex(LiquidGlassZIndex.Menu)
             .onGloballyPositioned { coordinates ->
                 hostBoundsInWindow = coordinates.boundsInWindow()
             }
@@ -211,15 +209,11 @@ internal fun BoxScope.LiquidGlassOverlayHost(state: LiquidGlassOverlayState) {
             placement = entry.placement,
             offset = entry.offset,
             modifier = Modifier.matchParentSize()
-        ) { alignment, transformOrigin ->
-            val anchorSize = IntSize(
-                width = entry.anchorBoundsInWindow.width.roundToInt().coerceAtLeast(1),
-                height = entry.anchorBoundsInWindow.height.roundToInt().coerceAtLeast(1)
-            )
+        ) { _, transformOrigin ->
             AnimatedVisibility(
                 visibleState = visibility,
-                enter = glassOverlayEnterTransition(anchorSize, performance, alignment, transformOrigin),
-                exit = glassOverlayExitTransition(anchorSize, performance, alignment, transformOrigin)
+                enter = glassOverlayEnterTransition(performance, transformOrigin),
+                exit = glassOverlayExitTransition(performance, transformOrigin)
             ) {
                 entry.content { state.dismiss(entry.key) }
             }
@@ -337,72 +331,40 @@ private fun LiquidGlassOverlayPositioner(
 }
 
 private fun glassOverlayEnterTransition(
-    anchorSize: IntSize,
     performance: LiquidGlassPerformanceState,
-    alignment: Alignment = Alignment.TopEnd,
     transformOrigin: TransformOrigin = TransformOrigin(0.92f, 0.04f)
 ): EnterTransition =
-    expandIn(
+    scaleIn(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.60f,
-            stiffness = 75f
+            dampingRatio = 0.78f,
+            stiffness = 420f
         ),
-        expandFrom = alignment,
-        clip = false,
-        initialSize = { fullSize ->
-            IntSize(
-                width = anchorSize.width.coerceAtMost(fullSize.width),
-                height = anchorSize.height.coerceAtMost(fullSize.height)
-            )
-        }
-    ) + scaleIn(
-        animationSpec = LiquidGlassMotionSpecs.spring(
-            performance = performance,
-            dampingRatio = 0.58f,
-            stiffness = 68f
-        ),
-        initialScale = 0.02f,
+        initialScale = 0.94f,
         transformOrigin = transformOrigin
     ) + fadeIn(
         animationSpec = LiquidGlassMotionSpecs.tween(
             performance = performance,
-            durationMillis = 500
+            durationMillis = 180
         )
     )
 
 private fun glassOverlayExitTransition(
-    anchorSize: IntSize,
     performance: LiquidGlassPerformanceState,
-    alignment: Alignment = Alignment.TopEnd,
     transformOrigin: TransformOrigin = TransformOrigin(0.92f, 0.04f)
 ): ExitTransition =
-    shrinkOut(
+    scaleOut(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.82f,
-            stiffness = 110f
+            dampingRatio = 0.88f,
+            stiffness = 460f
         ),
-        shrinkTowards = alignment,
-        clip = false,
-        targetSize = { fullSize ->
-            IntSize(
-                width = anchorSize.width.coerceAtMost(fullSize.width),
-                height = anchorSize.height.coerceAtMost(fullSize.height)
-            )
-        }
-    ) + scaleOut(
-        animationSpec = LiquidGlassMotionSpecs.spring(
-            performance = performance,
-            dampingRatio = 0.82f,
-            stiffness = 110f
-        ),
-        targetScale = 0.02f,
+        targetScale = 0.97f,
         transformOrigin = transformOrigin
     ) + fadeOut(
         animationSpec = LiquidGlassMotionSpecs.tween(
             performance = performance,
-            durationMillis = 360
+            durationMillis = 130
         )
     )
 

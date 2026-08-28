@@ -74,8 +74,7 @@ fun NavigationGesturesScreen(
             ) {
                 Text(
                     text = "Lo shader AGSL campiona il backdrop calcolando la dispersione cromatica e le ombre interne per simulare un vetro reale a 60/120 fps.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.80f)
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
@@ -89,8 +88,7 @@ fun NavigationGesturesScreen(
             ) {
                 Text(
                     text = "Ogni componente adatta la luminosità del vetro e la specular highlight al tema di sistema attivo.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.80f)
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }

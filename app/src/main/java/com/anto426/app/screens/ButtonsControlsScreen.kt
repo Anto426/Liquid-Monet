@@ -66,8 +66,7 @@ fun ButtonsControlsScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Prominenti & Vetro Puro",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.70f)
+                    style = MaterialTheme.typography.labelMedium
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -142,40 +141,30 @@ fun ButtonsControlsScreen(
                 LiquidIconButton(
                     icon = LiquidIcons.PlayArrow,
                     onClick = { },
-                    size = 46.dp,
-                    iconSize = 22.dp,
                     backdropState = backdropState
                 )
                 LiquidIconButton(
                     icon = LiquidIcons.Star,
                     onClick = { },
-                    size = 46.dp,
-                    iconSize = 22.dp,
                     backdropState = backdropState
                 )
                 LiquidIconButton(
                     icon = LiquidIcons.Share,
                     onClick = { },
-                    size = 46.dp,
-                    iconSize = 22.dp,
                     backdropState = backdropState
                 )
                 LiquidIconButton(
                     icon = LiquidIcons.Settings,
                     onClick = { },
-                    size = 46.dp,
-                    iconSize = 22.dp,
                     backdropState = backdropState
                 )
                 LiquidFloatingActionButton(
                     onClick = { },
-                    size = 46.dp,
                     backdropState = backdropState
                 ) {
                     Icon(
                         imageVector = LiquidIcons.Add,
                         contentDescription = "Nuovo",
-                        tint = Color.White,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -253,8 +242,7 @@ fun ButtonsControlsScreen(
                 )
                 Text(
                     text = "$starRating stelle su 5 selezionate",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.70f)
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }

@@ -34,9 +34,11 @@ import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
+import com.anto426.liquidmonet.components.internal.LiquidControlDefaults
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -60,35 +62,39 @@ fun LiquidControlCenterTile(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
-    val activeContentColor = colorScheme.onPrimary
-    val inactiveContentColor = colorScheme.onSurface
+    val glassColors = LiquidGlassTheme.colors
+    val inactiveContentColor = glassColors.content
 
     val shape = RoundedRectangle(22.dp)
     val iconShape = Capsule()
 
     // Smooth color interpolations between ON and OFF states
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (active) primaryColor.copy(alpha = 0.36f)
-        else inactiveContentColor.copy(alpha = 0.08f),
+        targetValue = if (active) {
+            glassColors.accentContainer
+        } else {
+            glassColors.neutralContainer
+        },
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileContainerColor"
     )
 
     val animatedIconBgColor by animateColorAsState(
-        targetValue = if (active) primaryColor else inactiveContentColor.copy(alpha = 0.14f),
+        targetValue = if (active) primaryColor.copy(alpha = 0.72f)
+        else inactiveContentColor.copy(alpha = 0.14f),
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileIconBgColor"
     )
 
     val animatedIconTint by animateColorAsState(
-        targetValue = if (active) activeContentColor else inactiveContentColor.copy(alpha = 0.88f),
+        targetValue = if (active) colorScheme.onPrimary else inactiveContentColor.copy(alpha = 0.88f),
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileIconTint"
     )
 
     val animatedSubtitleColor by animateColorAsState(
-        targetValue = if (active) activeContentColor.copy(alpha = 0.78f)
-        else inactiveContentColor.copy(alpha = 0.65f),
+        targetValue = if (active) inactiveContentColor.copy(alpha = 0.78f)
+        else glassColors.secondaryContent,
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
         label = "tileSubtitleColor"
     )
@@ -157,7 +163,7 @@ fun LiquidControlCenterTile(
                 BasicText(
                     text = title,
                     style = TextStyle(
-                        color = if (active) activeContentColor else inactiveContentColor,
+                        color = inactiveContentColor,
                         fontSize = 15.5.sp,
                         fontWeight = FontWeight.SemiBold
                     )

@@ -22,6 +22,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPerformanceState
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
@@ -74,13 +76,22 @@ fun <T> LiquidAnimatedNavContent(
     transition: LiquidNavTransition = LiquidNavTransition.AutoDirectional,
     contentAlignment: Alignment = Alignment.TopStart,
     label: String = "LiquidAnimatedNavContent",
+    onPredictiveBack: (() -> Unit)? = null,
     content: @Composable AnimatedContentScope.(targetState: T) -> Unit
 ) {
     val performance = LocalLiquidGlassPerformance.current
+    val predictiveBack = rememberLiquidPredictiveBackState(onPredictiveBack)
 
     AnimatedContent(
         targetState = targetState,
-        modifier = modifier,
+        modifier = modifier.graphicsLayer {
+            val progress = predictiveBack.progress
+            transformOrigin = TransformOrigin.Center
+            translationX = size.width * 0.16f * progress * predictiveBack.edgeDirection
+            scaleX = 1f - 0.025f * progress
+            scaleY = 1f - 0.025f * progress
+            alpha = 1f - 0.08f * progress
+        },
         transitionSpec = {
             when (transition) {
                 LiquidNavTransition.AutoDirectional -> {

@@ -5,19 +5,16 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,6 +71,7 @@ import com.anto426.liquidmonet.glass.overlay.rememberLiquidGlassOverlayAnchorSta
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.icons.LiquidIcons
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -113,7 +111,7 @@ fun LiquidMorphingAction(
     )
 
     val buttonScale by animateFloatAsState(
-        targetValue = if (isMorphing) 1.40f else 1f,
+        targetValue = if (isMorphing) 0.96f else 1f,
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
             dampingRatio = 0.60f,
@@ -235,7 +233,7 @@ fun LiquidMorphingAction(
                     expanded = false
                     usesHostedOverlay = false
                 },
-                properties = PopupProperties(focusable = true),
+                properties = PopupProperties(focusable = true, clippingEnabled = false),
                 offset = IntOffset.Zero
             ) {
                 AnimatedVisibility(
@@ -359,7 +357,7 @@ private fun LiquidDropdownMenuImpl(
         }
         Popup(
             onDismissRequest = onDismissRequest,
-            properties = PopupProperties(focusable = true),
+            properties = PopupProperties(focusable = true, clippingEnabled = false),
             offset = popupOffset
         ) {
             AnimatedVisibility(
@@ -393,7 +391,6 @@ private fun LiquidGlassMenuSurface(
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdropState)
     val menuShape = remember { RoundedRectangle(22.dp) }
     val surfaceBackdrop = rememberLayerBackdrop()
-    val surfaceHighlight = rememberLiquidControlHighlight()
     Box(
         modifier = modifier
             .widthIn(min = minWidth, max = maxWidth)
@@ -402,13 +399,7 @@ private fun LiquidGlassMenuSurface(
                 backdrop = effectiveBackdrop,
                 shape = menuShape,
                 role = LiquidGlassRole.Menu,
-                layerBlock = liquidControlLayerBlock(true, surfaceHighlight),
                 exportedBackdrop = surfaceBackdrop
-            )
-            .liquidControlPressFeedback(
-                enabled = true,
-                interactiveHighlight = surfaceHighlight,
-                drawHighlightOverlay = false
             )
             .padding(vertical = 6.dp, horizontal = 4.dp)
     ) {
@@ -428,19 +419,12 @@ private fun glassPopupEnterTransition(): EnterTransition {
     return scaleIn(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.58f,
-            stiffness = 68f
+            dampingRatio = 0.78f,
+            stiffness = 420f
         ),
-        initialScale = 0.02f,
+        initialScale = 0.94f,
         transformOrigin = TransformOrigin(0.92f, 0.04f)
-    ) + expandIn(
-        animationSpec = LiquidGlassMotionSpecs.spring(
-            performance = performance,
-            dampingRatio = 0.60f,
-            stiffness = 75f
-        ),
-        expandFrom = Alignment.TopEnd
-    ) + fadeIn(LiquidGlassMotionSpecs.tween(performance, 500))
+    ) + fadeIn(LiquidGlassMotionSpecs.tween(performance, 180))
 }
 
 @Composable
@@ -449,19 +433,12 @@ private fun glassPopupExitTransition(): ExitTransition {
     return scaleOut(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.82f,
-            stiffness = 110f
+            dampingRatio = 0.88f,
+            stiffness = 460f
         ),
-        targetScale = 0.02f,
+        targetScale = 0.97f,
         transformOrigin = TransformOrigin(0.92f, 0.04f)
-    ) + shrinkOut(
-        animationSpec = LiquidGlassMotionSpecs.spring(
-            performance = performance,
-            dampingRatio = 0.82f,
-            stiffness = 110f
-        ),
-        shrinkTowards = Alignment.TopEnd
-    ) + fadeOut(LiquidGlassMotionSpecs.tween(performance, 360))
+    ) + fadeOut(LiquidGlassMotionSpecs.tween(performance, 130))
 }
 
 /**
@@ -486,6 +463,7 @@ fun LiquidMenuItem(
     val isPressed by interactionSource.collectIsPressedAsState()
     val isHovered by interactionSource.collectIsHoveredAsState()
     val colorScheme = MaterialTheme.colorScheme
+    val glassColors = LiquidGlassTheme.colors
 
     val accentColor = if (destructive) colorScheme.error else colorScheme.primary
     val defaultColor = when {
@@ -509,9 +487,9 @@ fun LiquidMenuItem(
 
     val backgroundColor by androidx.compose.animation.animateColorAsState(
         targetValue = when {
-            isPressed -> accentColor.copy(alpha = 0.28f)
-            isHovered -> accentColor.copy(alpha = 0.20f)
-            selected -> accentColor.copy(alpha = 0.16f)
+            isPressed -> accentColor.copy(alpha = glassColors.selectedContainer.alpha)
+            isHovered -> accentColor.copy(alpha = glassColors.accentContainer.alpha)
+            selected -> accentColor.copy(alpha = glassColors.accentContainer.alpha * 0.80f)
             else -> Color.Transparent
         },
         animationSpec = androidx.compose.animation.core.tween(durationMillis = 180),
@@ -520,9 +498,9 @@ fun LiquidMenuItem(
 
     val borderColor by androidx.compose.animation.animateColorAsState(
         targetValue = when {
-            isPressed -> accentColor.copy(alpha = 0.45f)
-            isHovered -> accentColor.copy(alpha = 0.25f)
-            selected -> accentColor.copy(alpha = 0.20f)
+            isPressed -> accentColor.copy(alpha = glassColors.focusIndicator.alpha)
+            isHovered -> accentColor.copy(alpha = glassColors.focusIndicator.alpha * 0.62f)
+            selected -> accentColor.copy(alpha = glassColors.focusIndicator.alpha * 0.50f)
             else -> Color.Transparent
         },
         animationSpec = androidx.compose.animation.core.tween(durationMillis = 180),

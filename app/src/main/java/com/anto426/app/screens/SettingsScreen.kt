@@ -63,13 +63,11 @@ fun SettingsScreen(
                 Column {
                     Text(
                         text = "Anto Developer",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
                         text = "anto@liquidui.com • Pro Tier",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.70f)
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
@@ -139,8 +137,8 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Luminosità Schermo", color = Color.White)
-                    Text("${(brightnessVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("Luminosità Schermo")
+                    Text("${(brightnessVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
                 }
                 LiquidSlider(
                     value = brightnessVal,
@@ -156,8 +154,8 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Volume Audio", color = Color.White)
-                    Text("${(volumeVal * 100).toInt()}%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("Volume Audio")
+                    Text("${(volumeVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
                 }
                 LiquidSlider(
                     value = volumeVal,

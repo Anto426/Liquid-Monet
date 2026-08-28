@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
 import com.anto426.liquidmonet.glass.LiquidGlassRole
@@ -204,7 +205,7 @@ fun LiquidLazyFooter(
         Box(
             modifier = Modifier
                 .zIndex(2f)
-                .padding(6.dp),
+                .padding(LiquidLazyDefaults.OverflowPadding),
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -329,7 +330,7 @@ private fun LiquidLazyFooterContent(
                 color = if (state == LiquidLazyFooterState.Error) {
                     colorScheme.error
                 } else {
-                    colorScheme.onSurface.copy(alpha = 0.82f)
+                    LiquidGlassTheme.colors.secondaryContent
                 },
                 style = MaterialTheme.typography.bodyMedium
             )

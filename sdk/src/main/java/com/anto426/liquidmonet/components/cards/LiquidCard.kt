@@ -14,15 +14,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
 import com.anto426.liquidmonet.glass.LiquidGlassRole
+import com.anto426.liquidmonet.glass.LocalLiquidGlassContainer
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
+import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -38,7 +41,7 @@ fun LiquidCard(
     backdropState: Backdrop = backdrop,
     shape: Shape = RoundedRectangle(24.dp),
     containerColor: Color? = null,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    contentColor: Color = Color.Unspecified,
     contentPadding: androidx.compose.ui.unit.Dp = 16.dp,
     onClick: (() -> Unit)? = null,
     interactiveGelatin: Boolean = (onClick != null),
@@ -48,24 +51,25 @@ fun LiquidCard(
     val isInteractive = interactiveGelatin && (onClick != null)
     val interactiveHighlight = rememberLiquidControlHighlight()
     val colorScheme = MaterialTheme.colorScheme
+    val resolvedContentColor = if (contentColor.isSpecified) {
+        contentColor
+    } else {
+        LiquidGlassDefaults.contentColorFor(containerColor, colorScheme)
+    }
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
     val surfaceBackdrop = rememberLayerBackdrop()
     val effectiveHighlightColor = if (highlightColor != Color.Unspecified) highlightColor else (containerColor ?: colorScheme.primary)
+    val cardLayerBlock = liquidControlLayerBlock(true, interactiveHighlight)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .liquidGlass(
-                backdrop = effectiveBackdrop,
-                shape = shape,
-                role = LiquidGlassRole.Surface,
-                containerColor = containerColor,
-                layerBlock = if (isInteractive) {
-                    liquidControlLayerBlock(true, interactiveHighlight)
+            .then(
+                if (isInteractive && cardLayerBlock != null) {
+                    Modifier.graphicsLayer(cardLayerBlock)
                 } else {
-                    null
-                },
-                exportedBackdrop = surfaceBackdrop
+                    Modifier
+                }
             )
             .then(
                 if (isInteractive) {
@@ -86,13 +90,29 @@ fun LiquidCard(
                     )
                 } else Modifier
             )
-            .padding(contentPadding)
     ) {
-        CompositionLocalProvider(
-            LocalContentColor provides contentColor,
-            LocalLiquidGlassContentBackdrop provides surfaceBackdrop
-        ) {
-            content()
+        // The optical surface is a sibling of the content. Only the glass is clipped to [shape]:
+        // descendants remain free to bounce beyond the card bounds without being cut off.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .liquidGlass(
+                    backdrop = effectiveBackdrop,
+                    shape = shape,
+                    role = LiquidGlassRole.Surface,
+                    containerColor = containerColor,
+                    exportedBackdrop = surfaceBackdrop
+                )
+        )
+
+        Box(modifier = Modifier.padding(contentPadding)) {
+            CompositionLocalProvider(
+                LocalContentColor provides resolvedContentColor,
+                LocalLiquidGlassContentBackdrop provides surfaceBackdrop,
+                LocalLiquidGlassContainer provides true
+            ) {
+                content()
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTab
 import com.anto426.liquidmonet.components.internal.LiquidGlassBottomTabs
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.shapes.Capsule
 
 data class LiquidNavigationItem(
@@ -56,7 +57,7 @@ fun LiquidNavigationBar(
     backdropState: Backdrop = backdrop
 ) {
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
-    val contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f)
+    val contentColor = LiquidGlassTheme.colors.content
 
     LiquidNavigationBarShell(
         modifier = modifier,
@@ -121,6 +122,7 @@ private fun AdaptiveNavItem(
     itemsCount: Int,
     contentColor: Color
 ) {
+    val glassColors = LiquidGlassTheme.colors
     val count = itemsCount.coerceAtLeast(1)
     val icon = item.icon
     val badge = item.badge?.takeIf(String::isNotEmpty)
@@ -173,7 +175,7 @@ private fun AdaptiveNavItem(
                             .align(Alignment.TopEnd)
                             .offset(x = 6.dp, y = (-3).dp)
                             .clip(Capsule())
-                            .background(contentColor.copy(alpha = 0.20f))
+                            .background(glassColors.neutralContainer)
                             .padding(horizontal = 4.dp, vertical = 1.dp),
                         contentAlignment = Alignment.Center
                     ) {
