@@ -85,6 +85,22 @@ object LiquidIcons {
             }.build()
     }
 
+    val ArrowForward: ImageVector by lazy {
+        ImageVector.Builder("ArrowForward", 24.dp, 24.dp, 24f, 24f)
+            .path(fill = SolidColor(Color.Black)) {
+                moveTo(12.0f, 4.0f)
+                lineToRelative(-1.41f, 1.41f)
+                lineTo(16.17f, 11.0f)
+                horizontalLineTo(4.0f)
+                verticalLineToRelative(2.0f)
+                horizontalLineToRelative(12.17f)
+                lineToRelative(-5.58f, 5.59f)
+                lineTo(12.0f, 20.0f)
+                lineToRelative(8.0f, -8.0f)
+                close()
+            }.build()
+    }
+
     val Info: ImageVector by lazy {
         ImageVector.Builder("Info", 24.dp, 24.dp, 24f, 24f)
             .path(fill = SolidColor(Color.Black)) {

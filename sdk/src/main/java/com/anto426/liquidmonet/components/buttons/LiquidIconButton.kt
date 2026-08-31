@@ -80,7 +80,7 @@ fun LiquidIconButton(
                 enabled = enabled,
                 onClick = onClick
             )
-            .liquidControlPressFeedback(enabled, interactiveHighlight),
+            .liquidControlPressFeedback(enabled, interactiveHighlight, shape = shape),
         contentAlignment = Alignment.Center
     ) {
         Icon(

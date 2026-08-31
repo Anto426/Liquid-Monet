@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.anto426.liquidmonet.components.display.LiquidSectionHeader
+import com.anto426.liquidmonet.components.display.LiquidSectionHeaderSize
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
@@ -50,18 +52,21 @@ import com.kyant.shapes.Capsule
 fun LiquidPreferenceGroup(
     modifier: Modifier = Modifier,
     title: String? = null,
+    subtitle: String? = null,
+    size: LiquidSectionHeaderSize = LiquidSectionHeaderSize.Small,
+    titleColor: Color = MaterialTheme.colorScheme.onSurface,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (!title.isNullOrBlank()) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 12.dp, bottom = 6.dp, top = 8.dp)
+            LiquidSectionHeader(
+                title = title,
+                subtitle = subtitle,
+                size = size,
+                titleColor = titleColor,
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
             )
         }
         LiquidCard(

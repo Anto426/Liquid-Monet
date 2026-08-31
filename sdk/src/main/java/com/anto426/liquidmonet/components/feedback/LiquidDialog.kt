@@ -1,11 +1,9 @@
 package com.anto426.liquidmonet.components.feedback
 
-import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -34,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,6 +58,7 @@ import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassModalOverlayState
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.motion.rememberLiquidPredictiveBackState
 import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
@@ -68,7 +66,6 @@ import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -164,25 +161,12 @@ private fun LiquidDialogLayer(
         }
     }
 
-    var predictiveBackProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler(enabled = visibilityState.targetState) { progressFlow ->
-        try {
-            progressFlow.collect { backEvent -> predictiveBackProgress = backEvent.progress }
-            animateDismiss()
-        } catch (_: CancellationException) {
-            predictiveBackProgress = 0f
-        }
-    }
-
-    val animatedScale by animateFloatAsState(
-        targetValue = 1f - predictiveBackProgress * 0.10f,
-        animationSpec = LiquidGlassMotionSpecs.spring(
-            performance = performance,
-            dampingRatio = 0.85f,
-            stiffness = 400f
-        ),
-        label = "predictiveDialogScale"
+    val predictiveBack = rememberLiquidPredictiveBackState(
+        onPredictiveBack = animateDismiss,
+        enabled = visibilityState.targetState,
     )
+    val predictiveBackProgress = predictiveBack.progress
+    val predictiveScale = 1f - predictiveBackProgress * 0.10f
 
     AnimatedVisibility(
         visibleState = visibilityState,
@@ -205,8 +189,8 @@ private fun LiquidDialogLayer(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        scaleX = animatedScale
-                        scaleY = animatedScale
+                        scaleX = predictiveScale
+                        scaleY = predictiveScale
                         translationY = (predictiveBackProgress * 12.dp.toPx())
                         alpha = 1f - predictiveBackProgress * 0.35f
                     }

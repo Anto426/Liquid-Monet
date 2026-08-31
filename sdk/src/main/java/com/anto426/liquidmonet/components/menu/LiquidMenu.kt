@@ -210,7 +210,8 @@ fun LiquidMorphingAction(
                 }
                 .liquidControlPressFeedback(
                     enabled = true,
-                    interactiveHighlight = interactiveHighlight
+                    interactiveHighlight = interactiveHighlight,
+                    shape = anchorShape
                 ),
             contentAlignment = Alignment.Center
         ) {

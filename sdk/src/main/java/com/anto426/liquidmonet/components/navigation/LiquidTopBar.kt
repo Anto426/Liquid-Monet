@@ -285,7 +285,8 @@ private fun LiquidBackButton(
             )
             .liquidControlPressFeedback(
                 enabled = true,
-                interactiveHighlight = interactiveHighlight
+                interactiveHighlight = interactiveHighlight,
+                shape = shape
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

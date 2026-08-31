@@ -1,58 +1,81 @@
 package com.anto426.liquidmonet.motion
 
-import androidx.activity.BackEventCompat
-import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.navigationevent.NavigationEvent.Companion.EDGE_RIGHT
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Immutable
 internal data class LiquidPredictiveBackState(
     val progress: Float,
-    val edgeDirection: Float
+    val edgeDirection: Float,
 )
 
-/** Bridges Android's native back progress into the SDK motion system. */
+/**
+ * KMP navigation-event bridge shared by Liquid navigation, dialogs and sheets.
+ *
+ * Live progress is exposed without a time-based filter so visuals stay attached to the finger.
+ * Only a cancelled gesture is settled back to zero with Liquid motion.
+ */
 @Composable
 internal fun rememberLiquidPredictiveBackState(
-    onPredictiveBack: (() -> Unit)?
+    onPredictiveBack: (() -> Unit)?,
+    enabled: Boolean = onPredictiveBack != null,
 ): LiquidPredictiveBackState {
     val performance = LocalLiquidGlassPerformance.current
     val latestOnBack by rememberUpdatedState(onPredictiveBack)
-    var progress by remember { mutableFloatStateOf(0f) }
-    var edgeDirection by remember { mutableFloatStateOf(1f) }
+    val coroutineScope = rememberCoroutineScope()
+    val settledProgress = remember { Animatable(0f) }
+    val navigationState =
+        rememberNavigationEventState(
+            currentInfo = NavigationEventInfo.None,
+            backInfo = listOf(NavigationEventInfo.None),
+        )
+    val inProgress =
+        navigationState.transitionState as? NavigationEventTransitionState.InProgress
+    val latestEvent = inProgress?.latestEvent
+    val gestureProgress = latestEvent?.progress?.coerceIn(0f, 1f)
 
-    PredictiveBackHandler(enabled = onPredictiveBack != null) { progressFlow ->
-        try {
-            progressFlow.collect { event ->
-                progress = event.progress.coerceIn(0f, 1f)
-                edgeDirection = when (event.swipeEdge) {
-                    BackEventCompat.EDGE_RIGHT -> -1f
-                    else -> 1f
-                }
-            }
-            latestOnBack?.invoke()
-            progress = 0f
-        } catch (_: CancellationException) {
-            Animatable(progress).animateTo(
-                targetValue = 0f,
-                animationSpec = LiquidGlassMotionSpecs.spring(
-                    performance = performance,
-                    dampingRatio = 0.84f,
-                    stiffness = 480f
-                )
-            ) { progress = value }
-        }
+    LaunchedEffect(gestureProgress) {
+        if (gestureProgress != null) settledProgress.snapTo(gestureProgress)
     }
 
-    return LiquidPredictiveBackState(progress, edgeDirection)
+    NavigationBackHandler(
+        state = navigationState,
+        isBackEnabled = enabled && onPredictiveBack != null,
+        onBackCancelled = {
+            coroutineScope.launch {
+                settledProgress.animateTo(
+                    targetValue = 0f,
+                    animationSpec =
+                        LiquidGlassMotionSpecs.spring(
+                            performance = performance,
+                            dampingRatio = 0.84f,
+                            stiffness = 480f,
+                        ),
+                )
+            }
+        },
+        onBackCompleted = {
+            latestOnBack?.invoke()
+            coroutineScope.launch { settledProgress.snapTo(0f) }
+        },
+    )
+
+    return LiquidPredictiveBackState(
+        progress = gestureProgress ?: settledProgress.value,
+        edgeDirection = if (latestEvent?.swipeEdge == EDGE_RIGHT) -1f else 1f,
+    )
 }

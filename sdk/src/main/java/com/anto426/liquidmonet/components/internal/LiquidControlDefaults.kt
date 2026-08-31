@@ -116,13 +116,14 @@ internal fun liquidControlLayerBlock(
 internal fun Modifier.liquidControlPressFeedback(
     enabled: Boolean,
     interactiveHighlight: InteractiveHighlight,
+    shape: Shape? = null,
     drawHighlightOverlay: Boolean = true,
     highlightColor: Color = Color.Unspecified
 ): Modifier = if (enabled) {
     val elevatedModifier = this.liquidInteractiveZIndex()
     if (drawHighlightOverlay) {
         elevatedModifier
-            .then(interactiveHighlight.modifier(highlightColor))
+            .then(interactiveHighlight.modifier(highlightColor, shape))
             .then(interactiveHighlight.gestureModifier)
     } else {
         elevatedModifier.then(interactiveHighlight.gestureModifier)

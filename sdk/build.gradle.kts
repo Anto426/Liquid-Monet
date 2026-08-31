@@ -56,7 +56,7 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(libs.compose.material3.multiplatform)
                 implementation(compose.ui)
-                implementation(libs.compose.ui.backhandler)
+                implementation(libs.navigationevent.compose)
                 api(libs.kotlinx.datetime)
             }
         }
@@ -68,7 +68,6 @@ kotlin {
 
             dependencies {
                 implementation(libs.androidx.core.ktx)
-                implementation(libs.androidx.activity.compose)
             }
         }
     }

@@ -1,10 +1,8 @@
 package com.anto426.liquidmonet.components.feedback
 
-import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -57,6 +55,7 @@ import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassModalOverlayState
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
+import com.anto426.liquidmonet.motion.rememberLiquidPredictiveBackState
 import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.anto426.liquidmonet.theme.LiquidGlassDefaults
 import com.kyant.backdrop.Backdrop
@@ -64,7 +63,6 @@ import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -150,26 +148,13 @@ private fun LiquidSheetLayer(
         }
     }
 
-    var predictiveBackProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler(enabled = visibilityState.targetState) { progressFlow ->
-        try {
-            progressFlow.collect { backEvent -> predictiveBackProgress = backEvent.progress }
-            animateDismiss()
-        } catch (_: CancellationException) {
-            predictiveBackProgress = 0f
-        }
-    }
-
-    var dragOffsetY by remember { mutableFloatStateOf(0f) }
-    val animatedScale by animateFloatAsState(
-        targetValue = 1f - predictiveBackProgress * 0.08f,
-        animationSpec = LiquidGlassMotionSpecs.spring(
-            performance = performance,
-            dampingRatio = 0.85f,
-            stiffness = 400f
-        ),
-        label = "predictiveSheetScale"
+    val predictiveBack = rememberLiquidPredictiveBackState(
+        onPredictiveBack = animateDismiss,
+        enabled = visibilityState.targetState,
     )
+    val predictiveBackProgress = predictiveBack.progress
+    var dragOffsetY by remember { mutableFloatStateOf(0f) }
+    val predictiveScale = 1f - predictiveBackProgress * 0.08f
 
     AnimatedVisibility(
         visibleState = visibilityState,
@@ -198,8 +183,8 @@ private fun LiquidSheetLayer(
                         val deformation = abs(dragProgress)
                         translationY = dragOffsetY + predictiveOffset
                         transformOrigin = TransformOrigin(0.5f, 1f)
-                        scaleX = animatedScale * (1f + deformation * 0.025f)
-                        scaleY = animatedScale * (1f - dragProgress.coerceAtLeast(0f) * 0.018f)
+                        scaleX = predictiveScale * (1f + deformation * 0.025f)
+                        scaleY = predictiveScale * (1f - dragProgress.coerceAtLeast(0f) * 0.018f)
                         alpha = 1f - predictiveBackProgress * 0.25f
                     }
                     .animateEnterExit(

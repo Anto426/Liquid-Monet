@@ -130,7 +130,7 @@ fun LiquidControlCenterTile(
                 enabled = enabled,
                 onValueChange = { onClick() }
             )
-            .liquidControlPressFeedback(enabled, interactiveHighlight)
+            .liquidControlPressFeedback(enabled, interactiveHighlight, shape = shape)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {

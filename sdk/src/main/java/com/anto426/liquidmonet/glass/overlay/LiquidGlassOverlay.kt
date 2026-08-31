@@ -1,6 +1,5 @@
 package com.anto426.liquidmonet.glass.overlay
 
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -26,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -38,6 +38,7 @@ import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassPerformanceState
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.components.internal.LiquidGlassZIndex
+import com.anto426.liquidmonet.motion.rememberLiquidPredictiveBackState
 import com.kyant.backdrop.Backdrop
 import kotlin.math.roundToInt
 
@@ -179,9 +180,11 @@ internal fun BoxScope.LiquidGlassOverlayHost(state: LiquidGlassOverlayState) {
         }
     }
 
-    BackHandler(enabled = entry.visible) {
-        state.dismiss(entry.key)
-    }
+    val predictiveBack =
+        rememberLiquidPredictiveBackState(
+            onPredictiveBack = { state.dismiss(entry.key) },
+            enabled = entry.visible,
+        )
 
     Box(
         modifier = Modifier
@@ -212,6 +215,14 @@ internal fun BoxScope.LiquidGlassOverlayHost(state: LiquidGlassOverlayState) {
         ) { _, transformOrigin ->
             AnimatedVisibility(
                 visibleState = visibility,
+                modifier =
+                    Modifier.graphicsLayer {
+                        val progress = predictiveBack.progress
+                        translationX = size.width * 0.10f * progress * predictiveBack.edgeDirection
+                        scaleX = 1f - progress * 0.06f
+                        scaleY = 1f - progress * 0.06f
+                        alpha = 1f - progress * 0.18f
+                    },
                 enter = glassOverlayEnterTransition(performance, transformOrigin),
                 exit = glassOverlayExitTransition(performance, transformOrigin)
             ) {

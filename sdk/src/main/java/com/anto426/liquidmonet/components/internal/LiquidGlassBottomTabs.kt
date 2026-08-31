@@ -15,11 +15,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,9 +118,6 @@ internal fun LiquidGlassBottomTabs(
         val currentIsLtr by rememberUpdatedState(isLtr)
         val currentPanelOffset by rememberUpdatedState(panelOffset)
         val animationScope = rememberCoroutineScope()
-        var currentIndex by remember(safeTabsCount) {
-            mutableIntStateOf(selectedTabIndex().coerceIn(0, maxIndex))
-        }
         val dampedDragAnimation = remember(animationScope, safeTabsCount) {
             DampedDragAnimation(
                 animationScope = animationScope,
@@ -133,7 +128,12 @@ internal fun LiquidGlassBottomTabs(
                 pressedScale = 78f / 56f,
                 onDragStarted = {},
                 onDragStopped = {
-                    currentIndex = targetValue.fastRoundToInt().coerceIn(0, maxIndex)
+                    val settledIndex = targetValue.fastRoundToInt().coerceIn(0, maxIndex)
+                    // This callback belongs only to a real pointer interaction. Mirroring an
+                    // externally selected index back through onTabSelected creates a feedback
+                    // loop: a destination changes the navbar selection, which then selects its
+                    // top-level tab and pops the destination that was just opened.
+                    currentOnTabSelected(settledIndex)
                     animationScope.launch {
                         offsetAnimation.animateTo(
                             targetValue = 0f,
@@ -160,14 +160,11 @@ internal fun LiquidGlassBottomTabs(
 
         LaunchedEffect(dampedDragAnimation) {
             snapshotFlow { currentSelectedTabIndex() }
-                .collectLatest { index -> currentIndex = index.coerceIn(0, maxIndex) }
-        }
-        LaunchedEffect(dampedDragAnimation) {
-            snapshotFlow { currentIndex }
                 .drop(1)
                 .collectLatest { index ->
-                    dampedDragAnimation.animateToValue(index.toFloat())
-                    currentOnTabSelected(index)
+                    // Router-driven selection changes animate the material only. They must not
+                    // be reported back as fresh user navigation events.
+                    dampedDragAnimation.animateToValue(index.coerceIn(0, maxIndex).toFloat())
                 }
         }
 

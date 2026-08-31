@@ -8,6 +8,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -172,6 +173,52 @@ fun <S> AnimatedContentTransitionScope<S>.liquidSharedAxisHorizontal(
         ),
         targetScale = 0.97f
     )
+
+    return (enter togetherWith exit).using(SizeTransform(clip = false))
+}
+
+/**
+ * Seekable horizontal back transition for navigation hosts that expose predictive-back progress.
+ *
+ * Unlike [liquidSharedAxisHorizontal], this preset deliberately uses linear timing: the host seeks
+ * the transition from the user's gesture progress, so springs and delayed fades would make the
+ * screen lag behind the finger. The host remains responsible for consuming or cancelling Back.
+ *
+ * @param fromRightEdge true when the gesture starts from the right display edge (RTL direction).
+ */
+fun <S> AnimatedContentTransitionScope<S>.liquidPredictiveBackHorizontal(
+    fromRightEdge: Boolean,
+    performance: LiquidGlassPerformanceState,
+): ContentTransform {
+    val duration = LiquidGlassMotionSpecs.durationMillis(performance, 420)
+    val direction = if (fromRightEdge) -1 else 1
+
+    val enter =
+        slideInHorizontally(
+            animationSpec = tween(durationMillis = duration, easing = LinearEasing),
+            initialOffsetX = { width -> -(width * 0.18f * direction).toInt() },
+        ) +
+            fadeIn(
+                animationSpec = tween(durationMillis = duration, easing = LinearEasing),
+            ) +
+            scaleIn(
+                animationSpec = tween(durationMillis = duration, easing = LinearEasing),
+                initialScale = 0.96f,
+            )
+
+    val exit =
+        slideOutHorizontally(
+            animationSpec = tween(durationMillis = duration, easing = LinearEasing),
+            targetOffsetX = { width -> (width * 0.16f * direction).toInt() },
+        ) +
+            fadeOut(
+                animationSpec = tween(durationMillis = duration, easing = LinearEasing),
+                targetAlpha = 0.88f,
+            ) +
+            scaleOut(
+                animationSpec = tween(durationMillis = duration, easing = LinearEasing),
+                targetScale = 0.985f,
+            )
 
     return (enter togetherWith exit).using(SizeTransform(clip = false))
 }

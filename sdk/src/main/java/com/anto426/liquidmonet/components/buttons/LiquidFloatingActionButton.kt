@@ -130,7 +130,7 @@ fun LiquidFloatingActionButton(
                 enabled = enabled && visible,
                 onClick = onClick
             )
-            .liquidControlPressFeedback(enabled && visible, interactiveHighlight)
+            .liquidControlPressFeedback(enabled && visible, interactiveHighlight, shape = shape)
             .padding(horizontal = horizontalPadding),
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically

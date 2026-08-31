@@ -94,7 +94,7 @@ internal fun LiquidGlassButton(
             enabled = isInteractive,
             onClick = onClick
         )
-        .liquidControlPressFeedback(isInteractive, interactiveHighlight)
+        .liquidControlPressFeedback(isInteractive, interactiveHighlight, shape = shape)
         .height(height)
         .padding(contentPadding)
         .graphicsLayer { alpha = animatedAlpha }

@@ -10,7 +10,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.util.fastCoerceIn
 import com.kyant.backdrop.RuntimeShader
@@ -41,6 +45,10 @@ class InteractiveHighlight(
     val pressProgress: Float get() = pressProgressAnimation.value
     val offset: Offset get() = positionAnimation.value - startPosition
 
+    private val clipPath = Path()
+    private var lastClipSize: Size = Size.Unspecified
+    private var lastClipShape: Shape? = null
+
     private val shader =
         if (isRuntimeShaderSupported()) {
             RuntimeShader(
@@ -60,43 +68,63 @@ half4 main(float2 coord) {
             null
         }
 
-    fun modifier(highlightColor: Color = Color.Unspecified): Modifier =
+    fun modifier(
+        highlightColor: Color = Color.Unspecified,
+        clipShape: Shape? = null
+    ): Modifier =
         Modifier.drawWithContent {
             val progress = pressProgressAnimation.value
             if (progress > 0f) {
                 val resolvedColor = if (highlightColor.isSpecified) highlightColor else Color.White
-                if (shader != null) {
-                    drawRect(
-                        resolvedColor.copy(0.08f * progress),
-                        blendMode = BlendMode.Plus
-                    )
-                    shader.apply {
-                        val position = position(size, positionAnimation.value)
-                        setFloatUniform("size", size.width, size.height)
-                        setColorUniform("color", resolvedColor.copy(0.15f * progress))
-                        setFloatUniform("radius", size.minDimension * 1.5f)
-                        setFloatUniform(
-                            "position",
-                            position.x.fastCoerceIn(0f, size.width),
-                            position.y.fastCoerceIn(0f, size.height)
+
+                val drawHighlight: () -> Unit = {
+                    if (shader != null) {
+                        drawRect(
+                            resolvedColor.copy(0.08f * progress),
+                            blendMode = BlendMode.Plus
+                        )
+                        shader.apply {
+                            val position = position(size, positionAnimation.value)
+                            setFloatUniform("size", size.width, size.height)
+                            setColorUniform("color", resolvedColor.copy(0.15f * progress))
+                            setFloatUniform("radius", size.minDimension * 1.5f)
+                            setFloatUniform(
+                                "position",
+                                position.x.fastCoerceIn(0f, size.width),
+                                position.y.fastCoerceIn(0f, size.height)
+                            )
+                        }
+                        drawRect(
+                            ShaderBrush(shader.asComposeShader()),
+                            blendMode = BlendMode.Plus
+                        )
+                    } else {
+                        drawRect(
+                            resolvedColor.copy(0.25f * progress),
+                            blendMode = BlendMode.Plus
                         )
                     }
-                    drawRect(
-                        ShaderBrush(shader.asComposeShader()),
-                        blendMode = BlendMode.Plus
-                    )
+                }
+
+                if (clipShape != null) {
+                    if (lastClipSize != size || lastClipShape != clipShape) {
+                        clipPath.reset()
+                        clipPath.addOutline(clipShape.createOutline(size, layoutDirection, this))
+                        lastClipSize = size
+                        lastClipShape = clipShape
+                    }
+                    clipPath(clipPath) {
+                        drawHighlight()
+                    }
                 } else {
-                    drawRect(
-                        resolvedColor.copy(0.25f * progress),
-                        blendMode = BlendMode.Plus
-                    )
+                    drawHighlight()
                 }
             }
 
             drawContent()
         }
 
-    val modifier: Modifier get() = modifier(Color.Unspecified)
+    val modifier: Modifier get() = modifier(Color.Unspecified, null)
 
     val gestureModifier: Modifier =
         Modifier.pointerInput(animationScope) {
