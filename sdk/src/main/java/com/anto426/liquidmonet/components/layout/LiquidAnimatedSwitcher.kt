@@ -27,11 +27,21 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import com.anto426.liquidmonet.glass.runtime.LiquidGlassMotionSpecs
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
-import com.anto426.liquidmonet.motion.liquidLiquidSpring
-import com.anto426.liquidmonet.motion.liquidSharedAxisHorizontal
-import com.anto426.liquidmonet.motion.liquidSharedAxisVertical
 import com.anto426.liquidmonet.motion.rememberLiquidPredictiveBackState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -171,22 +181,44 @@ fun <T> LiquidAnimatedSwitcher(
                 scaleY = (1f - deformation * 0.16f) *
                     (1f - predictiveBack.progress * 0.025f)
                 alpha = 1f - predictiveBack.progress * 0.08f
+                clip = false
             },
         transitionSpec = {
             val forward = isForward?.invoke(initialState, targetState)
                 ?: inferForwardMotion(initialState, targetState)
-
             when (transition) {
                 LiquidSwitcherTransition.DirectionalHorizontal -> {
-                    liquidSharedAxisHorizontal(forward = forward, performance = performance)
+                    val enter = slideInHorizontally(
+                        animationSpec = LiquidGlassMotionSpecs.spring(performance, 0.78f, 380f),
+                        initialOffsetX = { if (forward) it / 3 else -it / 3 }
+                    ) + fadeIn(animationSpec = tween(220))
+                    val exit = slideOutHorizontally(
+                        animationSpec = LiquidGlassMotionSpecs.spring(performance, 0.78f, 380f),
+                        targetOffsetX = { if (forward) -it / 3 else it / 3 }
+                    ) + fadeOut(animationSpec = tween(180))
+                    (enter togetherWith exit).using(SizeTransform(clip = false))
                 }
-
                 LiquidSwitcherTransition.DirectionalVertical -> {
-                    liquidSharedAxisVertical(upward = forward, performance = performance)
+                    val enter = slideInVertically(
+                        animationSpec = LiquidGlassMotionSpecs.spring(performance, 0.78f, 380f),
+                        initialOffsetY = { if (forward) it / 3 else -it / 3 }
+                    ) + fadeIn(animationSpec = tween(220))
+                    val exit = slideOutVertically(
+                        animationSpec = LiquidGlassMotionSpecs.spring(performance, 0.78f, 380f),
+                        targetOffsetY = { if (forward) -it / 3 else it / 3 }
+                    ) + fadeOut(animationSpec = tween(180))
+                    (enter togetherWith exit).using(SizeTransform(clip = false))
                 }
-
                 LiquidSwitcherTransition.LiquidMorph -> {
-                    liquidLiquidSpring(forward = forward, performance = performance)
+                    val enter = scaleIn(
+                        animationSpec = LiquidGlassMotionSpecs.spring(performance, 0.72f, 360f),
+                        initialScale = 0.92f
+                    ) + fadeIn(animationSpec = tween(200))
+                    val exit = scaleOut(
+                        animationSpec = LiquidGlassMotionSpecs.spring(performance, 0.72f, 360f),
+                        targetScale = 0.92f
+                    ) + fadeOut(animationSpec = tween(160))
+                    (enter togetherWith exit).using(SizeTransform(clip = false))
                 }
             }
         },

@@ -233,7 +233,11 @@ internal fun LiquidGlassBottomTabs(
         CompositionLocalProvider(
             LocalLiquidBottomTabScale provides {
                 lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
-            }
+            },
+            // The mask is rendered a second time only to feed the droplet backdrop. Keeping its
+            // duplicated tab click handlers active places an invisible hit target above the real
+            // row and cuts short tap/release feedback during navigation.
+            LocalLiquidBottomTabInteractive provides false,
         ) {
             Row(
                 modifier = Modifier

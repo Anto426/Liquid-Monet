@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +72,10 @@ fun LiquidBarChart(
     barWidth: Dp = 20.dp,
     barColor: Color? = null,
     maxValue: Float? = null,
+    valueSuffix: String = "",
+    valueFormatter: (Float) -> String = ::formatLiquidChartValue,
+    detailDescription: String = "Valore del dato selezionato",
+    showDetails: Boolean = false,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
     onEntrySelected: ((LiquidChartEntry?) -> Unit)? = null
@@ -83,6 +89,8 @@ fun LiquidBarChart(
     val trackColor = LiquidGlassTheme.colors.inactiveTrack
 
     val dataMax = maxValue ?: ((entries.maxOfOrNull { it.value } ?: 100f) * 1.15f).coerceAtLeast(1f)
+    val actualMin = entries.minOfOrNull { it.value } ?: 0f
+    val actualMax = entries.maxOfOrNull { it.value } ?: 0f
 
     // Fluid spring entrance animation
     var animationPlayed by remember { mutableStateOf(false) }
@@ -108,13 +116,29 @@ fun LiquidBarChart(
     )
 
     // Selection state
-    var selectedIndex by remember { mutableStateOf<Int?>(null) }
-    val selectedEntry = selectedIndex?.let { entries.getOrNull(it) }
+    var selectedIndex by remember(entries) { mutableIntStateOf(entries.lastIndex) }
+    val selectedEntry = entries[selectedIndex.coerceIn(0, entries.lastIndex)]
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Min ${valueFormatter(actualMin)}${valueSuffix.withLeadingSpace()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Max ${valueFormatter(actualMax)}${valueSuffix.withLeadingSpace()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.onSurfaceVariant,
+            )
+        }
+
         // Canvas Viewport
         Box(
             modifier = Modifier
@@ -126,13 +150,8 @@ fun LiquidBarChart(
                         val totalBars = entries.size
                         val step = width / totalBars
                         val index = (offset.x / step).toInt().coerceIn(0, entries.lastIndex)
-                        if (selectedIndex == index) {
-                            selectedIndex = null
-                            onEntrySelected?.invoke(null)
-                        } else {
-                            selectedIndex = index
-                            onEntrySelected?.invoke(entries[index])
-                        }
+                        selectedIndex = index
+                        onEntrySelected?.invoke(entries[index])
                     }
                 }
         ) {
@@ -230,6 +249,31 @@ fun LiquidBarChart(
             }
         }
 
+        if (showDetails) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = entries.first().label,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.onSurfaceVariant,
+            )
+            if (entries.size > 1) {
+                Text(
+                    text = entries.last().label,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
         // Dynamic Bottom Detail Disclosure Pod (SOTTO AL GRAFICO)
         AnimatedContent(
             targetState = selectedEntry,
@@ -239,8 +283,7 @@ fun LiquidBarChart(
             },
             label = "BarBottomDetailTransition"
         ) { currentSelection ->
-            if (currentSelection != null) {
-                Box(
+            Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .liquidGlass(
@@ -287,7 +330,7 @@ fun LiquidBarChart(
                                     color = colorScheme.onSurface
                                 )
                                 Text(
-                                    text = if (currentSelection.value > 0f) "Crediti convalidati nel semestre" else "Semestre attualmente in corso",
+                                    text = detailDescription,
                                     fontSize = 11.sp,
                                     color = colorScheme.onSurfaceVariant
                                 )
@@ -306,47 +349,17 @@ fun LiquidBarChart(
                                 .padding(horizontal = 14.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = "${currentSelection.value.toInt()} CFU",
+                                text = "${valueFormatter(currentSelection.value)}${valueSuffix.withLeadingSpace()}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Black,
                                 color = primaryColor
                             )
                         }
                     }
-                }
-            } else {
-                // Interactive Touch Hint Pod
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .liquidGlass(
-                            backdrop = backdropState,
-                            shape = RoundedCornerShape(16.dp),
-                            role = LiquidGlassRole.Control,
-                            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.20f)
-                        )
-                        .padding(horizontal = 14.dp, vertical = 10.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = LiquidIcons.Search,
-                            contentDescription = null,
-                            tint = colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp).padding(end = 4.dp)
-                        )
-                        Text(
-                            text = "Tocca una colonna per esaminare i CFU del semestre",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
             }
+        }
         }
     }
 }
+
+private fun String.withLeadingSpace(): String = if (isBlank()) "" else " $this"

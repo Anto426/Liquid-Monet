@@ -302,7 +302,7 @@ fun LiquidDatePickerField(
                 enabled = enabled,
                 onClick = onClick
             )
-            .liquidControlPressFeedback(enabled, interactiveHighlight)
+            .liquidControlPressFeedback(enabled, interactiveHighlight, shape = RoundedRectangle(18.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {

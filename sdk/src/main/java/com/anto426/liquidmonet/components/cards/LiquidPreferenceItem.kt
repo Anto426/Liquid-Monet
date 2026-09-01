@@ -40,10 +40,12 @@ import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighligh
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.overlay.LocalLiquidGlassContentBackdrop
+import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
+import com.kyant.shapes.RoundedRectangle
 
 /**
  * LiquidPreferenceGroup - Liquid Glass Settings Group Container.
@@ -121,7 +123,8 @@ fun LiquidPreferenceItem(
             .liquidControlPressFeedback(
                 enabled = isInteractive,
                 interactiveHighlight = interactiveHighlight,
-                drawHighlightOverlay = false
+                shape = RoundedCornerShape(16.dp),
+                drawHighlightOverlay = true
             )
             .then(
                 if (isInteractive) {
@@ -141,16 +144,17 @@ fun LiquidPreferenceItem(
         } else if (icon != null) {
             Box(
                 modifier = Modifier
-                    .size(38.dp)
+                    .size(40.dp)
                     .graphicsLayer(liquidControlLayerBlock(true, iconHighlight) ?: {})
                     .liquidControlPressFeedback(
                         enabled = true,
                         interactiveHighlight = iconHighlight,
-                        drawHighlightOverlay = false
+                        shape = RoundedCornerShape(12.dp),
+                        drawHighlightOverlay = true
                     )
                     .liquidGlass(
                         backdrop = effectiveBackdrop,
-                        shape = Capsule(),
+                        shape = RoundedCornerShape(12.dp),
                         role = LiquidGlassRole.Navigation,
                         containerColor = colorScheme.primary.copy(
                             alpha = if (isPressed && isInteractive) {
@@ -191,6 +195,14 @@ fun LiquidPreferenceItem(
         if (trailingContent != null) {
             Spacer(modifier = Modifier.width(8.dp))
             trailingContent()
+        } else if (onClick != null) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                imageVector = LiquidIcons.ChevronRight,
+                contentDescription = null,
+                tint = glassColors.secondaryContent.copy(alpha = 0.5f),
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }

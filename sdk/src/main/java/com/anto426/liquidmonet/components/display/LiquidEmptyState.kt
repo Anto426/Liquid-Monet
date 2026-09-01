@@ -110,7 +110,8 @@ fun LiquidEmptyState(
                         .liquidControlPressFeedback(
                             enabled = true,
                             interactiveHighlight = iconHighlight,
-                            drawHighlightOverlay = false
+                            shape = Capsule(),
+                            drawHighlightOverlay = true
                         )
                         .then(
                             if (onIconClick != null) {

@@ -107,6 +107,7 @@ fun LiquidTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer(clip = false)
             .onSizeChanged { size ->
                 currentOnHeightChanged?.invoke(with(density) { size.height.toDp() })
             }
@@ -125,10 +126,16 @@ fun LiquidTopBar(
                 )
         )
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-            CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides surfaceBackdrop) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer(clip = false)
+        ) {
+            CompositionLocalProvider(LocalLiquidGlassContentBackdrop provides effectiveBackdrop) {
                 LargeTopAppBar(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer(clip = false),
                     title = {
                         Column {
                             LiquidTopBarTitle(
@@ -157,7 +164,7 @@ fun LiquidTopBar(
                         if (showNavigationIcon && onNavigationClick != null) {
                             LiquidBackButton(
                                 onClick = onNavigationClick,
-                                backdropState = surfaceBackdrop
+                                backdropState = effectiveBackdrop
                             )
                         } else {
                             navigationIcon()
@@ -168,7 +175,7 @@ fun LiquidTopBar(
                             LiquidMorphingAction(
                                 action = action,
                                 isLastItem = index == actionItems.lastIndex,
-                                backdropState = surfaceBackdrop
+                                backdropState = effectiveBackdrop
                             )
                         }
                         actions?.invoke(this)
@@ -205,7 +212,7 @@ fun LiquidTopBar(
                             query = searchQuery,
                             onQueryChange = onQueryChange,
                             placeholderText = searchPlaceholder,
-                            backdropState = surfaceBackdrop,
+                            backdropState = effectiveBackdrop,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -275,18 +282,20 @@ private fun LiquidBackButton(
 
     Box(
         modifier = modifier
+            .graphicsLayer(clip = false)
             .padding(start = 12.dp, end = 4.dp)
             .size(40.dp)
             .liquidGlass(
                 backdrop = backdropState,
                 shape = shape,
-                role = LiquidGlassRole.Navigation,
-                layerBlock = liquidControlLayerBlock(true, interactiveHighlight)
+                role = LiquidGlassRole.Control,
+                layerBlock = liquidControlLayerBlock(true, interactiveHighlight, stretchFactor = 0.35f, translationFactor = 0.35f)
             )
             .liquidControlPressFeedback(
                 enabled = true,
                 interactiveHighlight = interactiveHighlight,
-                shape = shape
+                shape = shape,
+                drawHighlightOverlay = true
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

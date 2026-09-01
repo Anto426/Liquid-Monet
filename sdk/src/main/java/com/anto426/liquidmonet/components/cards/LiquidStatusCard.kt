@@ -50,6 +50,8 @@ fun LiquidStatusCard(
     supportingText: String? = null,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
+    titleMaxLines: Int = Int.MAX_VALUE,
+    descriptionMaxLines: Int = Int.MAX_VALUE,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop
 ) {
@@ -76,7 +78,7 @@ fun LiquidStatusCard(
         backdropState = effectiveBackdrop,
         shape = RoundedRectangle(22.dp),
         containerColor = null,
-        contentPadding = 16.dp,
+        contentPadding = 14.dp,
         onClick = onClick
     ) {
         Row(
@@ -92,7 +94,8 @@ fun LiquidStatusCard(
                     .liquidControlPressFeedback(
                         enabled = true,
                         interactiveHighlight = iconHighlight,
-                        drawHighlightOverlay = false
+                        shape = Capsule(),
+                        drawHighlightOverlay = true
                     )
                     .liquidGlass(
                         backdrop = effectiveBackdrop,
@@ -115,18 +118,25 @@ fun LiquidStatusCard(
                 )
             }
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = contentColor
+                    color = contentColor,
+                    maxLines = titleMaxLines,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
                     color = glassColors.secondaryContent,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier.padding(top = 2.dp),
+                    maxLines = descriptionMaxLines,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 if (!supportingText.isNullOrBlank()) {
                     Text(

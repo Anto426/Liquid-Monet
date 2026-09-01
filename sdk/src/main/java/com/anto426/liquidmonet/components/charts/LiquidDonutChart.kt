@@ -38,6 +38,7 @@ import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.PI
 import kotlin.math.sin
 
 /**
@@ -108,7 +109,9 @@ fun LiquidDonutChart(
                         detectTapGestures { offset ->
                             val center = Offset(this@pointerInput.size.width / 2f, this@pointerInput.size.height / 2f)
                             val touchOffset = offset - center
-                            var angle = Math.toDegrees(atan2(touchOffset.y.toDouble(), touchOffset.x.toDouble())).toFloat()
+                            var angle =
+                                (atan2(touchOffset.y.toDouble(), touchOffset.x.toDouble()) * 180.0 / PI)
+                                    .toFloat()
                             if (angle < 0) angle += 360f
 
                             // Angle 0 is at 3 o'clock; our chart starts at -90 (12 o'clock)

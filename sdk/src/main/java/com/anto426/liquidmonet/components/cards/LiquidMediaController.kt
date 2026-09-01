@@ -170,7 +170,8 @@ fun LiquidMediaController(
                         .liquidControlPressFeedback(
                             enabled = enabled,
                             interactiveHighlight = albumHighlight,
-                            drawHighlightOverlay = false
+                            shape = albumShape,
+                            drawHighlightOverlay = true
                         )
                         .drawBehind {
                             val glowRadius = size.maxDimension * 0.65f
@@ -265,7 +266,8 @@ fun LiquidMediaController(
                         .liquidControlPressFeedback(
                             enabled = enabled,
                             interactiveHighlight = prevHighlight,
-                            drawHighlightOverlay = false
+                            shape = controlShape,
+                            drawHighlightOverlay = true
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -297,7 +299,8 @@ fun LiquidMediaController(
                         .liquidControlPressFeedback(
                             enabled = enabled,
                             interactiveHighlight = playHighlight,
-                            drawHighlightOverlay = false
+                            shape = controlShape,
+                            drawHighlightOverlay = true
                         )
                         .drawBehind {
                             val activePulse = playPulse
@@ -355,7 +358,8 @@ fun LiquidMediaController(
                         .liquidControlPressFeedback(
                             enabled = enabled,
                             interactiveHighlight = nextHighlight,
-                            drawHighlightOverlay = false
+                            shape = controlShape,
+                            drawHighlightOverlay = true
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },

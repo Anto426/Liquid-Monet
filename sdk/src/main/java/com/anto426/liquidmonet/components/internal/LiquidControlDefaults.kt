@@ -79,7 +79,9 @@ internal fun rememberLiquidControlHighlight(): InteractiveHighlight {
 
 internal fun liquidControlLayerBlock(
     enabled: Boolean,
-    interactiveHighlight: InteractiveHighlight
+    interactiveHighlight: InteractiveHighlight,
+    stretchFactor: Float = 1f,
+    translationFactor: Float = 1f
 ): (GraphicsLayerScope.() -> Unit)? = if (enabled) {
     {
         val width = size.width.coerceAtLeast(1f)
@@ -90,13 +92,13 @@ internal fun liquidControlLayerBlock(
         val progress = interactiveHighlight.pressProgress
         val baseScale = 1f + (LiquidControlDefaults.pressedScale - 1f) * progress
 
-        val initialDerivative = 0.07f
+        val initialDerivative = 0.07f * translationFactor
         val offset = interactiveHighlight.offset
-        translationX = minDim * tanh(initialDerivative * offset.x / minDim)
-        translationY = minDim * tanh(initialDerivative * offset.y / minDim)
+        translationX = minDim * translationFactor * tanh(initialDerivative * offset.x / minDim)
+        translationY = minDim * translationFactor * tanh(initialDerivative * offset.y / minDim)
 
         // Fluid non-linear elastic stretching in all directions (left, right, top, bottom, diagonal)
-        val maxDragScale = 0.12f * progress
+        val maxDragScale = 0.12f * progress * stretchFactor
         val offsetAngle = atan2(offset.y, offset.x)
         val aspectX = (width / height).coerceIn(0.5f, 2.0f)
         val aspectY = (height / width).coerceIn(0.5f, 2.0f)

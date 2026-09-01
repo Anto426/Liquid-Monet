@@ -19,6 +19,9 @@ import com.kyant.shapes.Capsule
 internal val LocalLiquidBottomTabScale =
     staticCompositionLocalOf { { 1f } }
 
+internal val LocalLiquidBottomTabInteractive =
+    staticCompositionLocalOf { true }
+
 @Composable
 internal fun RowScope.LiquidGlassBottomTab(
     onClick: () -> Unit,
@@ -26,6 +29,7 @@ internal fun RowScope.LiquidGlassBottomTab(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val scale = LocalLiquidBottomTabScale.current
+    val interactive = LocalLiquidBottomTabInteractive.current
     Column(
         modifier
             // Scale outside the shape clip: the tab keeps its capsule mask, while the complete
@@ -38,11 +42,17 @@ internal fun RowScope.LiquidGlassBottomTab(
             }
             .liquidInteractiveZIndex()
             .clip(Capsule())
-            .clickable(
-                interactionSource = null,
-                indication = null,
-                role = Role.Tab,
-                onClick = onClick
+            .then(
+                if (interactive) {
+                    Modifier.clickable(
+                        interactionSource = null,
+                        indication = null,
+                        role = Role.Tab,
+                        onClick = onClick,
+                    )
+                } else {
+                    Modifier
+                },
             )
             .fillMaxHeight()
             .weight(1f),

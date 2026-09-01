@@ -302,8 +302,12 @@ private fun LiquidLoadingDots(
         if (message != null) {
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = LiquidGlassTheme.colors.secondaryContent
+                style = when (loadingSize) {
+                    LiquidLoadingSize.Small -> MaterialTheme.typography.bodySmall
+                    LiquidLoadingSize.Medium -> MaterialTheme.typography.bodyMedium
+                    LiquidLoadingSize.Large -> MaterialTheme.typography.titleMedium
+                },
+                color = LiquidGlassTheme.colors.content
             )
         }
     }
@@ -340,7 +344,7 @@ private fun LiquidLoadingPulse(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
             modifier = Modifier.size(totalSize),
@@ -377,8 +381,12 @@ private fun LiquidLoadingPulse(
         if (message != null) {
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = LiquidGlassTheme.colors.secondaryContent
+                style = when (loadingSize) {
+                    LiquidLoadingSize.Small -> MaterialTheme.typography.bodySmall
+                    LiquidLoadingSize.Medium -> MaterialTheme.typography.bodyMedium
+                    LiquidLoadingSize.Large -> MaterialTheme.typography.titleMedium
+                },
+                color = LiquidGlassTheme.colors.content
             )
         }
     }

@@ -107,7 +107,8 @@ private fun LiquidBreadcrumbItemView(
             .liquidControlPressFeedback(
                 enabled = isClickable,
                 interactiveHighlight = highlight,
-                drawHighlightOverlay = false
+                shape = Capsule(),
+                drawHighlightOverlay = true
             )
             .then(
                 if (isClickable) {

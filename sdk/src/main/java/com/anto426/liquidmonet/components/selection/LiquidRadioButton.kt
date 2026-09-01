@@ -110,7 +110,7 @@ fun LiquidRadioButton(
                                 onClick()
                             }
                         )
-                        .liquidControlPressFeedback(enabled, interactiveHighlight)
+                        .liquidControlPressFeedback(enabled, interactiveHighlight, shape = shape)
                 } else Modifier
             ),
         contentAlignment = Alignment.Center

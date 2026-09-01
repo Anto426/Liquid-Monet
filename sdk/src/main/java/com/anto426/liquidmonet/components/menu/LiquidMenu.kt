@@ -141,7 +141,11 @@ fun LiquidMorphingAction(
         onDispose { overlayState?.removeImmediately(overlayKey) }
     }
 
-    Box(modifier = modifier.padding(start = 4.dp, end = if (isLastItem) 12.dp else 0.dp)) {
+    Box(
+        modifier = modifier
+            .graphicsLayer(clip = false)
+            .padding(start = 4.dp, end = if (isLastItem) 12.dp else 0.dp)
+    ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -149,15 +153,25 @@ fun LiquidMorphingAction(
                     alpha = buttonAlpha
                     scaleX = buttonScale
                     scaleY = buttonScale
+                    clip = false
                 }
                 .liquidGlassOverlayAnchor(anchorState)
                 .liquidGlass(
                     backdrop = backdropState,
                     shape = anchorShape,
-                    role = LiquidGlassRole.Navigation,
-                    layerBlock = liquidControlLayerBlock(true, interactiveHighlight)
+                    role = LiquidGlassRole.Control,
+                    layerBlock = liquidControlLayerBlock(true, interactiveHighlight, stretchFactor = 0.35f, translationFactor = 0.35f)
                 )
-                .clickable {
+                .liquidControlPressFeedback(
+                    enabled = true,
+                    interactiveHighlight = interactiveHighlight,
+                    shape = anchorShape,
+                    drawHighlightOverlay = true
+                )
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     if (action.subItems.isEmpty()) {
                         action.onClick()
                     } else if (expanded) {
@@ -207,12 +221,7 @@ fun LiquidMorphingAction(
                             expanded = true
                         }
                     }
-                }
-                .liquidControlPressFeedback(
-                    enabled = true,
-                    interactiveHighlight = interactiveHighlight,
-                    shape = anchorShape
-                ),
+                },
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -420,10 +429,10 @@ private fun glassPopupEnterTransition(): EnterTransition {
     return scaleIn(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.78f,
-            stiffness = 420f
+            dampingRatio = 0.54f,
+            stiffness = 340f
         ),
-        initialScale = 0.94f,
+        initialScale = 0.72f,
         transformOrigin = TransformOrigin(0.92f, 0.04f)
     ) + fadeIn(LiquidGlassMotionSpecs.tween(performance, 180))
 }
@@ -434,12 +443,12 @@ private fun glassPopupExitTransition(): ExitTransition {
     return scaleOut(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.88f,
-            stiffness = 460f
+            dampingRatio = 0.82f,
+            stiffness = 440f
         ),
-        targetScale = 0.97f,
+        targetScale = 0.85f,
         transformOrigin = TransformOrigin(0.92f, 0.04f)
-    ) + fadeOut(LiquidGlassMotionSpecs.tween(performance, 130))
+    ) + fadeOut(LiquidGlassMotionSpecs.tween(performance, 140))
 }
 
 /**

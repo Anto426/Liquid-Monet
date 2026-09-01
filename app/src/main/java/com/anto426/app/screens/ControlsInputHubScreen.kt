@@ -47,7 +47,10 @@ import com.anto426.liquidmonet.components.pickers.LiquidTimePickerDialog
 import com.anto426.liquidmonet.components.pickers.LiquidTimePickerField
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
-import java.util.Calendar
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 @Composable
 fun ControlsInputHubScreen(
@@ -79,7 +82,7 @@ fun ControlsInputHubScreen(
 
     // Date & Time pickers
     var isDatePickerOpen by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf<Calendar?>(Calendar.getInstance()) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     var isTimePickerOpen by remember { mutableStateOf(false) }
     var selectedHour by remember { mutableIntStateOf(14) }
     var selectedMinute by remember { mutableIntStateOf(30) }
@@ -309,7 +312,7 @@ fun ControlsInputHubScreen(
         isOpen = isDatePickerOpen,
         onDismissRequest = { isDatePickerOpen = false },
         onDateSelected = { selectedDate = it },
-        initialDate = selectedDate ?: Calendar.getInstance(),
+        initialDate = selectedDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault()),
         backdropState = backdropState
     )
 

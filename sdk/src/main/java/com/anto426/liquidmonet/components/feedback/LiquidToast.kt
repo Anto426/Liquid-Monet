@@ -14,16 +14,22 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +48,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -101,6 +108,7 @@ class LiquidToastState(private val scope: CoroutineScope) {
 
     private var dismissJob: Job? = null
     private var nextId = 0L
+    private val pendingToasts = ArrayDeque<LiquidToastData>()
 
     fun show(
         message: String,
@@ -109,27 +117,41 @@ class LiquidToastState(private val scope: CoroutineScope) {
         icon: ImageVector? = null,
         durationMillis: Long = 2800L
     ) {
-        dismissJob?.cancel()
         val data = LiquidToastData(
             id = ++nextId,
             message = message,
             subtitle = subtitle,
             type = type,
             icon = icon,
-            durationMillis = durationMillis
+            durationMillis = durationMillis.coerceAtLeast(900L)
         )
+        if (currentToast == null) {
+            present(data)
+        } else if (currentToast?.message != data.message || currentToast?.type != data.type) {
+            pendingToasts.addLast(data)
+        }
+    }
+
+    private fun present(data: LiquidToastData) {
+        dismissJob?.cancel()
         currentToast = data
         dismissJob = scope.launch {
-            delay(durationMillis)
+            delay(data.durationMillis)
             if (currentToast?.id == data.id) {
-                currentToast = null
+                showNext()
             }
         }
     }
 
     fun dismiss() {
         dismissJob?.cancel()
+        showNext()
+    }
+
+    private fun showNext() {
+        val next = if (pendingToasts.isEmpty()) null else pendingToasts.removeFirst()
         currentToast = null
+        if (next != null) present(next)
     }
 }
 
@@ -161,35 +183,40 @@ fun LiquidToastHost(
             // Toasts are scene overlays, not navigation content. Keep them above top bars,
             // floating controls and every ordinary interactive z-index.
             .zIndex(LiquidGlassZIndex.Toast)
-            .padding(horizontal = 20.dp, vertical = 20.dp),
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .graphicsLayer(clip = false),
         contentAlignment = alignment
     ) {
         AnimatedContent(
             targetState = toast,
+            modifier = Modifier.graphicsLayer(clip = false),
             transitionSpec = {
                 (
                     slideInVertically(
                         animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
-                        initialOffsetY = { -it / 2 }
+                        initialOffsetY = { -it - 60 }
                     ) + scaleIn(
                         animationSpec = spring(dampingRatio = 0.84f, stiffness = 440f),
-                        initialScale = 0.96f
-                    ) + fadeIn(tween(150))
+                        initialScale = 0.90f
+                    ) + fadeIn(tween(180))
                 ).togetherWith(
                     slideOutVertically(
                         animationSpec = spring(dampingRatio = 0.90f, stiffness = 500f),
-                        targetOffsetY = { -it / 3 }
+                        targetOffsetY = { -it - 60 }
                     ) + scaleOut(
                         animationSpec = spring(dampingRatio = 0.90f, stiffness = 500f),
-                        targetScale = 0.98f
-                    ) + fadeOut(tween(120))
+                        targetScale = 0.90f
+                    ) + fadeOut(tween(150))
                 ).using(SizeTransform(clip = false))
             },
+            contentAlignment = alignment,
             label = "liquidToastTransition"
         ) { currentToastItem ->
             if (currentToastItem != null) {
                 LiquidToast(
                     data = currentToastItem,
+                    modifier = Modifier.fillMaxWidth().widthIn(max = 520.dp).graphicsLayer(clip = false),
                     onDismiss = { state.dismiss() },
                     backdropState = backdropState
                 )
@@ -211,7 +238,8 @@ fun LiquidToast(
 ) {
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
-    val offsetAnim = remember(data.id) { Animatable(0f) }
+    val offsetXAnim = remember(data.id) { Animatable(0f) }
+    val offsetYAnim = remember(data.id) { Animatable(0f) }
     val colorScheme = MaterialTheme.colorScheme
     val glassColors = LiquidGlassTheme.colors
     val toastHighlight = rememberLiquidControlHighlight()
@@ -235,25 +263,61 @@ fun LiquidToast(
     val shape = RoundedRectangle(20.dp)
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdrop, backdropState)
 
-    val currentOffset = offsetAnim.value
+    val currentOffsetX = offsetXAnim.value
+    val currentOffsetY = offsetYAnim.value
     val dismissThresholdPx = with(density) { 90.dp.toPx() }
 
     Box(
         modifier = modifier
-            .offset { IntOffset(currentOffset.roundToInt(), 0) }
+            .offset { IntOffset(currentOffsetX.roundToInt(), currentOffsetY.roundToInt()) }
             .graphicsLayer {
-                rotationZ = (currentOffset / with(density) { 32.dp.toPx() }).coerceIn(-3f, 3f)
-                alpha = 1f - (abs(currentOffset) / with(density) { 280.dp.toPx() }).coerceIn(0f, 0.55f)
+                rotationZ = (currentOffsetX / with(density) { 32.dp.toPx() }).coerceIn(-3f, 3f)
+                val totalDist = kotlin.math.sqrt(currentOffsetX * currentOffsetX + currentOffsetY * currentOffsetY)
+                alpha = 1f - (totalDist / with(density) { 280.dp.toPx() }).coerceIn(0f, 0.55f)
                 cameraDistance = 16f
+                clip = false
             }
             .pointerInput(dismissThresholdPx) {
-                detectHorizontalDragGestures(
+                detectDragGestures(
                     onDragEnd = {
                         coroutineScope.launch {
-                            if (abs(offsetAnim.value) > dismissThresholdPx) {
+                            if (abs(offsetXAnim.value) > dismissThresholdPx || offsetYAnim.value < -dismissThresholdPx) {
                                 onDismiss?.invoke()
                             } else {
-                                offsetAnim.animateTo(
+                                launch {
+                                    offsetXAnim.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = spring(
+                                            dampingRatio = 0.68f,
+                                            stiffness = 380f
+                                        )
+                                    )
+                                }
+                                launch {
+                                    offsetYAnim.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = spring(
+                                            dampingRatio = 0.68f,
+                                            stiffness = 380f
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    onDragCancel = {
+                        coroutineScope.launch {
+                            launch {
+                                offsetXAnim.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = spring(
+                                        dampingRatio = 0.68f,
+                                        stiffness = 380f
+                                    )
+                                )
+                            }
+                            launch {
+                                offsetYAnim.animateTo(
                                     targetValue = 0f,
                                     animationSpec = spring(
                                         dampingRatio = 0.68f,
@@ -263,29 +327,30 @@ fun LiquidToast(
                             }
                         }
                     },
-                    onDragCancel = {
-                        coroutineScope.launch {
-                            offsetAnim.animateTo(
-                                targetValue = 0f,
-                                animationSpec = spring(
-                                    dampingRatio = 0.68f,
-                                    stiffness = 380f
-                                )
-                            )
-                        }
-                    },
-                    onHorizontalDrag = { change, dragAmount ->
+                    onDrag = { change, dragAmount ->
                         change.consume()
                         coroutineScope.launch {
-                            val newRaw = offsetAnim.value + dragAmount
-                            val damped = if (abs(newRaw) > dismissThresholdPx) {
-                                val excess = abs(newRaw) - dismissThresholdPx
+                            val newRawX = offsetXAnim.value + dragAmount.x
+                            val dampedX = if (abs(newRawX) > dismissThresholdPx) {
+                                val excess = abs(newRawX) - dismissThresholdPx
                                 val dampedExcess = 60.dp.toPx() * (1f - exp(-excess / (80.dp.toPx())))
-                                newRaw.sign * (dismissThresholdPx + dampedExcess)
+                                newRawX.sign * (dismissThresholdPx + dampedExcess)
                             } else {
-                                newRaw
+                                newRawX
                             }
-                            offsetAnim.snapTo(damped)
+                            offsetXAnim.snapTo(dampedX)
+
+                            val newRawY = offsetYAnim.value + dragAmount.y
+                            val dampedY = if (newRawY > 0f) {
+                                48.dp.toPx() * (1f - exp(-newRawY / (64.dp.toPx())))
+                            } else if (newRawY < -dismissThresholdPx) {
+                                val excess = abs(newRawY) - dismissThresholdPx
+                                val dampedExcess = 40.dp.toPx() * (1f - exp(-excess / (60.dp.toPx())))
+                                -(dismissThresholdPx + dampedExcess)
+                            } else {
+                                newRawY
+                            }
+                            offsetYAnim.snapTo(dampedY)
                         }
                     }
                 )
@@ -293,14 +358,8 @@ fun LiquidToast(
             .liquidGlass(
                 backdrop = effectiveBackdrop,
                 shape = shape,
-                role = LiquidGlassRole.Navigation,
-                containerColor = accentColor.copy(alpha = glassColors.neutralContainer.alpha),
-                layerBlock = liquidControlLayerBlock(true, toastHighlight)
-            )
-            .liquidControlPressFeedback(
-                enabled = true,
-                interactiveHighlight = toastHighlight,
-                drawHighlightOverlay = false
+                role = LiquidGlassRole.Dialog,
+                containerColor = accentColor.copy(alpha = (glassColors.neutralContainer.alpha * 1.5f).coerceAtMost(0.28f))
             )
             .clickable(
                 interactionSource = null,
@@ -309,7 +368,7 @@ fun LiquidToast(
                 onClick = { onDismiss?.invoke() }
             )
             .defaultMinSize(minHeight = 56.dp)
-            .padding(start = 12.dp, top = 10.dp, end = 16.dp, bottom = 10.dp)
+            .padding(start = 14.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -337,18 +396,23 @@ fun LiquidToast(
             }
 
             Column(
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
                     text = data.message,
                     style = MaterialTheme.typography.labelLarge,
-                    color = glassColors.content
+                    color = glassColors.content,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 if (data.subtitle != null) {
                     Text(
                         text = data.subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = glassColors.secondaryContent
+                        color = glassColors.secondaryContent,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }

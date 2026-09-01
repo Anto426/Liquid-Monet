@@ -102,7 +102,8 @@ fun LiquidRatingBar(
                     .liquidControlPressFeedback(
                         enabled = enabled,
                         interactiveHighlight = starHighlight,
-                        drawHighlightOverlay = false
+                        shape = Capsule(),
+                        drawHighlightOverlay = true
                     )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

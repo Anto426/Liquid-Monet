@@ -4,6 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Single data point for Liquid Line and Bar Charts.
@@ -41,3 +43,10 @@ data class LiquidChartStyle(
     val dropletRadius: Dp = 5.dp,
     val refractiveGlow: Boolean = true
 )
+
+/** Multiplatform-safe compact value formatter used by chart disclosures and scales. */
+fun formatLiquidChartValue(value: Float): String {
+    val integer = value.roundToInt()
+    if (abs(value - integer) < 0.01f) return integer.toString()
+    return ((value * 10f).roundToInt() / 10f).toString()
+}

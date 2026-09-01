@@ -11,6 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
+import com.anto426.liquidmonet.components.display.LiquidIconBox
 import com.anto426.liquidmonet.components.internal.liquidControlLayerBlock
 import com.anto426.liquidmonet.components.internal.liquidControlPressFeedback
 import com.anto426.liquidmonet.components.internal.rememberLiquidControlHighlight
@@ -128,7 +130,8 @@ fun LiquidAccordionItem(
                     .liquidControlPressFeedback(
                         enabled = true,
                         interactiveHighlight = headerHighlight,
-                        drawHighlightOverlay = false
+                        shape = RoundedCornerShape(14.dp),
+                        drawHighlightOverlay = true
                     )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
@@ -141,14 +144,16 @@ fun LiquidAccordionItem(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     if (leadingIcon != null) {
-                        Icon(
-                            imageVector = leadingIcon,
-                            contentDescription = null,
-                            tint = if (isExpanded) colorScheme.primary else colorScheme.primary.copy(alpha = 0.85f),
-                            modifier = Modifier.size(22.dp)
+                        LiquidIconBox(
+                            icon = leadingIcon,
+                            size = 40.dp,
+                            iconSize = 20.dp,
+                            containerColor = colorScheme.primary.copy(alpha = if (isExpanded) 0.16f else 0.10f),
+                            iconTint = colorScheme.primary,
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
                         )
                     }
 

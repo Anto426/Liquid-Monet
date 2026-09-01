@@ -348,10 +348,10 @@ private fun glassOverlayEnterTransition(
     scaleIn(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.78f,
-            stiffness = 420f
+            dampingRatio = 0.54f,
+            stiffness = 340f
         ),
-        initialScale = 0.94f,
+        initialScale = 0.72f,
         transformOrigin = transformOrigin
     ) + fadeIn(
         animationSpec = LiquidGlassMotionSpecs.tween(
@@ -367,15 +367,15 @@ private fun glassOverlayExitTransition(
     scaleOut(
         animationSpec = LiquidGlassMotionSpecs.spring(
             performance = performance,
-            dampingRatio = 0.88f,
-            stiffness = 460f
+            dampingRatio = 0.82f,
+            stiffness = 440f
         ),
-        targetScale = 0.97f,
+        targetScale = 0.85f,
         transformOrigin = transformOrigin
     ) + fadeOut(
         animationSpec = LiquidGlassMotionSpecs.tween(
             performance = performance,
-            durationMillis = 130
+            durationMillis = 140
         )
     )
 

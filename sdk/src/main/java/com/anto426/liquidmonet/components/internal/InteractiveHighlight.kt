@@ -73,6 +73,8 @@ half4 main(float2 coord) {
         clipShape: Shape? = null
     ): Modifier =
         Modifier.drawWithContent {
+            drawContent()
+
             val progress = pressProgressAnimation.value
             if (progress > 0f) {
                 val resolvedColor = if (highlightColor.isSpecified) highlightColor else Color.White
@@ -120,8 +122,6 @@ half4 main(float2 coord) {
                     drawHighlight()
                 }
             }
-
-            drawContent()
         }
 
     val modifier: Modifier get() = modifier(Color.Unspecified, null)

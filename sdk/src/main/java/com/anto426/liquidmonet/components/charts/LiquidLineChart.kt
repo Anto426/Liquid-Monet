@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +88,10 @@ fun LiquidLineChart(
     minValue: Float? = null,
     maxValue: Float? = null,
     showLegend: Boolean = true,
+    primarySeriesLabel: String = "Valore",
+    valueSuffix: String = "",
+    valueFormatter: (Float) -> String = ::formatLiquidChartValue,
+    showDetails: Boolean = false,
     backdrop: Backdrop = emptyBackdrop(),
     backdropState: Backdrop = backdrop,
     onEntrySelected: ((LiquidChartEntry) -> Unit)? = null
@@ -112,6 +117,8 @@ fun LiquidLineChart(
 
     val dataMin = minValue ?: (allValues.minOfOrNull { it }?.let { if (it > 18f) 18f else it } ?: 18f)
     val dataMax = maxValue ?: ((allValues.maxOfOrNull { it } ?: 31f) + 1.4f).coerceAtLeast(31f)
+    val actualMin = allValues.minOrNull() ?: dataMin
+    val actualMax = allValues.maxOrNull() ?: dataMax
     val valueRange = (dataMax - dataMin).coerceAtLeast(0.001f)
 
     // Fluid entrance animation with spring
@@ -190,7 +197,7 @@ fun LiquidLineChart(
                                 .background(if (showGradesLine) Color.White else primaryColor)
                         )
                     },
-                    text = "Voto"
+                    text = primarySeriesLabel
                 )
 
                 if (weightedAverageEntries != null) {
@@ -233,6 +240,22 @@ fun LiquidLineChart(
                     )
                 }
             }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Min ${valueFormatter(actualMin)}${valueSuffix.withLeadingSpace()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Max ${valueFormatter(actualMax)}${valueSuffix.withLeadingSpace()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.onSurfaceVariant,
+            )
         }
 
         // 2. Optical Canvas Viewport with Uniform Refractive Lens Droplets
@@ -565,6 +588,31 @@ fun LiquidLineChart(
             }
         }
 
+        if (showDetails) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = entries.first().label,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.onSurfaceVariant,
+            )
+            if (entries.size > 1) {
+                Text(
+                    text = entries.last().label,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
         // 3. Multi-Metric Disclosure Pod
         AnimatedContent(
             targetState = selectedEntry,
@@ -627,7 +675,7 @@ fun LiquidLineChart(
                                     color = colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Esame #${effectiveSelectedIndex + 1} di ${entries.size}",
+                                    text = "Dato #${effectiveSelectedIndex + 1} di ${entries.size}",
                                     fontSize = 11.sp,
                                     color = colorScheme.onSurfaceVariant
                                 )
@@ -646,7 +694,7 @@ fun LiquidLineChart(
                                 .padding(horizontal = 14.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = if (currentSelection.value >= 31f) "30L" else "${currentSelection.value.toInt()} / 30",
+                                text = "${valueFormatter(currentSelection.value)}${valueSuffix.withLeadingSpace()}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Black,
                                 color = primaryColor
@@ -756,5 +804,8 @@ fun LiquidLineChart(
                 }
             }
         }
+        }
     }
 }
+
+private fun String.withLeadingSpace(): String = if (isBlank()) "" else " $this"

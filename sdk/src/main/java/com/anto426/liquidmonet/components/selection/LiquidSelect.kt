@@ -1,6 +1,7 @@
 package com.anto426.liquidmonet.components.selection
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -80,7 +81,7 @@ fun <T> LiquidSelect(
 
     val chevronRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
-        animationSpec = tween(220),
+        animationSpec = spring(dampingRatio = 0.65f, stiffness = 420f),
         label = "dropdownChevron"
     )
 

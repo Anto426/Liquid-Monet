@@ -97,7 +97,7 @@ fun LiquidCheckbox(
                             enabled = enabled,
                             onClick = { onCheckedChange(!checked) }
                         )
-                        .liquidControlPressFeedback(enabled, interactiveHighlight)
+                        .liquidControlPressFeedback(enabled, interactiveHighlight, shape = shape)
                 } else Modifier
             ),
         contentAlignment = Alignment.Center

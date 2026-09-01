@@ -118,7 +118,8 @@ fun LiquidChip(
             .liquidControlPressFeedback(
                 enabled = enabled,
                 interactiveHighlight = interactiveHighlight,
-                drawHighlightOverlay = false
+                shape = shape,
+                drawHighlightOverlay = true
             )
             .liquidGlass(
                 backdrop = effectiveBackdrop,
@@ -197,7 +198,8 @@ fun LiquidChip(
                         .liquidControlPressFeedback(
                             enabled = enabled,
                             interactiveHighlight = closeHighlight,
-                            drawHighlightOverlay = false
+                            shape = Capsule(),
+                            drawHighlightOverlay = true
                         )
                         .clickable(
                             interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },

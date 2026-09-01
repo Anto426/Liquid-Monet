@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -63,7 +64,8 @@ fun LiquidAvatar(
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     backdrop: Backdrop = emptyBackdrop(),
-    backdropState: Backdrop = backdrop
+    backdropState: Backdrop = backdrop,
+    content: (@Composable BoxScope.() -> Unit)? = null,
 ) {
     val hostContentBackdrop = LocalLiquidGlassContentBackdrop.current
     val effectiveBackdrop = when {
@@ -95,7 +97,8 @@ fun LiquidAvatar(
             .liquidControlPressFeedback(
                 enabled = enabled,
                 interactiveHighlight = interactiveHighlight,
-                drawHighlightOverlay = false
+                shape = CircleShape,
+                drawHighlightOverlay = true
             )
             .then(
                 if (onClick != null) {
@@ -123,7 +126,9 @@ fun LiquidAvatar(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (initials != null) {
+            if (content != null) {
+                content()
+            } else if (initials != null) {
                 Text(
                     text = initials.take(2).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -208,7 +213,8 @@ fun LiquidAvatarGroup(
                     .liquidControlPressFeedback(
                         enabled = true,
                         interactiveHighlight = overflowHighlight,
-                        drawHighlightOverlay = false
+                        shape = CircleShape,
+                        drawHighlightOverlay = true
                     )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

@@ -9,6 +9,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -49,6 +50,7 @@ fun LiquidCard(
     contentPadding: Dp = 16.dp,
     onClick: (() -> Unit)? = null,
     interactiveGelatin: Boolean = (onClick != null),
+    drawHighlightOverlay: Boolean = true,
     highlightColor: Color = Color.Unspecified,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -80,7 +82,7 @@ fun LiquidCard(
                         enabled = true,
                         interactiveHighlight = interactiveHighlight,
                         shape = shape,
-                        drawHighlightOverlay = true,
+                        drawHighlightOverlay = drawHighlightOverlay,
                         highlightColor = highlightColor
                     )
                 } else Modifier
@@ -109,7 +111,12 @@ fun LiquidCard(
                 )
         )
 
-        Box(modifier = Modifier.padding(contentPadding)) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .padding(contentPadding)
+        ) {
             CompositionLocalProvider(
                 LocalContentColor provides resolvedContentColor,
                 LocalLiquidGlassContentBackdrop provides surfaceBackdrop,
