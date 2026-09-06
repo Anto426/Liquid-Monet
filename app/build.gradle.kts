@@ -13,6 +13,7 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -53,4 +54,5 @@ dependencies {
     implementation(libs.androidx.compose.graphics)
     implementation(libs.androidx.compose.preview)
     implementation(libs.androidx.material3)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }

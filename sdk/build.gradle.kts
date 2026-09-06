@@ -25,6 +25,8 @@ kotlin {
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
 
+        withHostTest {}
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -41,16 +43,10 @@ kotlin {
     }
 
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
         commonMain {
-            kotlin.srcDir("src/main/java")
-            // The bundled Kyant renderer is part of this SDK. Only its four Android-backed
-            // bridges are replaced by expect/actual implementations for KMP.
-            kotlin.exclude("com/kyant/backdrop/Platform.kt")
-            kotlin.exclude("com/kyant/backdrop/RuntimeShader.kt")
-            kotlin.exclude("com/kyant/backdrop/internal/Paint.kt")
-            kotlin.exclude("com/kyant/backdrop/internal/RenderEffect.kt")
-            kotlin.exclude("com/anto426/liquidmonet/glass/runtime/LiquidGlassPerformanceManager.kt")
-
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -62,10 +58,6 @@ kotlin {
         }
 
         androidMain {
-            kotlin.srcDir("src/main/java")
-            kotlin.include("**/*.android.kt")
-            kotlin.include("com/anto426/liquidmonet/glass/runtime/LiquidGlassPerformanceManager.kt")
-
             dependencies {
                 implementation(libs.androidx.core.ktx)
             }

@@ -1,6 +1,6 @@
 # Liquid Monet SDK
 
-**Liquid Monet** is a Jetpack Compose UI library that combines adaptive Material 3 controls,
+**Liquid Monet** is a Compose Multiplatform UI library that combines adaptive Material 3 controls,
 Monet color and real optical glass (blur, lens refraction, chromatic aberration and highlights).
 The public API lives under `com.anto426.liquidmonet`; renderer implementation details are internal.
 
@@ -82,8 +82,17 @@ LiquidAnimatedSwitcher(
 
 ## Build and run
 
-To build and install the demo showcase application:
+Build the Android SDK and demo showcase:
 
 ```bash
-./gradlew :sdk:assembleDebug :app:assembleDebug
+./gradlew :sdk:assembleAndroidMain :app:assembleDebug
 ```
+
+Install the demo with `./gradlew :app:installDebug`. Run device interaction tests with
+`./gradlew :app:connectedDebugAndroidTest` and validate shared Kotlin metadata with
+`./gradlew :sdk:compileCommonMainKotlinMetadata`.
+
+See [SDK architecture](docs/ARCHITECTURE.md) for source ownership and verification boundaries.
+Android uses a [persistent device calibration](docs/DEVICE_CALIBRATION.md) with CPU, memory and
+graphics measurements on first launch. Later launches reuse the same profile.
+Run `python scripts/check_sdk_structure.py` to check the complete source layout.

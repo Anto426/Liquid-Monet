@@ -34,6 +34,7 @@ import com.anto426.liquidmonet.components.pickers.LiquidPaletteOption
 import com.anto426.liquidmonet.components.pickers.LiquidPaletteSelector
 import com.anto426.liquidmonet.components.selection.LiquidBackgroundSelector
 import com.anto426.liquidmonet.components.selection.LiquidSlider
+import com.anto426.liquidmonet.components.selection.LiquidSwitch
 import com.anto426.liquidmonet.components.cards.LiquidStatusCard
 import com.anto426.liquidmonet.components.cards.LiquidStatusType
 import com.anto426.liquidmonet.glass.LiquidBackgroundEffect
@@ -51,8 +52,14 @@ fun StudioHubScreen(
     onSliderChange: (Float) -> Unit,
     backdropState: Backdrop,
     modifier: Modifier = Modifier,
-    selectedEffect: LiquidBackgroundEffect = LiquidBackgroundEffect.RadiantBeam,
-    onSelectEffect: (LiquidBackgroundEffect) -> Unit = {}
+    selectedEffect: LiquidBackgroundEffect = LiquidBackgroundEffect.Aurora,
+    onSelectEffect: (LiquidBackgroundEffect) -> Unit = {},
+    isDark: Boolean = true,
+    onToggleDark: (Boolean) -> Unit = {},
+    backgroundSpeed: Float = 1.0f,
+    onSpeedChange: (Float) -> Unit = {},
+    backgroundIntensity: Float = 1.0f,
+    onIntensityChange: (Float) -> Unit = {}
 ) {
     var currentSubTab by remember { mutableIntStateOf(0) }
     val subTabs = listOf(
@@ -111,15 +118,20 @@ fun StudioHubScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Intensità Vetro Rifrattivo", style = MaterialTheme.typography.bodyMedium)
-                                    Text("${(sliderVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text("Modalità Scura OLED", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                                        Text(
+                                            if (isDark) "Nero cosmico per massimo contrasto ottico" else "Cristallo bianco perlato luminoso",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    LiquidSwitch(
+                                        checked = isDark,
+                                        onCheckedChange = onToggleDark,
+                                        backdropState = backdropState
+                                    )
                                 }
-                                LiquidSlider(
-                                    value = sliderVal,
-                                    onValueChange = onSliderChange,
-                                    valueRange = 0f..1f,
-                                    backdropState = backdropState
-                                )
 
                                 LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
@@ -130,6 +142,53 @@ fun StudioHubScreen(
                                 LiquidBackgroundSelector(
                                     selectedEffect = selectedEffect,
                                     onEffectSelected = onSelectEffect,
+                                    backdropState = backdropState
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Intensità Bagliore Sfondo", style = MaterialTheme.typography.bodyMedium)
+                                    Text("${(backgroundIntensity * 100).toInt()}%", fontWeight = FontWeight.Bold)
+                                }
+                                LiquidSlider(
+                                    value = backgroundIntensity,
+                                    onValueChange = onIntensityChange,
+                                    valueRange = 0.2f..1.5f,
+                                    backdropState = backdropState
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Velocità Dinamica Fluida", style = MaterialTheme.typography.bodyMedium)
+                                    Text(String.format(Locale.getDefault(), "%.1fx", backgroundSpeed), fontWeight = FontWeight.Bold)
+                                }
+                                LiquidSlider(
+                                    value = backgroundSpeed,
+                                    onValueChange = onSpeedChange,
+                                    valueRange = 0.2f..3.0f,
+                                    backdropState = backdropState
+                                )
+
+                                LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Rifrazione Vetro (Snell AGSL)", style = MaterialTheme.typography.bodyMedium)
+                                    Text("${(sliderVal * 100).toInt()}%", fontWeight = FontWeight.Bold)
+                                }
+                                LiquidSlider(
+                                    value = sliderVal,
+                                    onValueChange = onSliderChange,
+                                    valueRange = 0f..1f,
                                     backdropState = backdropState
                                 )
                             }

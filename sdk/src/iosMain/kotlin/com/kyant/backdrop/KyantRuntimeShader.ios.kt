@@ -4,11 +4,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.asComposeShader
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
-import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
 
 actual fun RuntimeShader(shaderString: String): RuntimeShader {
-    return SkikoRuntimeShader(RuntimeShaderBuilder(RuntimeEffect.makeForShader(shaderString)))
+    return SkikoRuntimeShader(RuntimeShaderBuilder(RuntimeShaderPrewarm.obtain(shaderString)))
 }
 
 actual fun RuntimeShader.asComposeShader(): Shader = asSkikoRuntimeShader().makeShader().asComposeShader()

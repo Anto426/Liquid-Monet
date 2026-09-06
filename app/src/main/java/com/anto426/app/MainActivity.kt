@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
+import com.anto426.liquidmonet.glass.runtime.LiquidGlassQualityTier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
@@ -64,6 +66,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             var selectedPresetIndex by remember { mutableIntStateOf(0) }
             var sliderVal by remember { mutableFloatStateOf(0.65f) }
+            val systemDark = isSystemInDarkTheme()
+            var isDarkTheme by remember { mutableStateOf<Boolean?>(null) }
+            val isDark = isDarkTheme ?: systemDark
+            var backgroundSpeed by remember { mutableFloatStateOf(1.0f) }
+            var backgroundIntensity by remember { mutableFloatStateOf(1.0f) }
+
             val currentSeed: LiquidMonetSeed = when (selectedPresetIndex) {
                 0 -> LiquidMonetPresets.Sapphire
                 1 -> LiquidMonetPresets.Emerald
@@ -72,18 +80,20 @@ class MainActivity : ComponentActivity() {
             }
 
             LiquidMonetTheme(
+                darkTheme = isDark,
                 useMonetEngine = true,
                 customMonetSeed = currentSeed,
-                liquidIntensity = sliderVal
+                liquidIntensity = sliderVal,
+                maximumGlassQuality = LiquidGlassQualityTier.ULTRA
             ) {
                 val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
                 var selectedEffectIndex by remember { mutableIntStateOf(0) }
                 val backgroundEffects = listOf(
-                    LiquidBackgroundEffect.RadiantBeam,
                     LiquidBackgroundEffect.Aurora,
                     LiquidBackgroundEffect.MeshGlow,
-                    LiquidBackgroundEffect.OrbitalPulse
+                    LiquidBackgroundEffect.OrbitalPulse,
+                    LiquidBackgroundEffect.RadiantBeam
                 )
 
                 val toastState = rememberLiquidToastState()
@@ -122,8 +132,10 @@ class MainActivity : ComponentActivity() {
                     background = {
                         LiquidBackground(
                             effect = backgroundEffects[selectedEffectIndex],
+                            isDark = isDark,
                             monetSeed = currentSeed,
-                            intensity = sliderVal
+                            speedFactor = backgroundSpeed,
+                            intensity = backgroundIntensity
                         )
                     },
                     topBar = { contentBackdrop ->
@@ -246,10 +258,7 @@ class MainActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                                 .nestedScroll(navBarScrollConnection),
-                            containerColor = Color.Transparent,
-                            topBar = {
-                                Spacer(modifier = Modifier.height(topBarHeight))
-                            }
+                            containerColor = Color.Transparent
                         ) { innerPadding ->
                             Box(
                                 modifier = Modifier.fillMaxSize()
@@ -261,7 +270,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(horizontal = 16.dp),
                                     verticalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+                                    Spacer(modifier = Modifier.height(topBarHeight + 8.dp))
 
                                     when (currentTab) {
                                             0 -> StudioHubScreen(
@@ -271,7 +280,13 @@ class MainActivity : ComponentActivity() {
                                                 onSliderChange = { sliderVal = it },
                                                 selectedEffect = backgroundEffects[selectedEffectIndex],
                                                 onSelectEffect = { effect -> selectedEffectIndex = backgroundEffects.indexOf(effect) },
-                                                backdropState = backdropState
+                                                backdropState = backdropState,
+                                                isDark = isDark,
+                                                onToggleDark = { isDarkTheme = it },
+                                                backgroundSpeed = backgroundSpeed,
+                                                onSpeedChange = { backgroundSpeed = it },
+                                                backgroundIntensity = backgroundIntensity,
+                                                onIntensityChange = { backgroundIntensity = it }
                                             )
                                             1 -> ControlsInputHubScreen(
                                                 backdropState = backdropState

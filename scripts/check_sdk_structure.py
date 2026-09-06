@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+"""Check source-set and rendering boundaries without modifying the SDK."""
+
+from pathlib import Path
+import re
+import sys
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parents[1]
+    sources = root / "sdk" / "src"
+    errors = []
+    files = sorted(sources.rglob("*.kt"))
+    for path in files:
+        relative = path.relative_to(sources)
+        text = path.read_text()
+        if not text.strip():
+            errors.append(f"{relative}: empty Kotlin file")
+        if relative.parts[0] == "main":
+            errors.append(f"{relative}: use commonMain or a platform source set")
+        package = re.search(r"^package ([\w.]+)", text, re.MULTILINE)
+        if package and "kotlin" in relative.parts:
+            expected = Path(*package.group(1).split("."))
+            actual = path.parent.relative_to(sources / relative.parts[0] / "kotlin")
+            if expected != actual:
+                errors.append(f"{relative}: package does not match its directory")
+        imports = re.findall(r"^import ([\w.]+)", text, re.MULTILINE)
+        if relative.parts[0] == "commonMain":
+            for name in imports:
+                if name.startswith(("android.", "java.", "javax.", "platform.")):
+                    errors.append(f"{relative}: platform import in common code: {name}")
+        if "/components/" in path.as_posix():
+            for name in imports:
+                if name in {"com.kyant.backdrop.drawBackdrop", "com.kyant.backdrop.drawPlainBackdrop"}:
+                    errors.append(f"{relative}: components must use the shared glass renderers")
+                if name == "androidx.compose.animation.core.spring":
+                    errors.append(f"{relative}: use LiquidMotion for finite motion")
+            code = re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)
+            if re.search(r"\bLiquidGlassScene\s*\(", code):
+                errors.append(f"{relative}: a component must not create a nested scene")
+
+    for error in errors:
+        print(error, file=sys.stderr)
+    print(f"Checked {len(files)} Kotlin files; {len(errors)} structural violations.")
+    return bool(errors)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
