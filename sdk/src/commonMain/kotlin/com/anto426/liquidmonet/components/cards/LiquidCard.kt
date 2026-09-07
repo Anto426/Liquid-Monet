@@ -94,6 +94,7 @@ fun LiquidCard(
                 .liquidGlass(
                     backdrop = effectiveBackdrop,
                     shape = shape,
+                    isCardSurface = true,
                     role = LiquidGlassRole.Surface,
                     containerColor = colors.containerColor
                 )

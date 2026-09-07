@@ -30,6 +30,9 @@ class LiquidLoadingAnimationTest {
 
     @Test fun everyInlineLoadingStyleMovesAtMinimalBudget() {
         val styles = LiquidLoadingStyle.entries.filter { it != LiquidLoadingStyle.Overlay }
+        // Compose's test policy cancels infinite animations when autoAdvance is true.
+        // Disable it before composition; changing it after waitForIdle cannot restart them.
+        compose.mainClock.autoAdvance = false
         compose.setContent {
             MaterialTheme {
                 CompositionLocalProvider(LocalLiquidGlassPerformance provides
@@ -48,7 +51,6 @@ class LiquidLoadingAnimationTest {
             }
         }
         compose.waitForIdle()
-        compose.mainClock.autoAdvance = false
         compose.mainClock.advanceTimeBy(160)
         val first = styles.associateWith { compose.onNodeWithTag(it.name).captureToImage() }
         compose.mainClock.advanceTimeBy(640)

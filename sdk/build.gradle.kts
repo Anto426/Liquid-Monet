@@ -30,6 +30,13 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+
+        optimization {
+            minify = true
+            keepRules.file("proguard-rules.pro")
+            consumerKeepRules.publish = true
+            consumerKeepRules.file("proguard-rules.pro")
+        }
     }
 
     listOf(

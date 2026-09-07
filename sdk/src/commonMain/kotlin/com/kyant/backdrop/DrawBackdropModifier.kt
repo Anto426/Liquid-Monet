@@ -358,7 +358,7 @@ private class DrawBackdropNode(
         }
     }
 
-    private val drawBackdropLayer: DrawScope.() -> Unit = {
+    private fun DrawScope.recordBackdropLayer(): Boolean {
         val layer = graphicsLayer
         if (layer != null && size.width > 0f && size.height > 0f) {
             val padding = padding
@@ -375,12 +375,19 @@ private class DrawBackdropNode(
                 // Keep fractional padding aligned too: integer layer offsets would shift
                 // the sampled backdrop by up to two logical pixels at half resolution.
                 layer.topLeft = IntOffset.Zero
-                withTransform({
-                    scale(1f / resolutionScale, 1f / resolutionScale, Offset.Zero)
-                    translate(-padding, -padding)
-                }) {
-                    drawLayer(layer)
-                }
+                return true
+            }
+        }
+        return false
+    }
+
+    private val drawBackdropLayer: DrawScope.() -> Unit = {
+        graphicsLayer?.let { layer ->
+            withTransform({
+                scale(1f / resolutionScale, 1f / resolutionScale, Offset.Zero)
+                translate(-padding, -padding)
+            }) {
+                drawLayer(layer)
             }
         }
     }
@@ -401,7 +408,10 @@ private class DrawBackdropNode(
         }
 
         onDrawBehind?.invoke(this)
-        drawBackdropLayer()
+        // Visible and exported surfaces replay the same recording from this draw. Never retain
+        // a scene snapshot across frames: moving backgrounds still invalidate and record normally.
+        val backdropRecorded = recordBackdropLayer()
+        if (backdropRecorded) drawBackdropLayer()
         onDrawSurface?.invoke(this)
         drawContent()
         onDrawFront?.invoke(this)
@@ -409,7 +419,7 @@ private class DrawBackdropNode(
         exportedBackdrop?.graphicsLayer?.let { layer ->
             recordLayer(layer) {
                 onDrawBehind?.invoke(this)
-                drawBackdropLayer()
+                if (backdropRecorded) drawBackdropLayer()
                 onDrawSurface?.invoke(this)
                 onDrawFront?.invoke(this)
             }

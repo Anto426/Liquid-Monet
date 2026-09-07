@@ -60,7 +60,9 @@ fun LiquidSearchBar(
     placeholderText: String = "Cerca...",
     enabled: Boolean = true,
     backdropState: Backdrop = emptyBackdrop(),
+    onClose: (() -> Unit)? = null,
     onSearch: ((String) -> Unit)? = null
+
 ) {
     val performance = LocalLiquidGlassPerformance.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -140,22 +142,29 @@ fun LiquidSearchBar(
                     innerTextField()
                 }
                 AnimatedVisibility(
-                    visible = query.isNotEmpty(),
+                    visible = query.isNotEmpty() || onClose != null,
                     enter = fadeIn(LiquidMotion.tween(performance, 160)),
                     exit = fadeOut(LiquidMotion.tween(performance, 140))
                 ) {
                     IconButton(
-                        onClick = { onQueryChange("") },
+                        onClick = {
+                            if (query.isNotEmpty()) {
+                                onQueryChange("")
+                            } else {
+                                onClose?.invoke()
+                            }
+                        },
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = LiquidIcons.Close,
-                            contentDescription = "Cancella",
+                            contentDescription = if (query.isNotEmpty()) "Cancella" else "Chiudi",
                             tint = contentColor.copy(alpha = 0.70f),
                             modifier = Modifier.size(18.dp)
                         )
                     }
                 }
+
             }
         }
     )

@@ -40,6 +40,7 @@ average where abundant RAM could hide a slow processor.
 | Arithmetic/transform workload | Single-core throughput: eight warm-ups, then five timed samples |
 | Memory transfers | Four observable 1 MiB transfers per sample, separate from arithmetic |
 | Core count, architecture, per-core maximum frequency | Supporting ceilings, not substitutes for measured speed |
+| Processor family and known generation introduction year | Manual CPU ceiling, resolved once on IO; see [family policy](PROCESSOR_FAMILIES.md) |
 | SoC, manufacturer, model, hardware, graphics API support | Hashed device/backend identity; no serial number or IMEI |
 | Resolution, density and maximum supported refresh | Account for pixels and frame budget |
 | Hardware-rendered scene | Background and six filtered panels at each candidate sampling resolution |
@@ -90,6 +91,24 @@ is the measured sampling budget, `opticalQualityTier` is the caller's material s
 behavior of manually supplied performance states. Live pressure fields are diagnostics only.
 Loading feedback remains animated at every budget unless explicit `reduceMotion` disables motion.
 
+Processor family rules participate in new calibrations only. An SDK table update does not change
+the device identity, invalidate a saved profile or run another benchmark. Broad families with no
+verified generation date retain an unknown year; neither the phone's release nor the Android
+version is used as the chip's age. Generation-era limits are fixed, without a calendar-driven
+annual downgrade.
+
+## Card-specific material
+
+Only `LiquidCard` selects the lighter card treatment on every device: no blur pass,
+chromatic dispersion or additional inner shadow. Lens dimensions, refraction
+strength, outer shadow, highlight, tint and press interaction retain their existing values.
+This is an intentional card design choice, independent of hardware classification.
+
+The internal flag belongs to the card's background alone and is not inherited by its children.
+Ordinary `Surface` glass, `LiquidGlassContainer`, menus, dialogs, sheets, bars, controls and the
+dynamic renderer retain their original effect and animation policies. The public `liquidGlass`
+signature is unchanged. Removing these passes does not establish a particular frame-time improvement.
+
 ## Shader preparation and cache ownership
 
 Android 13+ prepares the four built-in programs: refraction, dispersion, directional highlight and
@@ -123,6 +142,8 @@ compiled again every frame. Detachment clears the local cache.
 
 - Default backdrop recordings traverse the content subtree once and replay its display list.
   Custom recording callbacks retain their independent traversal.
+- A surface with an exported backdrop records its sampled background once per draw, then replays
+  that recording for the visible and exported layers. It still records anew on the next draw.
 - Outer offscreen compositing is retained. Downsampling applies only to the filtered backdrop;
   foreground text, controls, highlights and shadows stay at layout resolution. Effect density,
   dimensions and padding scale together so the lens keeps its logical shape and depth.
@@ -149,7 +170,8 @@ python3 scripts/check_sdk_structure.py
 ```
 
 Host tests cover independent CPU/RAM constraints, clocks, graphics budget, persistent records,
-optical-policy invariance, essential motion and shader cache reuse/invalidation/bounds. Android
+processor aliases/generation eras, card-only treatment, optical-policy invariance, essential motion
+and shader cache reuse/invalidation/bounds. Android
 instrumentation covers nested recording, menu interaction, visible loading motion, backdrop
 alignment and retained refraction under downsampling. Compilation of instrumentation tests is not
 an execution result.

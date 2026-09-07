@@ -95,4 +95,6 @@ Install the demo with `./gradlew :app:installDebug`. Run device interaction test
 See [SDK architecture](docs/ARCHITECTURE.md) for source ownership and verification boundaries.
 Android uses a [persistent device calibration](docs/DEVICE_CALIBRATION.md) with CPU, memory and
 graphics measurements on first launch. Later launches reuse the same profile.
+An offline [processor-family table](docs/PROCESSOR_FAMILIES.md) adds generation-aware ceilings to
+new calibrations. `LiquidCard` uses a modestly lighter material; other surfaces retain their styles.
 Run `python scripts/check_sdk_structure.py` to check the complete source layout.

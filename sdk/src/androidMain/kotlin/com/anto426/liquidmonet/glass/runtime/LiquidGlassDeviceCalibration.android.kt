@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -66,9 +67,14 @@ internal object LiquidGlassDeviceCalibration {
                 "memory=${calibration.memoryCopyP90Nanos}ns, render=${calibration.renderP90Nanos}ns")
             val calibrated = LiquidGlassCalibratedDevice(device, calibration)
             // Shader preparation is per process, separate from the permanent hardware score.
-            // Waiting is bounded even if a native driver ignores coroutine cancellation.
-            val warmup = workerScope.async { LiquidGlassShaderWarmup.prepare(context, calibrated) }
-            if (withTimeoutOrNull(1_500L) { warmup.await(); true } != true) warmup.cancel()
+            // Run asynchronously in the background so window focus and rendering are not stalled.
+            workerScope.launch {
+                try {
+                    LiquidGlassShaderWarmup.prepare(context, calibrated)
+                } catch (_: Throwable) {
+                    // Non-fatal background warmup
+                }
+            }
             calibrated
         }
 

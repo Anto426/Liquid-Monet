@@ -35,6 +35,7 @@ internal object LiquidGlassHardwareProbe {
         val metrics = context.resources.displayMetrics
         val width = mode?.physicalWidth ?: metrics.widthPixels
         val height = mode?.physicalHeight ?: metrics.heightPixels
+        val socModel = if (Build.VERSION.SDK_INT >= 31) Build.SOC_MODEL else Build.HARDWARE
         return LiquidGlassDeviceProfile(
             sdkInt = Build.VERSION.SDK_INT,
             supportsRenderEffect = Build.VERSION.SDK_INT >= 31,
@@ -50,7 +51,8 @@ internal object LiquidGlassHardwareProbe {
             displayHeightPixels = maxOf(width, height),
             displayRefreshRateHz = mode?.refreshRate ?: 60f,
             displayDensity = metrics.density,
-            socModel = if (Build.VERSION.SDK_INT >= 31) Build.SOC_MODEL else Build.HARDWARE
+            socModel = socModel,
+            processorFamily = LiquidGlassProcessorFamilies.identify(socModel, Build.HARDWARE)
         )
     }
 

@@ -1,2 +1,17 @@
-# The demo intentionally relies on the SDK consumer rules. Keep this file focused:
-# adding a blanket keep for com.anto426 would hide missing R8 contracts and disable shrinking.
+# Application R8 Configuration for LiquidMonet App (Aggressive Optimization Mode)
+
+# Aggressive Optimization & Inlining flags
+-allowaccessmodification
+-repackageclasses ''
+-optimizationpasses 5
+-overloadaggressively
+-mergeinterfacesaggressively
+
+# Dead code elimination and member stripping
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontskipnonpubliclibraryclassmembers
+
+-keepattributes SourceFile,LineNumberTable,*Annotation*,Signature
+-renamesourcefileattribute 'SourceFile'
+

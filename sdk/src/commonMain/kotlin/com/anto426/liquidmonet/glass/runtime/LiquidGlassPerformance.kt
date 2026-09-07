@@ -40,7 +40,9 @@ data class LiquidGlassDeviceProfile(
     val displayHeightPixels: Int = 0,
     val displayRefreshRateHz: Float = 60f,
     val displayDensity: Float = 1f,
-    val socModel: String = ""
+    val socModel: String = "",
+    /** Resolved once by the platform probe; family regex matching never happens during drawing. */
+    val processorFamily: LiquidGlassProcessorFamily? = null
 )
 
 /**

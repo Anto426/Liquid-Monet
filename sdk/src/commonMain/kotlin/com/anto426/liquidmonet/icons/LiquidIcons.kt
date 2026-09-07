@@ -1082,4 +1082,43 @@ object LiquidIcons {
                 close()
             }.build()
     }
+
+    val SwitchAccount: ImageVector by lazy {
+        ImageVector.Builder("SwitchAccount", 24.dp, 24.dp, 24f, 24f)
+            .path(fill = SolidColor(Color.Black)) {
+                moveTo(4.0f, 6.0f)
+                lineTo(2.0f, 6.0f)
+                verticalLineToRelative(14.0f)
+                curveToRelative(0.0f, 1.1f, 0.9f, 2.0f, 2.0f, 2.0f)
+                horizontalLineToRelative(14.0f)
+                verticalLineToRelative(-2.0f)
+                lineTo(4.0f, 20.0f)
+                lineTo(4.0f, 6.0f)
+                close()
+                moveTo(20.0f, 2.0f)
+                lineTo(8.0f, 2.0f)
+                curveToRelative(-1.1f, 0.0f, -2.0f, 0.9f, -2.0f, 2.0f)
+                verticalLineToRelative(12.0f)
+                curveToRelative(0.0f, 1.1f, 0.9f, 2.0f, 2.0f, 2.0f)
+                horizontalLineToRelative(12.0f)
+                curveToRelative(1.1f, 0.0f, 2.0f, -0.9f, 2.0f, -2.0f)
+                lineTo(22.0f, 4.0f)
+                curveToRelative(0.0f, -1.1f, -0.9f, -2.0f, -2.0f, -2.0f)
+                close()
+                moveTo(14.0f, 5.0f)
+                curveToRelative(1.66f, 0.0f, 3.0f, 1.34f, 3.0f, 3.0f)
+                reflectiveCurveToRelative(-1.34f, 3.0f, -3.0f, 3.0f)
+                reflectiveCurveToRelative(-3.0f, -1.34f, -3.0f, -3.0f)
+                reflectiveCurveToRelative(1.34f, -3.0f, 3.0f, -3.0f)
+                close()
+                moveTo(20.0f, 16.0f)
+                lineTo(8.0f, 16.0f)
+                verticalLineToRelative(-1.12f)
+                curveToRelative(0.0f, -1.55f, 2.37f, -2.38f, 6.0f, -2.38f)
+                reflectiveCurveToRelative(6.0f, 0.83f, 6.0f, 2.38f)
+                lineTo(20.0f, 16.0f)
+                close()
+            }.build()
+    }
 }
+

@@ -158,4 +158,31 @@ class LiquidGlassCalibrationTest {
             assertTrue(sampled.renderDetailedBackground)
         }
     }
+
+    @Test fun cardTreatmentIsLocalAndKeepsLensAndOuterDepthOnEveryDevice() {
+        for (budget in LiquidGlassQualityTier.entries) {
+            val state = LiquidGlassPerformanceState.Fallback.copy(
+                device = capable, qualityTier = budget, opticalQualityTier = LiquidGlassQualityTier.ULTRA,
+                blurScale = 1f, refractionScale = 1f, chromaticAberrationScale = 1f)
+            val surface = state.effectPolicy(LiquidGlassRole.Surface)
+            val card = state.effectPolicy(LiquidGlassRole.Surface, isCardSurface = true)
+            assertFalse(card.blur)
+            assertFalse(card.chromaticAberration)
+            assertFalse(card.innerShadow)
+            assertTrue(card.refraction)
+            assertEquals(surface.refraction, card.refraction)
+            assertEquals(surface.highlight, card.highlight)
+            assertEquals(surface.shadow, card.shadow)
+            assertTrue(surface.blur)
+            assertTrue(surface.chromaticAberration)
+            assertTrue(surface.innerShadow)
+            for (role in LiquidGlassRole.entries) {
+                val regular = state.effectPolicy(role, interactive = true)
+                assertTrue(regular.blur)
+                assertTrue(regular.refraction)
+                assertTrue(regular.chromaticAberration)
+                if (role != LiquidGlassRole.TopBar) assertTrue(regular.innerShadow)
+            }
+        }
+    }
 }

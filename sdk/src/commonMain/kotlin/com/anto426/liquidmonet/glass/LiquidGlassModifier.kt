@@ -39,6 +39,32 @@ fun Modifier.liquidGlass(
     layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
     exportedBackdrop: LayerBackdrop? = null,
     backdropPolicy: LiquidGlassBackdropPolicy = LiquidGlassBackdropPolicy.SceneFirst
+): Modifier = liquidGlass(
+    backdrop = backdrop,
+    shape = shape,
+    isCardSurface = false,
+    role = role,
+    containerColor = containerColor,
+    preset = preset,
+    performance = performance,
+    layerBlock = layerBlock,
+    exportedBackdrop = exportedBackdrop,
+    backdropPolicy = backdropPolicy
+)
+
+/** Only LiquidCard selects this treatment. The flag stays local to its optical background. */
+@Composable
+internal fun Modifier.liquidGlass(
+    backdrop: Backdrop = emptyBackdrop(),
+    shape: Shape,
+    isCardSurface: Boolean,
+    role: LiquidGlassRole = LiquidGlassRole.Surface,
+    containerColor: Color? = null,
+    preset: LiquidGlassPreset? = null,
+    performance: LiquidGlassPerformanceState = LocalLiquidGlassPerformance.current,
+    layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
+    exportedBackdrop: LayerBackdrop? = null,
+    backdropPolicy: LiquidGlassBackdropPolicy = LiquidGlassBackdropPolicy.SceneFirst
 ): Modifier {
     // A shared container already paid for backdrop sampling. Descendants retain their exact
     // shape, semantic tint and press deformation without multiplying blur/refraction passes.
@@ -73,7 +99,8 @@ fun Modifier.liquidGlass(
 
     val effectPolicy = performance.effectPolicy(
         role = role,
-        interactive = layerBlock != null
+        interactive = layerBlock != null,
+        isCardSurface = isCardSurface
     )
     val useBlur = effectPolicy.blur && tokens.blurRadius > 0.dp
     val useRefraction = effectPolicy.refraction &&

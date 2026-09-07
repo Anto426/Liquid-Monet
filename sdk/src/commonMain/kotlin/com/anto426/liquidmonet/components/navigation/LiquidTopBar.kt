@@ -255,8 +255,13 @@ fun LiquidTopBar(
                             onQueryChange = onQueryChange,
                             placeholderText = searchPlaceholder,
                             backdropState = effectiveBackdrop,
+                            onClose = {
+                                onSearchActiveChange?.invoke(false)
+                                onQueryChange("")
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
+
                     }
                 }
 

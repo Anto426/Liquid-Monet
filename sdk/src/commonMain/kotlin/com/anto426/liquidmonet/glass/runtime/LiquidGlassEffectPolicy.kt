@@ -22,7 +22,8 @@ internal data class LiquidGlassEffectPolicy(
 /** Resolves the one effect budget used by both public surfaces and internal renderers. */
 internal fun LiquidGlassPerformanceState.effectPolicy(
     role: LiquidGlassRole,
-    interactive: Boolean = false
+    interactive: Boolean = false,
+    isCardSurface: Boolean = false
 ): LiquidGlassEffectPolicy {
     val tier = opticalQualityTier ?: qualityTier
     val canRenderEffects = tier != LiquidGlassQualityTier.MINIMAL
@@ -49,13 +50,13 @@ internal fun LiquidGlassPerformanceState.effectPolicy(
         )
 
     return LiquidGlassEffectPolicy(
-        blur = canRenderEffects && (role != LiquidGlassRole.Control || interactive),
+        blur = !isCardSurface && canRenderEffects && (role != LiquidGlassRole.Control || interactive),
         refraction = canUseLens,
-        chromaticAberration = tier == LiquidGlassQualityTier.ULTRA && canUseLens,
+        chromaticAberration = !isCardSurface && tier == LiquidGlassQualityTier.ULTRA && canUseLens,
         highlight = canRenderEffects,
         shadow = canRenderEffects &&
             (isLargeSurface || isInteractiveControl || isNavigationInteraction),
-        innerShadow = tier == LiquidGlassQualityTier.ULTRA &&
+        innerShadow = !isCardSurface && tier == LiquidGlassQualityTier.ULTRA &&
             (isLargeSurface || isInteractiveControl || isNavigationInteraction)
     )
 }

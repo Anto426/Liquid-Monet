@@ -78,7 +78,8 @@ internal object LiquidGlassCalibrationPolicy {
             device.cpuCoreCount <= 4 || !device.is64Bit -> LiquidGlassQualityTier.HIGH
             else -> LiquidGlassQualityTier.ULTRA
         }
-        return minOf(capabilityCeiling(device), measured, topologyCeiling)
+        val familyCeiling = device.processorFamily?.effectiveCpuQualityCeiling ?: LiquidGlassQualityTier.ULTRA
+        return minOf(minOf(capabilityCeiling(device), measured, topologyCeiling), familyCeiling)
     }
 
     fun acceptsRenderSample(
