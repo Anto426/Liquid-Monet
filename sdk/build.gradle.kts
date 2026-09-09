@@ -6,6 +6,22 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.compose)
+    `maven-publish`
+}
+
+afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/Anto426/Liquid-Monet")
+                credentials {
+                    username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                    password = providers.environmentVariable("GITHUB_TOKEN").orNull
+                }
+            }
+        }
+    }
 }
 
 kotlin {
