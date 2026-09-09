@@ -1,0 +1,71 @@
+name: Build & Release SDK
+
+# Runs on every push to main: compiles the AAR with R8 full-mode obfuscation
+# and publishes it as a GitHub Release so uniapp can resolve the pre-built binary.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to create GitHub Releases
+
+concurrency:
+  group: sdk-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v3
+
+      # Write to cache so the uniapp pre-build job can read it.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      # R8 full mode is already enabled in gradle.properties.
+      # GITHUB_RUN_NUMBER sets the Maven patch version (e.g. 1.0.42).
+      - name: Build release AAR — :sdk
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon --max-workers=2 :sdk:bundleReleaseAndroidLibrary :sdk:assembleRelease
+          echo "BUILD_VERSION=1.0.${{ github.run_number }}" >> "$GITHUB_ENV"
+
+      - name: Collect AARs
+        run: |
+          set -euo pipefail
+          mkdir -p release-output
+          find sdk/build/outputs/aar -name "*.aar" | xargs -I{} cp {} release-output/
+          echo "=== AARs ==="
+          ls -lh release-output/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v${BUILD_VERSION}"
+          TITLE="LiquidMonet SDK ${BUILD_VERSION} (build ${{ github.run_number }})"
+          gh release create "$TAG" release-output/*.aar \
+            --title "$TITLE" \
+            --notes "Automated build from run ${{ github.run_number }} — commit ${{ github.sha }}" \
+            --repo "${{ github.repository }}"
