@@ -1,17 +1,9 @@
-# Consumer R8 / ProGuard rules for LiquidMonet SDK (Aggressive Optimization & Obfuscation Mode)
-
-# Jetpack Compose runtime
--keepclassmembers class * extends androidx.compose.runtime.RecomposeScope { *; }
--dontwarn androidx.compose.**
-
-
-
-# Android graphics RenderEffect and RuntimeShader (API 31/33 fallback)
--dontwarn android.graphics.RenderEffect
--dontwarn android.graphics.RuntimeShader
-
-# Allow aggressive shrinking and obfuscation of unused LiquidMonet & Backdrop components and shaders
--keep,allowshrinking,allowobfuscation class com.anto426.liquidmonet.** { *; }
--keep,allowshrinking,allowobfuscation class com.kyant.backdrop.** { *; }
-
-
+# Build-time rules: a published library must retain its callable ABI.
+# The final application R8 pass can shrink/rename unused public APIs.
+-keepattributes Signature,InnerClasses,EnclosingMethod,Exceptions,*Annotation*
+-keep class kotlin.Metadata { *; }
+-allowaccessmodification
+-keep,includedescriptorclasses,allowoptimization public class com.anto426.liquidmonet.** { public protected *; }
+-keep,includedescriptorclasses,allowoptimization public class com.kyant.** { public protected *; }
+-keep,includedescriptorclasses,allowoptimization @kotlin.PublishedApi class * { *; }
+-keepclassmembers,includedescriptorclasses,allowoptimization class * { @kotlin.PublishedApi *; }

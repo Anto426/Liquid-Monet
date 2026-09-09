@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Verify that all KMP targets exist and package a self-contained Maven repository."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import zipfile
+
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--repository', type=Path, required=True)
+p.add_argument('--coordinate', required=True)
+p.add_argument('--version', required=True)
+p.add_argument('--source-repository', required=True)
+p.add_argument('--source-sha', required=True)
+a = p.parse_args()
+group, artifact = a.coordinate.split(':')
+base = a.repository / group.replace('.', '/')
+root = base / artifact / a.version
+required = [root / f'{artifact}-{a.version}.module']
+for suffix, extension in [('android', 'aar'), ('iosarm64', 'klib'), ('iossimulatorarm64', 'klib')]:
+    target = f'{artifact}-{suffix}'
+    required.append(base / target / a.version / f'{target}-{a.version}.{extension}')
+for path in required:
+    if not path.is_file() or not path.stat().st_size:
+        raise SystemExit(f'Missing published target: {path}')
+# An AAR stripped of its public API is not a reusable library.
+with zipfile.ZipFile(required[1]) as aar:
+    if len(aar.read('classes.jar')) < 1000:
+        raise SystemExit('Published Android classes are missing or unexpectedly empty')
+files = {str(f.relative_to(a.repository)): hashlib.sha256(f.read_bytes()).hexdigest()
+         for f in a.repository.rglob('*') if f.is_file()}
+info = dict(coordinate=a.coordinate, version=a.version, sourceRepository=a.source_repository,
+            sourceSha=a.source_sha, files=files)
+archive = a.repository.with_suffix('.zip')
+with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as out:
+    out.writestr('sdk-info.json', json.dumps(info, indent=2))
+    for name in sorted(files):
+        out.write(a.repository / name, 'maven/' + name)
+digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+archive.with_suffix('.zip.sha256').write_text(f'{digest}  {archive.name}\n')
+print(f'Validated {a.coordinate}:{a.version}: Android, iOS device/simulator and KMP metadata')

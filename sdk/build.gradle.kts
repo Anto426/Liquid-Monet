@@ -9,20 +9,15 @@ plugins {
     `maven-publish`
 }
 
-afterEvaluate {
-    publishing {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/Anto426/Liquid-Monet")
-                credentials {
-                    username = providers.environmentVariable("GITHUB_ACTOR").orNull
-                    password = providers.environmentVariable("GITHUB_TOKEN").orNull
-                }
-            }
+publishing {
+    repositories {
+        maven {
+            name = "Staging"
+            url = uri(rootProject.layout.buildDirectory.dir("maven-repository"))
         }
     }
 }
+
 
 kotlin {
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
@@ -51,7 +46,7 @@ kotlin {
             minify = true
             keepRules.file("proguard-rules.pro")
             consumerKeepRules.publish = true
-            consumerKeepRules.file("proguard-rules.pro")
+            consumerKeepRules.file("consumer-rules.pro")
         }
     }
 
