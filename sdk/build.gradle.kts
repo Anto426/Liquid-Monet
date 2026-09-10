@@ -12,6 +12,14 @@ plugins {
 publishing {
     repositories {
         maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/anto426-project/liquid-monet")
+            credentials {
+                username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                password = providers.environmentVariable("GITHUB_TOKEN").orNull
+            }
+        }
+        maven {
             name = "Staging"
             url = uri(rootProject.layout.buildDirectory.dir("maven-repository"))
         }

@@ -7,3 +7,6 @@
 -keep,includedescriptorclasses,allowoptimization public class com.kyant.** { public protected *; }
 -keep,includedescriptorclasses,allowoptimization @kotlin.PublishedApi class * { *; }
 -keepclassmembers,includedescriptorclasses,allowoptimization class * { @kotlin.PublishedApi *; }
+
+# Independently minified SDKs must not produce colliding names such as a.a.
+-repackageclasses com.anto426.liquidmonet.obfuscated

@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   group: sdk-publication-${{ github.ref }}
@@ -56,6 +57,12 @@ jobs:
             **/build/outputs/mapping/
           if-no-files-found: ignore
           retention-days: 14
+      - name: Publish Maven packages for Gradle
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          ./gradlew --no-daemon --max-workers=2 -PsdkVersion="$SDK_VERSION" \
+            :sdk:publishAllPublicationsToGitHubPackagesRepository
       - name: Publish immutable SDK release
         env:
           GH_TOKEN: ${{ github.token }}

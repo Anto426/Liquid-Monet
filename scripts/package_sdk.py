@@ -27,8 +27,11 @@ for path in required:
 with zipfile.ZipFile(required[1]) as aar:
     if len(aar.read('classes.jar')) < 1000:
         raise SystemExit('Published Android classes are missing or unexpectedly empty')
+# Only this version belongs in the archive, even when staging contains older local builds.
+publication_dirs = [root, *(base / f'{artifact}-{suffix}' / a.version
+                           for suffix in ('android', 'iosarm64', 'iossimulatorarm64'))]
 files = {str(f.relative_to(a.repository)): hashlib.sha256(f.read_bytes()).hexdigest()
-         for f in a.repository.rglob('*') if f.is_file()}
+         for directory in publication_dirs for f in directory.rglob('*') if f.is_file()}
 info = dict(coordinate=a.coordinate, version=a.version, sourceRepository=a.source_repository,
             sourceSha=a.source_sha, files=files)
 archive = a.repository.with_suffix('.zip')
