@@ -3,23 +3,54 @@ package com.anto426.liquidmonet.glass.runtime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
-import com.kyant.backdrop.RuntimeShaderPrewarm
-import kotlinx.coroutines.withTimeoutOrNull
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSOperationQueue
+import platform.Foundation.NSProcessInfo
+import platform.Foundation.NSProcessInfoPowerStateDidChangeNotification
+import platform.Foundation.NSProcessInfoThermalState.NSProcessInfoThermalStateCritical
+import platform.Foundation.NSProcessInfoThermalState.NSProcessInfoThermalStateFair
+import platform.Foundation.NSProcessInfoThermalState.NSProcessInfoThermalStateNominal
+import platform.Foundation.NSProcessInfoThermalState.NSProcessInfoThermalStateSerious
+import platform.Foundation.NSProcessInfoThermalStateDidChangeNotification
+import platform.Foundation.lowPowerModeEnabled
+import platform.Foundation.thermalState
+import platform.UIKit.UIApplicationDidBecomeActiveNotification
 
 @Composable
 internal actual fun rememberLiquidGlassPerformanceState(
     liquidIntensity: Float,
     maximumQuality: LiquidGlassQualityTier,
     reduceMotion: Boolean
-): State<LiquidGlassPerformanceState?> = produceState(null, liquidIntensity, maximumQuality, reduceMotion) {
-    // Programs are prepared once on Default; recreation only awaits the same process-owned job.
-    // This compiles Skia source, not a Metal pipeline or a device performance score.
-    withTimeoutOrNull(1_000L) { RuntimeShaderPrewarm.prepare() }
-    value = LiquidGlassPerformanceState.Fallback.copy(
-        liquidIntensity = if (liquidIntensity.isFinite()) liquidIntensity.coerceIn(0f, 1f) else 1f,
-        // iOS has a Skia backend, but no calibrated device probe yet. Retain its existing
-        // conservative profile until that backend can be measured on an Apple device.
-        qualityTier = LiquidGlassQualityTier.MINIMAL,
-        motionScale = if (reduceMotion) 0f else LiquidGlassPerformanceState.Fallback.motionScale
-    )
+): State<LiquidGlassPerformanceState?> {
+    return produceState(null, liquidIntensity, maximumQuality, reduceMotion) {
+        val calibrated = LiquidGlassIosDeviceCalibration.load()
+        fun publishState() {
+            val process = NSProcessInfo.processInfo
+            value = liquidGlassPerformanceState(
+                device = calibrated.device,
+                qualityTier = calibrated.calibration.qualityTier,
+                liquidIntensity = liquidIntensity,
+                maximumQuality = maximumQuality,
+                reduceMotion = reduceMotion,
+                calibration = calibrated.calibration,
+                thermalStatus = when (process.thermalState) {
+                    NSProcessInfoThermalStateNominal -> LiquidGlassThermalStatus.NONE
+                    NSProcessInfoThermalStateFair -> LiquidGlassThermalStatus.LIGHT
+                    NSProcessInfoThermalStateSerious -> LiquidGlassThermalStatus.SEVERE
+                    NSProcessInfoThermalStateCritical -> LiquidGlassThermalStatus.CRITICAL
+                },
+                isPowerSaveMode = process.lowPowerModeEnabled
+            )
+        }
+        val notifications = NSNotificationCenter.defaultCenter
+        val observers = listOfNotNull(
+            NSProcessInfoThermalStateDidChangeNotification,
+            NSProcessInfoPowerStateDidChangeNotification,
+            UIApplicationDidBecomeActiveNotification
+        ).map { name ->
+            notifications.addObserverForName(name, null, NSOperationQueue.mainQueue) { publishState() }
+        }
+        publishState()
+        awaitDispose { observers.forEach { notifications.removeObserver(it) } }
+    }
 }

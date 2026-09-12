@@ -9,7 +9,9 @@ enum class LiquidGlassCalibrationSource {
     CAPABILITY_LIMIT,
     INTERRUPTED,
     TEST_UNAVAILABLE,
-    CONSTRAINED_START
+    CONSTRAINED_START,
+    /** iOS capability fallback when a native benchmark cannot safely complete; contains no timings. */
+    CAPABILITY_ESTIMATE
 }
 
 /** Local diagnostics for the one-time calibration; times are nanoseconds, not synthetic scores. */
@@ -63,13 +65,7 @@ internal object LiquidGlassCalibrationPolicy {
         cpuP90Nanos: Long,
         memoryCopyP90Nanos: Long
     ): LiquidGlassQualityTier {
-        val measured = when {
-            cpuP90Nanos <= 0 || memoryCopyP90Nanos <= 0 -> LiquidGlassQualityTier.MINIMAL
-            cpuP90Nanos > 6_000_000 || memoryCopyP90Nanos > 6_000_000 -> LiquidGlassQualityTier.MINIMAL
-            cpuP90Nanos > 3_000_000 || memoryCopyP90Nanos > 3_000_000 -> LiquidGlassQualityTier.BALANCED
-            cpuP90Nanos > 1_500_000 || memoryCopyP90Nanos > 1_500_000 -> LiquidGlassQualityTier.HIGH
-            else -> LiquidGlassQualityTier.ULTRA
-        }
+        val measured = measuredCpuCeiling(cpuP90Nanos, memoryCopyP90Nanos)
         // Clock is a conservative supporting signal. It never promotes a weak measured CPU,
         // and restricted sysfs access does not penalize a device with good measured throughput.
         val maxClock = device.cpuMaxFrequenciesKhz.maxOrNull()
@@ -80,6 +76,14 @@ internal object LiquidGlassCalibrationPolicy {
         }
         val familyCeiling = device.processorFamily?.effectiveCpuQualityCeiling ?: LiquidGlassQualityTier.ULTRA
         return minOf(minOf(capabilityCeiling(device), measured, topologyCeiling), familyCeiling)
+    }
+
+    fun measuredCpuCeiling(cpuP90Nanos: Long, memoryCopyP90Nanos: Long): LiquidGlassQualityTier = when {
+        cpuP90Nanos <= 0 || memoryCopyP90Nanos <= 0 -> LiquidGlassQualityTier.MINIMAL
+        cpuP90Nanos > 6_000_000 || memoryCopyP90Nanos > 6_000_000 -> LiquidGlassQualityTier.MINIMAL
+        cpuP90Nanos > 3_000_000 || memoryCopyP90Nanos > 3_000_000 -> LiquidGlassQualityTier.BALANCED
+        cpuP90Nanos > 1_500_000 || memoryCopyP90Nanos > 1_500_000 -> LiquidGlassQualityTier.HIGH
+        else -> LiquidGlassQualityTier.ULTRA
     }
 
     fun acceptsRenderSample(
@@ -131,9 +135,11 @@ internal data class LiquidGlassCalibrationRecord(
             }
             val tier = LiquidGlassQualityTier.entries.find { it.name == fields[2] } ?: return null
             val source = LiquidGlassCalibrationSource.entries.find { it.name == fields[3] } ?: return null
-            if (source != LiquidGlassCalibrationSource.MEASURED && tier != LiquidGlassQualityTier.MINIMAL) return null
+            if (source != LiquidGlassCalibrationSource.MEASURED &&
+                source != LiquidGlassCalibrationSource.CAPABILITY_ESTIMATE && tier != LiquidGlassQualityTier.MINIMAL) return null
             val numbers = fields.drop(4).map { it.toLongOrNull()?.takeIf { n -> n >= 0 } ?: return null }
             if (numbers.drop(3).any { it > Int.MAX_VALUE }) return null
+            if (source == LiquidGlassCalibrationSource.CAPABILITY_ESTIMATE && numbers.any { it != 0L }) return null
             if (source == LiquidGlassCalibrationSource.MEASURED && tier != LiquidGlassQualityTier.MINIMAL &&
                 (numbers[0] == 0L || numbers[1] == 0L || numbers[2] == 0L || numbers[3] < 5 ||
                     numbers[4] == 0L || numbers[5] == 0L)) return null

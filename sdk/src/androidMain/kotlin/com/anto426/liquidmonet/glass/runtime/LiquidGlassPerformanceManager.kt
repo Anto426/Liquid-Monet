@@ -37,7 +37,7 @@ internal class LiquidGlassPerformanceManager(
     private val selectedQualityTier = calibratedDevice.calibration.qualityTier
     private val diagnosticsMonitor = LiquidGlassDiagnosticsMonitor(applicationContext, deviceProfile)
 
-    private var normalizedLiquidIntensity = normalizeIntensity(liquidIntensity)
+    private var normalizedLiquidIntensity = normalizeLiquidGlassIntensity(liquidIntensity)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observation: Job? = null
     private var diagnostics = LiquidGlassDiagnostics()
@@ -62,7 +62,7 @@ internal class LiquidGlassPerformanceManager(
      * are clamped to `0f..1f`.
      */
     fun setLiquidIntensity(@FloatRange(from = 0.0, to = 1.0) value: Float) {
-        val normalized = normalizeIntensity(value)
+        val normalized = normalizeLiquidGlassIntensity(value)
         runOnMain {
             if (normalizedLiquidIntensity == normalized) return@runOnMain
             normalizedLiquidIntensity = normalized
@@ -90,78 +90,16 @@ internal class LiquidGlassPerformanceManager(
         mutableState.value = readState()
     }
 
-    private fun readState(): LiquidGlassPerformanceState {
-        val availableMemoryBytes = diagnostics.availableMemoryBytes
-        val memoryPressureHigh = diagnostics.memoryPressureHigh
-        val powerSaveMode = diagnostics.powerSaveMode
-        val thermalStatus = diagnostics.thermalStatus
-
-        // Material fidelity follows the caller; calibration only budgets texture resolution.
-        val baseScales = scalesFor(maximumQuality)
-        val intensity = normalizedLiquidIntensity
-
-        return LiquidGlassPerformanceState(
-            device = deviceProfile,
-            qualityTier = selectedQualityTier,
-            thermalStatus = thermalStatus,
-            isPowerSaveMode = powerSaveMode,
-            isMemoryPressureHigh = memoryPressureHigh,
-            availableMemoryBytes = availableMemoryBytes,
-            liquidIntensity = intensity,
-            blurScale = if (deviceProfile.supportsRenderEffect) baseScales.blur * intensity else 0f,
-            refractionScale = if (deviceProfile.supportsRuntimeShader) baseScales.refraction * intensity else 0f,
-            motionScale = if (reduceMotion) 0f else baseScales.motion,
-            chromaticAberrationScale = if (deviceProfile.supportsRuntimeShader) {
-                baseScales.chromaticAberration * intensity
-            } else {
-                0f
-            },
-            calibration = calibratedDevice.calibration,
-            opticalQualityTier = maximumQuality,
-            renderResolutionScale = selectedQualityTier.renderResolutionScale
-        )
-    }
-
-    private data class PerformanceScales(
-        val blur: Float,
-        val refraction: Float,
-        val motion: Float,
-        val chromaticAberration: Float
+    private fun readState(): LiquidGlassPerformanceState = liquidGlassPerformanceState(
+        device = deviceProfile,
+        qualityTier = selectedQualityTier,
+        liquidIntensity = normalizedLiquidIntensity,
+        maximumQuality = maximumQuality,
+        reduceMotion = reduceMotion,
+        calibration = calibratedDevice.calibration,
+        thermalStatus = diagnostics.thermalStatus,
+        isPowerSaveMode = diagnostics.powerSaveMode,
+        isMemoryPressureHigh = diagnostics.memoryPressureHigh,
+        availableMemoryBytes = diagnostics.availableMemoryBytes
     )
-
-    private companion object {
-        private fun normalizeIntensity(value: Float): Float =
-            if (value.isFinite()) value.coerceIn(0f, 1f) else 1f
-
-        private fun scalesFor(tier: LiquidGlassQualityTier): PerformanceScales = when (tier) {
-            LiquidGlassQualityTier.MINIMAL -> PerformanceScales(
-                blur = 0.4f,
-                refraction = 0.2f,
-                motion = 0.5f,
-                chromaticAberration = 0f
-            )
-
-            LiquidGlassQualityTier.BALANCED -> PerformanceScales(
-                blur = 0.7f,
-                refraction = 0.55f,
-                motion = 0.75f,
-                chromaticAberration = 0.35f
-            )
-
-            LiquidGlassQualityTier.HIGH -> PerformanceScales(
-                blur = 0.9f,
-                refraction = 0.85f,
-                motion = 0.9f,
-                chromaticAberration = 0.75f
-            )
-
-            LiquidGlassQualityTier.ULTRA -> PerformanceScales(
-                blur = 1f,
-                refraction = 1f,
-                motion = 1f,
-                chromaticAberration = 1f
-            )
-        }
-
-    }
 }

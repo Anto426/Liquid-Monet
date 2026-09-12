@@ -26,9 +26,10 @@ import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
  * LiquidMonetTheme - Official Google Material 3 Expressive Theme with MonetEngine Dynamic Color.
  * Fuses Material 3 Expressive color schemes & motion with AGSL Snell Glass Backdrops.
  *
- * On Android the first launch measures CPU, memory traffic and graphics rendering off the UI
+ * On Android and iOS the first launch measures CPU, memory traffic and graphics rendering off the UI
  * thread, then saves a permanent device profile. Content starts only after a profile is ready;
  * later launches reuse it. Calibration controls sampling resolution, preserving material depth.
+ * iOS uses Skia/Metal and retains an explicit capability estimate if native calibration is unavailable.
  * [maximumGlassQuality] defaults to [LiquidGlassQualityTier.HIGH] and selects optical fidelity
  * independently of device speed. [liquidIntensity] controls the strength of that material.
  * [reduceMotion] is an accessibility-level policy: components receive zero motion scale and

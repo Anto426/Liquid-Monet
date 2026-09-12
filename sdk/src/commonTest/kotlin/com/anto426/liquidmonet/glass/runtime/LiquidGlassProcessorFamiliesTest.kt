@@ -7,6 +7,31 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class LiquidGlassProcessorFamiliesTest {
+    @Test fun appleMetalNamesResolveActualChipGeneration() {
+        val names = mapOf(
+            "Apple A8X GPU" to "apple-a8", "Apple A9 GPU" to "apple-a9",
+            "Apple A10X GPU" to "apple-a10", "Apple A11 Bionic GPU" to "apple-a11",
+            "Apple A12Z GPU" to "apple-a12", "Apple A13 GPU" to "apple-a13",
+            "Apple A14 GPU" to "apple-a14", "Apple A15 GPU" to "apple-a15",
+            "Apple A16 GPU" to "apple-a16", "Apple A17 Pro GPU" to "apple-a17",
+            "Apple A18 GPU" to "apple-a18", "Apple A18 Pro GPU" to "apple-a18",
+            "Apple A19 Pro GPU" to "apple-a19", "Apple M1 GPU" to "apple-m1",
+            "Apple M2 GPU" to "apple-m2", "Apple M3 Max" to "apple-m3",
+            "Apple M4 GPU" to "apple-m4", "Apple M5 GPU" to "apple-m5"
+        )
+        for ((name, expected) in names) assertEquals(expected, LiquidGlassProcessorFamilies.identify(name)?.id, name)
+        for (name in listOf("Apple", "Apple GPU", "Apple A99 GPU", "Apple M99 GPU", "iPhone18,1", "Apple A190 GPU")) {
+            assertNull(LiquidGlassProcessorFamilies.identify(name), name)
+        }
+    }
+
+    @Test fun appleGenerationsUseSameFixedEraPolicyAsAndroid() {
+        assertEquals(2018, LiquidGlassProcessorFamilies.identify("Apple A12Z")?.generationIntroducedYear)
+        assertEquals(LiquidGlassQualityTier.BALANCED, LiquidGlassProcessorFamilies.identify("Apple A10X")?.effectiveCpuQualityCeiling)
+        assertEquals(LiquidGlassQualityTier.HIGH, LiquidGlassProcessorFamilies.identify("Apple A14")?.effectiveCpuQualityCeiling)
+        assertEquals(LiquidGlassQualityTier.ULTRA, LiquidGlassProcessorFamilies.identify("Apple A19 Pro")?.effectiveCpuQualityCeiling)
+    }
+
     @Test fun hardwareAliasesAndMarketingNamesSelectTheSameGeneration() {
         val aliases = listOf(
             "Snapdragon 821" to "MSM8996PRO", "Snapdragon 835" to "MSM8998",

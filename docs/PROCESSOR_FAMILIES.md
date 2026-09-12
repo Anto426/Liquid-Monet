@@ -21,8 +21,8 @@ BALANCED, 2017–2020 at HIGH; later or unknown dates add no extra age ceiling. 
 SDK defaults, not manufacturer performance claims. No current-year arithmetic or age inferred
 from the phone, Android release, firmware or build timestamp is used. Unknown dates stay null.
 
-The table currently covers Qualcomm Snapdragon, MediaTek Dimensity/Helio, Samsung Exynos,
-Google Tensor, UNISOC and Kirin families. Coverage and dated generations are deliberately partial.
+The table currently covers Apple A8–A19 and M1–M5, Qualcomm Snapdragon, MediaTek Dimensity/Helio,
+Samsung Exynos, Google Tensor, UNISOC and Kirin families. Coverage and dated generations are deliberately partial.
 For example, unspecified Snapdragon 8 generations use a conservative series fallback rather than
 inheriting the year of the first 8-series chip. Unverified MediaTek/Samsung board-code aliases are
 not inferred from a vendor prefix. Add a specific generation before its series fallback, document
@@ -33,7 +33,29 @@ calibration, not an already persisted result. Family metadata is available throu
 `LocalLiquidGlassPerformance.current.device.processorFamily`. Optical fidelity and the explicit
 LiquidCard treatment are separate from the classification table.
 
+On iOS the Metal device name supplies the SoC model. `Apple A18 Pro GPU`, for example, resolves to
+the A18 generation while preserving the exact model in `device.socModel`. A-series X/Z variants and
+M-series Pro/Max/Ultra variants retain the underlying generation's date. iPhone identifiers and
+generic `Apple GPU` strings are not CPU models and do not select a family. Future unknown chips
+still use the native benchmark and hardware ceilings. Existing fixed era rules apply equally:
+A10 generation is at most BALANCED; A11–A14 and M1 at most HIGH; later generations may reach ULTRA
+when RAM, measured CPU/memory traffic and real rendering also qualify. These thresholds need
+representative-device validation and do not guarantee that one chip is faster than another.
+
 ## Primary references
+
+Apple's [Metal feature tables](https://developer.apple.com/metal/capabilities/) list supported A/M
+chip names and GPU families. Generation dates follow the silicon introductions, including
+[A15 (2021)](https://www.apple.com/newsroom/2021/09/apple-introduces-iphone-13-and-iphone-13-mini/),
+[A16 (2022)](https://www.apple.com/newsroom/2022/09/apple-debuts-iphone-14-pro-and-iphone-14-pro-max/),
+[A17 Pro (2023)](https://www.apple.com/sn/newsroom/2023/09/apple-unveils-iphone-15-pro-and-iphone-15-pro-max/),
+[A18 Pro (2024)](https://images.apple.com/uk/newsroom/2024/09/apple-debuts-iphone-16-pro-and-iphone-16-pro-max/),
+[A19 Pro (2025)](https://www.apple.com/newsroom/2025/09/apple-unveils-iphone-17-pro-and-iphone-17-pro-max/),
+[M1 (2020)](https://www.apple.com/newsroom/2020/11/apple-unleashes-m1/),
+[M2 (2022)](https://www.apple.com/au/newsroom/2022/06/apple-unveils-m2-with-breakthrough-performance-and-capabilities/),
+[M3 (2023)](https://www.apple.com/newsroom/2023/10/apple-unveils-m3-m3-pro-and-m3-max-the-most-advanced-chips-for-a-personal-computer/),
+[M4 (2024)](https://www.apple.com/newsroom/2024/05/apple-introduces-m4-chip/), and
+[M5 (2025)](https://www.apple.com/es/newsroom/2025/10/apple-unleashes-m5-the-next-big-leap-in-ai-performance-for-apple-silicon/).
 
 | Generation | Introduction | Manufacturer reference |
 | --- | --- | --- |

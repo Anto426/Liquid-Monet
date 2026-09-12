@@ -3,7 +3,7 @@ package com.anto426.liquidmonet.glass.runtime
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/** Rendering quality calibrated once and retained for this device. */
+/** Device sampling budget, calibrated locally within CPU, memory and graphics capability limits. */
 enum class LiquidGlassQualityTier {
     MINIMAL,
     BALANCED,
@@ -26,11 +26,13 @@ enum class LiquidGlassThermalStatus {
 /** Stable hardware capabilities which do not normally change during a process lifetime. */
 @Immutable
 data class LiquidGlassDeviceProfile(
+    /** Android API level; zero on other platforms. */
     val sdkInt: Int,
     val supportsRenderEffect: Boolean,
     val supportsRuntimeShader: Boolean,
     val isLowRamDevice: Boolean,
     val totalMemoryBytes: Long,
+    /** Android app heap class; zero when the platform does not expose one. */
     val appMemoryClassMb: Int,
     val cpuCoreCount: Int,
     val is64Bit: Boolean,
@@ -46,11 +48,11 @@ data class LiquidGlassDeviceProfile(
 )
 
 /**
- * Calibrated values consumed by liquid-glass components. Pressure fields are diagnostics;
+ * Resolved values consumed by liquid-glass components. Pressure fields are diagnostics;
  * they do not change the selected appearance during a session or on subsequent launches.
  *
  * Every scale is normalized to `0f..1f`. A zero refraction or chromatic-aberration
- * scale is also the explicit signal that the device cannot run the required AGSL shader.
+ * scale also disables that effect, including when the platform cannot run its runtime shader.
  */
 @Immutable
 data class LiquidGlassPerformanceState(

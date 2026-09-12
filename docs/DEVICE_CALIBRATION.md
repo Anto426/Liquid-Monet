@@ -1,6 +1,6 @@
 # Device calibration, preparation and rendering caches
 
-Android selects a device sampling budget once before `LiquidMonetTheme` composes application
+Android and iOS select a device sampling budget once before `LiquidMonetTheme` composes application
 content. Later launches load that same result. Material fidelity is a separate setting:
 `maximumGlassQuality` (HIGH by default) and `liquidIntensity` retain their optical meaning.
 A slow CPU or small memory budget must not silently remove refraction, highlights or depth.
@@ -131,8 +131,79 @@ are the same as for calibration.
 
 On iOS, four immutable Skia RuntimeEffects are compiled once on Default and reused with separate
 builders for each renderer. This prepares source programs; it does not precompile a Metal pipeline.
-iOS still retains its existing conservative performance profile pending a native hardware probe
-and measurements on Apple devices.
+
+### iOS calibration and Metal preparation
+
+iOS reads physical RAM and core count through Apple's [ProcessInfo](https://developer.apple.com/documentation/foundation/processinfo),
+screen pixels/density/refresh through UIKit, and [Metal GPU family support](https://developer.apple.com/documentation/metal/mtlgpufamily).
+The Metal device name identifies the actual Apple SoC when available (for example `Apple A19 Pro GPU`).
+It populates `device.socModel` and the same `LiquidGlassProcessorFamilies` used by Android; see
+[processor family policy](PROCESSOR_FAMILIES.md) for supported A/M generations and fixed age ceilings.
+It no longer publishes the Android-shaped `Fallback` with zero RAM, unsupported shaders and a
+hard-coded MINIMAL tier. The Skia backend supplies the real effect-support flags. Android-only
+API level and app heap class remain zero (unknown) and do not penalize the iOS decision.
+
+`LiquidGlassIosPerformancePolicy` supplies independent upper limits for the benchmark:
+
+| Signal | Sampling ceiling |
+| --- | --- |
+| RAM below 2 GiB / below 4 GiB / below 7 GiB / at least 7 GiB | MINIMAL / BALANCED / HIGH / ULTRA |
+| At most 2 cores / at most 4 cores / more cores | BALANCED / HIGH / ULTRA |
+| Apple GPU family 7 or later / family 4–6 / older or unknown family | ULTRA / HIGH / BALANCED |
+| Recognized Apple CPU generation | Its shared family/era ceiling, just as on Android |
+
+An unknown CPU model adds no family penalty: available capabilities and actual timings remain in
+charge. Generic GPU-family support never invents an exact CPU model. The family table contains
+SDK policy limits, not Apple performance ratings, and updates do not invalidate a saved profile.
+
+`LiquidGlassIosDeviceCalibration` shares one process-owned operation across themes/windows. Only
+UIKit hardware/lifecycle reads run on Main; files, CPU probes and GPU work run on workers. Cancelling
+a theme's await does not cancel calibration. The first active launch measures the same arithmetic
+and four observable 1 MiB memory transfers as Android, with eight warm-ups and five samples timed by
+the native thread CPU clock. CPU and memory P90 provide additional independent ceilings.
+
+`LiquidGlassIosOffscreenRenderSession` creates a real Skia Metal `DirectContext` and GPU surfaces.
+For each resolution candidate, it draws a changing background and six panels with the SDK's actual
+blur and dispersion/refraction shader. Two untimed frames precede five timed frames. The timer
+includes recording, filtering, submission and `flushAndSubmit(syncCpu = true)`, which waits for GPU
+completion under [Skia's submission contract](https://api.skia.org/classGrDirectContext.html).
+A one-pixel GPU readback outside the samples rejects missing output. All native resources are
+created, used and closed on the same worker thread, with no coroutine suspension while a context
+is alive. Textures are limited to about 1 or 4 MP, dimensions to 4096, and the Skia resource cache to
+64 MiB. The shared acceptance policy charges smaller probes for display resolution and refresh.
+
+The coordinator waits up to 4 seconds; the GPU loop checks a 2.5-second deadline between frames.
+Native driver calls may ignore cancellation. Late results never write the profile, and resources
+are released when the worker returns. Background entry, a memory warning, low power mode or serious
+thermal pressure invalidates the current run. These are end-to-end estimates on a representative
+SDK scene, not hardware GPU counters or a frame-rate guarantee for every app screen.
+
+The atomic profile lives in `Application Support/liquid-glass/device-profile-v1`, with the directory
+excluded from backup/transfer. Reads are bounded to 4 KiB. A local hash includes machine, SoC,
+memory, renderer capabilities, normalized screen dimensions, refresh, density, simulator status
+and an iOS workload version. It excludes serial numbers, app versions and caller theme settings.
+The simulator measures its host GPU and has a separate key; it must not stand in for an iPhone.
+
+A pending record is saved before GPU work. An interrupted process, timeout, failed/partial test,
+or unavailable storage yields `CAPABILITY_ESTIMATE` with **zero measured timings**, keeping the
+hardware estimate instead of permanently forcing every recent phone to MINIMAL. Successful probes
+publish `MEASURED` with CPU/memory/render P90 and sample dimensions. Both completed results are
+stable across subsequent launches; pending recovery does not repeat potentially crashing native
+work. Clearing the SDK profile or changing its hardware/workload key permits a new calibration.
+
+On measured-profile launches, a small 256 x 256 offscreen pass prepares all four actual SDK shaders
+on Metal. It is process-owned and independent of the permanent score; Skia source programs are
+also shared by the live renderers. A device/source signature in `shader-warmup.pending` prevents
+repeating a crashed, failed or timed-out GPU preparation. The 1.5-second coordinator only removes
+that marker after timely success. The offscreen context is released afterward: this warms actual
+GPU work but does not expose or preload Compose's separate context-local pipeline cache, nor does
+it remove the steady per-frame cost of blur/refraction.
+
+Both platforms use the same state builder: `maximumGlassQuality` selects optical fidelity,
+`liquidIntensity` scales the effects, `reduceMotion` disables motion, and the hardware budget only
+selects texture resolution. iOS refreshes thermal/power diagnostics on system notifications and
+foreground entry, removing observers when the theme leaves composition. These diagnostics never
+reclassify hardware. Available memory remains unknown (zero); total RAM is not reported as free RAM.
 
 Each local runtime shader cache keeps at most eight successful entries and eight rejected sources.
 Changing a source under the same key invalidates that entry; an unchanged rejected source is not
@@ -175,6 +246,15 @@ and shader cache reuse/invalidation/bounds. Android
 instrumentation covers nested recording, menu interaction, visible loading motion, backdrop
 alignment and retained refraction under downsampling. Compilation of instrumentation tests is not
 an execution result.
+
+The iOS coordinator host tests additionally cover pending-before-measure ordering, cached restarts,
+concurrent themes, caller cancellation, invalid samples, timeouts with late native completion,
+warm-up crash guards and device-key invalidation. Apple CPU names and generation ceilings are
+covered by the common processor tests. `LiquidGlassIosNativeCalibrationTest` exercises the native
+thread clock, all four shaders on Metal with readback, and atomic Foundation persistence on Apple
+hardware/simulator. Compile it with `:sdk:compileTestKotlinIosArm64` and
+`:sdk:compileTestKotlinIosSimulatorArm64`; execute `:sdk:iosSimulatorArm64Test` on macOS. A Linux
+compilation result does not execute these native tests.
 
 For acceptance, verify a fresh calibration, process restart without reclassification, preparation
 on a cached-profile launch, interrupted-record recovery, light/dark mode, rotation, moving

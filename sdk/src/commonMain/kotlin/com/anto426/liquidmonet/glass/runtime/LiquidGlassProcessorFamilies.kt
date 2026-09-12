@@ -39,6 +39,25 @@ object LiquidGlassProcessorFamilies {
     // These are SDK policy choices, not vendor performance guarantees. Keep code aliases only
     // where their family is known; a generic vendor name such as qcom or mt must not select a tier.
     private val rules = listOf(
+        // Metal's device name exposes the Apple SoC (e.g. "Apple A18 Pro GPU"). Match
+        // actual silicon names, never an iPhone product number or a generic "Apple GPU".
+        rule("apple-a8", "Apple A8 / A8X", LiquidGlassQualityTier.BALANCED, "APPLE A8X?", year = 2014),
+        rule("apple-a9", "Apple A9 / A9X", LiquidGlassQualityTier.BALANCED, "APPLE A9X?", year = 2015),
+        rule("apple-a10", "Apple A10 / A10X", LiquidGlassQualityTier.HIGH, "APPLE A10X?", year = 2016),
+        rule("apple-a11", "Apple A11 Bionic", LiquidGlassQualityTier.HIGH, "APPLE A11", year = 2017),
+        rule("apple-a12", "Apple A12 / A12X / A12Z", LiquidGlassQualityTier.HIGH, "APPLE A12[XZ]?", year = 2018),
+        rule("apple-a13", "Apple A13 Bionic", LiquidGlassQualityTier.HIGH, "APPLE A13", year = 2019),
+        rule("apple-a14", "Apple A14 Bionic", LiquidGlassQualityTier.ULTRA, "APPLE A14", year = 2020),
+        rule("apple-a15", "Apple A15 Bionic", LiquidGlassQualityTier.ULTRA, "APPLE A15", year = 2021),
+        rule("apple-a16", "Apple A16 Bionic", LiquidGlassQualityTier.ULTRA, "APPLE A16", year = 2022),
+        rule("apple-a17", "Apple A17 Pro", LiquidGlassQualityTier.ULTRA, "APPLE A17 PRO", year = 2023),
+        rule("apple-a18", "Apple A18 / A18 Pro", LiquidGlassQualityTier.ULTRA, "APPLE A18(?: PRO)?", year = 2024),
+        rule("apple-a19", "Apple A19 / A19 Pro", LiquidGlassQualityTier.ULTRA, "APPLE A19(?: PRO)?", year = 2025),
+        rule("apple-m1", "Apple M1 family", LiquidGlassQualityTier.ULTRA, "APPLE M1(?: PRO| MAX| ULTRA)?", year = 2020),
+        rule("apple-m2", "Apple M2 family", LiquidGlassQualityTier.ULTRA, "APPLE M2(?: PRO| MAX| ULTRA)?", year = 2022),
+        rule("apple-m3", "Apple M3 family", LiquidGlassQualityTier.ULTRA, "APPLE M3(?: PRO| MAX| ULTRA)?", year = 2023),
+        rule("apple-m4", "Apple M4 family", LiquidGlassQualityTier.ULTRA, "APPLE M4(?: PRO| MAX| ULTRA)?", year = 2024),
+        rule("apple-m5", "Apple M5 family", LiquidGlassQualityTier.ULTRA, "APPLE M5(?: PRO| MAX| ULTRA)?", year = 2025),
         // Specific generations must precede series fallbacks. Rebrands retain their silicon era.
         // Launch dates and code aliases are documented in docs/PROCESSOR_FAMILIES.md.
         rule("snapdragon-820", "Snapdragon 820/821 generation", LiquidGlassQualityTier.HIGH,
