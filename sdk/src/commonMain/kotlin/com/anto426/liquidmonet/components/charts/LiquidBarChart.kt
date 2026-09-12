@@ -43,16 +43,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anto426.liquidmonet.glass.LiquidGlassRole
-import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.glass.runtime.animateBackground
-import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.components.internal.LiquidInputNormalization
 import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
@@ -77,8 +75,9 @@ fun LiquidBarChart(
     maxValue: Float? = null,
     valueSuffix: String = "",
     valueFormatter: (Float) -> String = ::formatLiquidChartValue,
-    detailDescription: String = "Valore del dato selezionato",
+    detailDescription: String = "",
     showDetails: Boolean = false,
+    showXAxisLabels: Boolean = true,
     backdropState: Backdrop = emptyBackdrop(),
     onEntrySelected: ((LiquidChartEntry?) -> Unit)? = null
 ) {
@@ -289,6 +288,31 @@ fun LiquidBarChart(
             }
         }
 
+        // X-Axis Labels directly under each bar
+        if (showXAxisLabels && entries.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                entries.forEachIndexed { index, entry ->
+                    val isSelected = index == selectedIndex
+                    Text(
+                        text = entry.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isSelected) primaryColor else colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
         if (showDetails) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
@@ -315,80 +339,53 @@ fun LiquidBarChart(
             }
         }
 
-        // Dynamic Bottom Detail Disclosure Pod (SOTTO AL GRAFICO)
+        // Selection Detail Display (Clean, flat, no double box)
         AnimatedContent(
             targetState = selectedEntry,
             transitionSpec = {
                 LiquidMotion.slideUpFadeEnter(performance) { it / 2 } togetherWith
                     LiquidMotion.slideDownFadeExit(performance) { -it / 2 }
             },
-            label = "BarBottomDetailTransition"
+            label = "BarSelectionTransition"
         ) { currentSelection ->
-            Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .liquidGlass(
-                            backdrop = effectiveBackdrop,
-                            shape = RoundedRectangle(20.dp),
-                            role = LiquidGlassRole.Control,
-                            containerColor = primaryColor.copy(alpha = 0.14f)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f).padding(end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedRectangle(10.dp))
-                                    .background(primaryColor.copy(alpha = 0.25f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = LiquidIcons.Calendar,
-                                    contentDescription = null,
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-
-                            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                                Text(
-                                    text = currentSelection.label,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.onSurface
-                                )
-                                Text(
-                                    text = detailDescription,
-                                    fontSize = 11.sp,
-                                    color = colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        // Value Pill
-                        Box(
-                            modifier = Modifier
-                                .clip(Capsule())
-                                .background(primaryColor.copy(alpha = 0.28f))
-                                .padding(horizontal = 14.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                text = "${valueFormatter(currentSelection.value)}${valueSuffix.withLeadingSpace()}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Black,
-                                color = primaryColor
-                            )
-                        }
+                    Text(
+                        text = currentSelection.label,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (detailDescription.isNotBlank()) {
+                        Text(
+                            text = detailDescription,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
+                }
+
+                Text(
+                    text = "${valueFormatter(currentSelection.value)}${valueSuffix.withLeadingSpace()}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black,
+                    color = primaryColor,
+                    softWrap = false,
+                    maxLines = 1
+                )
             }
         }
     }

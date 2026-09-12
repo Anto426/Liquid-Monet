@@ -12,6 +12,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -49,16 +50,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anto426.liquidmonet.components.buttons.LiquidButton
-import com.anto426.liquidmonet.components.buttons.LiquidButtonSize
-import com.anto426.liquidmonet.components.buttons.LiquidButtonVariant
 import com.anto426.liquidmonet.components.internal.LiquidInputNormalization
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
 import com.anto426.liquidmonet.glass.resolveLiquidGlassBackdrop
 import com.anto426.liquidmonet.glass.runtime.LocalLiquidGlassPerformance
 import com.anto426.liquidmonet.glass.runtime.animateBackground
-import com.anto426.liquidmonet.icons.LiquidIcons
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
@@ -88,8 +85,8 @@ fun LiquidLineChart(
     maxValue: Float? = null,
     showLegend: Boolean = true,
     primarySeriesLabel: String = "Valore",
-    secondarySeriesLabel: String = "Media Pond.",
-    tertiarySeriesLabel: String = "Media Arit.",
+    secondarySeriesLabel: String = "Serie 2",
+    tertiarySeriesLabel: String = "Serie 3",
     valueSuffix: String = "",
     valueFormatter: (Float) -> String = ::formatLiquidChartValue,
     showDetails: Boolean = false,
@@ -199,7 +196,7 @@ fun LiquidLineChart(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // 1. Series Pill Controls with LiquidButton
+        // 1. Series Pill Controls (Compact, non-wrapping chips)
         if (showLegend) {
             Row(
                 modifier = Modifier
@@ -208,62 +205,92 @@ fun LiquidLineChart(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                LiquidButton(
-                    onClick = { showGradesLine = !showGradesLine },
-                    variant = if (showGradesLine) LiquidButtonVariant.Primary else LiquidButtonVariant.Glass,
-                    size = LiquidButtonSize.Small,
-                    backdropState = effectiveBackdrop,
-                    shape = Capsule(),
-                    modifier = Modifier.weight(1f),
-                    leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .clip(Capsule())
+                        .background(if (showGradesLine) primaryColor.copy(alpha = 0.16f) else colorScheme.surfaceVariant.copy(alpha = 0.40f))
+                        .clickable { showGradesLine = !showGradesLine }
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(7.dp)
+                                .size(6.dp)
                                 .clip(Capsule())
-                                .background(if (showGradesLine) Color.White else primaryColor)
+                                .background(if (showGradesLine) primaryColor else colorScheme.outlineVariant)
                         )
-                    },
-                    text = primarySeriesLabel
-                )
+                        Text(
+                            text = primarySeriesLabel,
+                            fontSize = 11.sp,
+                            fontWeight = if (showGradesLine) FontWeight.Bold else FontWeight.Medium,
+                            color = if (showGradesLine) primaryColor else colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
 
                 if (weightedAverageEntries != null) {
-                    LiquidButton(
-                        onClick = { showWeightedLine = !showWeightedLine },
-                        variant = if (showWeightedLine) LiquidButtonVariant.Tonal else LiquidButtonVariant.Glass,
-                        size = LiquidButtonSize.Small,
-                        backdropState = effectiveBackdrop,
-                        shape = Capsule(),
-                        modifier = Modifier.weight(1.3f),
-                        leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .clip(Capsule())
+                            .background(if (showWeightedLine) secondaryColor.copy(alpha = 0.16f) else colorScheme.surfaceVariant.copy(alpha = 0.40f))
+                            .clickable { showWeightedLine = !showWeightedLine }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .size(7.dp)
+                                    .size(6.dp)
                                     .clip(Capsule())
-                                    .background(if (showWeightedLine) Color.White else secondaryColor)
+                                    .background(if (showWeightedLine) secondaryColor else colorScheme.outlineVariant)
                             )
-                        },
-                        text = secondarySeriesLabel
-                    )
+                            Text(
+                                text = secondarySeriesLabel,
+                                fontSize = 11.sp,
+                                fontWeight = if (showWeightedLine) FontWeight.Bold else FontWeight.Medium,
+                                color = if (showWeightedLine) secondaryColor else colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
                 }
 
                 if (arithmeticAverageEntries != null) {
-                    LiquidButton(
-                        onClick = { showArithmeticLine = !showArithmeticLine },
-                        variant = if (showArithmeticLine) LiquidButtonVariant.Secondary else LiquidButtonVariant.Glass,
-                        size = LiquidButtonSize.Small,
-                        backdropState = effectiveBackdrop,
-                        shape = Capsule(),
-                        modifier = Modifier.weight(1.3f),
-                        leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .clip(Capsule())
+                            .background(if (showArithmeticLine) tertiaryColor.copy(alpha = 0.16f) else colorScheme.surfaceVariant.copy(alpha = 0.40f))
+                            .clickable { showArithmeticLine = !showArithmeticLine }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .size(7.dp)
+                                    .size(6.dp)
                                     .clip(Capsule())
-                                    .background(if (showArithmeticLine) Color.White else tertiaryColor)
+                                    .background(if (showArithmeticLine) tertiaryColor else colorScheme.outlineVariant)
                             )
-                        },
-                        text = tertiarySeriesLabel
-                    )
+                            Text(
+                                text = tertiarySeriesLabel,
+                                fontSize = 11.sp,
+                                fontWeight = if (showArithmeticLine) FontWeight.Bold else FontWeight.Medium,
+                                color = if (showArithmeticLine) tertiaryColor else colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -640,161 +667,96 @@ fun LiquidLineChart(
             }
         }
 
-        // 3. Multi-Metric Disclosure Pod
+        // 3. Selection Detail Display (Clean, flat, no double box)
         AnimatedContent(
             targetState = selectedEntry,
             transitionSpec = {
                 LiquidMotion.slideUpFadeEnter(performance) { h -> h / 3 } togetherWith
                     LiquidMotion.slideDownFadeExit(performance) { h -> -h / 3 }
             },
-            label = "MultiMetricDetailTransition"
+            label = "LineSelectionDetailTransition"
         ) { currentSelection ->
-            val curWeighted = selectedWeighted?.value ?: currentSelection.secondaryValue ?: currentSelection.value
-            val curArithmetic = selectedArithmetic?.value ?: currentSelection.value
+            val curWeighted = selectedWeighted?.value ?: currentSelection.secondaryValue
+            val curArithmetic = selectedArithmetic?.value
 
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .liquidGlass(
-                        backdrop = effectiveBackdrop,
-                        shape = RoundedRectangle(22.dp),
-                        role = LiquidGlassRole.Control,
-                        containerColor = primaryColor.copy(alpha = 0.10f)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Header con Dettaglio Valore
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = currentSelection.label,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false).padding(end = 12.dp)
+                    )
+
+                    Text(
+                        text = "${valueFormatter(currentSelection.value)}${valueSuffix.withLeadingSpace()}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = primaryColor
+                    )
+                }
+
+                if (curWeighted != null || curArithmetic != null) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.weight(1f).padding(end = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(RoundedRectangle(12.dp))
-                                    .background(primaryColor.copy(alpha = 0.22f)),
-                                contentAlignment = Alignment.Center
+                        if (curWeighted != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Icon(
-                                    imageVector = LiquidIcons.Star,
-                                    contentDescription = null,
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-
-                            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                                Text(
-                                    text = currentSelection.label,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.onSurface
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(Capsule())
+                                        .background(secondaryColor)
                                 )
                                 Text(
-                                    text = "Dato #${effectiveSelectedIndex + 1} di ${entries.size}",
-                                    fontSize = 11.sp,
+                                    text = secondarySeriesLabel,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
                                     color = colorScheme.onSurfaceVariant
                                 )
-                            }
-                        }
-
-                        // Valore Singolo Pill
-                        Box(
-                            modifier = Modifier
-                                .clip(Capsule())
-                                .background(primaryColor.copy(alpha = 0.25f))
-                                .padding(horizontal = 14.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                text = "${valueFormatter(currentSelection.value)}${valueSuffix.withLeadingSpace()}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Black,
-                                color = primaryColor
-                            )
-                        }
-                    }
-
-                    // Sezione Serie Ausiliarie sullo Stesso Punto
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Serie Secondaria
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedRectangle(14.dp))
-                                .background(secondaryColor.copy(alpha = 0.16f))
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(6.dp)
-                                            .clip(Capsule())
-                                            .background(secondaryColor)
-                                    )
-                                    Text(
-                                        text = secondarySeriesLabel,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = colorScheme.onSurfaceVariant
-                                    )
-                                }
                                 Text(
                                     text = "${valueFormatter(curWeighted)}${valueSuffix.withLeadingSpace()}",
                                     fontSize = 13.sp,
-                                    fontWeight = FontWeight.Black,
+                                    fontWeight = FontWeight.Bold,
                                     color = secondaryColor
                                 )
                             }
                         }
 
-                        // Serie Terziaria
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedRectangle(14.dp))
-                                .background(tertiaryColor.copy(alpha = 0.16f))
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
-                        ) {
+                        if (curArithmetic != null) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(6.dp)
-                                            .clip(Capsule())
-                                            .background(tertiaryColor)
-                                    )
-                                    Text(
-                                        text = tertiarySeriesLabel,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = colorScheme.onSurfaceVariant
-                                    )
-                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(Capsule())
+                                        .background(tertiaryColor)
+                                )
+                                Text(
+                                    text = tertiarySeriesLabel,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = colorScheme.onSurfaceVariant
+                                )
                                 Text(
                                     text = "${valueFormatter(curArithmetic)}${valueSuffix.withLeadingSpace()}",
                                     fontSize = 13.sp,
