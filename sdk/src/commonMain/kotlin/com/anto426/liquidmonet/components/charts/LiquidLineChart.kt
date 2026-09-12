@@ -88,8 +88,8 @@ fun LiquidLineChart(
     maxValue: Float? = null,
     showLegend: Boolean = true,
     primarySeriesLabel: String = "Valore",
-    secondarySeriesLabel: String = "Secondaria",
-    tertiarySeriesLabel: String = "Terziaria",
+    secondarySeriesLabel: String = "Media Pond.",
+    tertiarySeriesLabel: String = "Media Arit.",
     valueSuffix: String = "",
     valueFormatter: (Float) -> String = ::formatLiquidChartValue,
     showDetails: Boolean = false,
@@ -615,27 +615,28 @@ fun LiquidLineChart(
         }
 
         if (showDetails) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = entries.first().label,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.onSurfaceVariant,
-            )
-            if (entries.size > 1) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 Text(
-                    text = entries.last().label,
+                    text = entries.first().label,
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall,
                     color = colorScheme.onSurfaceVariant,
                 )
+                if (entries.size > 1) {
+                    Text(
+                        text = entries.last().label,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
 
@@ -756,7 +757,7 @@ fun LiquidLineChart(
                                     )
                                 }
                                 Text(
-                                    text = "${((curWeighted * 100).toInt() / 100.0)}",
+                                    text = "${valueFormatter(curWeighted)}${valueSuffix.withLeadingSpace()}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Black,
                                     color = secondaryColor
@@ -795,7 +796,7 @@ fun LiquidLineChart(
                                     )
                                 }
                                 Text(
-                                    text = "${((curArithmetic * 100).toInt() / 100.0)}",
+                                    text = "${valueFormatter(curArithmetic)}${valueSuffix.withLeadingSpace()}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = tertiaryColor
@@ -805,7 +806,6 @@ fun LiquidLineChart(
                     }
                 }
             }
-        }
         }
     }
 }

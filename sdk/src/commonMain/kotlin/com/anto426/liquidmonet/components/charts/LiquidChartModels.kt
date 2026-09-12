@@ -51,7 +51,13 @@ data class LiquidChartStyle(
 
 /** Multiplatform-safe compact value formatter used by chart disclosures and scales. */
 fun formatLiquidChartValue(value: Float): String {
-    val integer = value.roundToInt()
-    if (abs(value - integer) < 0.01f) return integer.toString()
-    return ((value * 10f).roundToInt() / 10f).toString()
+    val scaled = (value * 100f).roundToInt()
+    val sign = if (scaled < 0) "-" else ""
+    val absScaled = abs(scaled)
+    val integerPart = absScaled / 100
+    val remainder = absScaled % 100
+    if (remainder == 0) return "$sign$integerPart"
+    if (remainder % 10 == 0) return "$sign$integerPart.${remainder / 10}"
+    val fraction = remainder.toString().padStart(2, '0')
+    return "$sign$integerPart.$fraction"
 }

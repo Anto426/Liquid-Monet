@@ -11,6 +11,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -172,6 +173,27 @@ fun LiquidBarChart(
                         onEntrySelected?.invoke(entries[index])
                     }
                 }
+                .pointerInput(entries) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            val width = size.width
+                            val totalBars = entries.size
+                            val step = width / totalBars
+                            val index = (offset.x / step).toInt().coerceIn(0, entries.lastIndex)
+                            selectedIndex = index
+                            onEntrySelected?.invoke(entries[index])
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            val width = size.width
+                            val totalBars = entries.size
+                            val step = width / totalBars
+                            val index = (change.position.x / step).toInt().coerceIn(0, entries.lastIndex)
+                            selectedIndex = index
+                            onEntrySelected?.invoke(entries[index])
+                        }
+                    )
+                }
         ) {
             Canvas(modifier = Modifier.matchParentSize()) {
                 val width = size.width
@@ -268,27 +290,28 @@ fun LiquidBarChart(
         }
 
         if (showDetails) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = entries.first().label,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.onSurfaceVariant,
-            )
-            if (entries.size > 1) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 Text(
-                    text = entries.last().label,
+                    text = entries.first().label,
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall,
                     color = colorScheme.onSurfaceVariant,
                 )
+                if (entries.size > 1) {
+                    Text(
+                        text = entries.last().label,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
 
@@ -367,7 +390,6 @@ fun LiquidBarChart(
                         }
                     }
             }
-        }
         }
     }
 }
