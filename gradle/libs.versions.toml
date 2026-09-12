@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.2"
+agp = "9.4.0"
 kotlin = "2.4.10"
 compileSdk = "37"
 targetSdk = "37"
@@ -12,6 +12,7 @@ activityCompose = "1.13.0"
 composeMultiplatform = "1.12.0"
 material3Multiplatform = "1.10.0-alpha05"
 datetime = "0.8.0"
+coroutines = "1.11.0"
 navigationEvent = "1.0.1"
 
 [libraries]
@@ -26,6 +27,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 compose-material3-multiplatform = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "material3Multiplatform" }
 navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationEvent" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 
 [plugins]
