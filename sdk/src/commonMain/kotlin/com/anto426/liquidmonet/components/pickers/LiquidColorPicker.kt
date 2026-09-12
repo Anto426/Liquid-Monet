@@ -1,6 +1,5 @@
 package com.anto426.liquidmonet.components.pickers
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import com.anto426.liquidmonet.motion.LiquidMotion
 import androidx.compose.foundation.Canvas
@@ -9,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,11 +16,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -58,7 +61,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
-import com.anto426.liquidmonet.components.display.liquidIconContainer
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.glass.LiquidGlassRole
 import com.anto426.liquidmonet.glass.liquidGlass
@@ -76,15 +78,15 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 /**
- * LiquidColorPicker - Advanced Optical Liquid Glass Color Spectrum & Palette Selector.
+ * LiquidColorPicker - Selettore cromatico avanzato rifatto da zero.
  *
- * Features:
- * - Real-time Snell optical liquid glass refraction & elastic physics
- * - Magnified Liquid Glass Color Lens with specular reflection & split preview
- * - 3 Interactive Modes: Curated Thematic Palettes, 2D Spectrum Canvas, and Precision Sliders
- * - Direct Hex input with clipboard copy/paste feedback
- * - Recent colors history strip
- * - High precision HSV / HSL / RGB / Hex bidirectional synchronization
+ * Architettura:
+ * 1. Header con anteprima cromatica ad alta fedeltà, codice HEX interattivo, valori RGB e ripristino rapido.
+ * 2. Selettore modalità a segmenti (Palette, Spettro 2D, Slider).
+ * 3. Palette tematiche con pillole di categoria a scorrimento orizzontale privo di wrap spezzati.
+ * 4. Spettro continuo con manipolazione fluida 2D di saturazione e luminosità.
+ * 5. Cursori di precisione individuali con barre cromatiche dinamiche in tempo reale.
+ * 6. Input HEX diretto con validazione istantanea e supporto clipboard.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -108,22 +110,21 @@ fun LiquidColorPicker(
     var value by remember { mutableFloatStateOf(0.90f) }
     var alpha by remember { mutableFloatStateOf(selectedColor.alpha) }
 
-    var selectedMode by remember { mutableIntStateOf(0) } // 0: Tavolozze, 1: Spettro 2D, 2: Cursori
+    var selectedMode by remember { mutableIntStateOf(0) } // 0: Palette, 1: Spettro, 2: Slider
     var selectedCategoryIndex by remember { mutableIntStateOf(0) } // 0: Tutti, 1: Accademici, 2: Vibranti, 3: Pastello, 4: Material
-    var showHexDialog by remember { mutableStateOf(false) }
     var hexInputText by remember { mutableStateOf("") }
     var copiedFeedback by remember { mutableStateOf(false) }
 
     val recentColors = remember { mutableStateListOf<Color>() }
 
-    // Synchronize initial HSV with selectedColor when it changes externally
+    // Sincronizza HSV con selectedColor se cambia dall'esterno
     LaunchedEffect(selectedColor) {
         val (h, s, v) = colorToHsv(selectedColor)
         hue = h
         saturation = s
         value = v
         alpha = selectedColor.alpha
-        if (!recentColors.contains(selectedColor)) {
+        if (!recentColors.any { it.toArgb() == selectedColor.toArgb() }) {
             recentColors.add(0, selectedColor)
             if (recentColors.size > 8) {
                 recentColors.removeLast()
@@ -143,16 +144,17 @@ fun LiquidColorPicker(
     val gInt = (currentColor.green * 255).toInt().coerceIn(0, 255)
     val bInt = (currentColor.blue * 255).toInt().coerceIn(0, 255)
 
+    // Palette tematiche predefinite
     val academicPresets = remember {
         listOf(
-            Color(0xFF0061A4), // Sapphire
-            Color(0xFF006C4C), // Emerald
-            Color(0xFFBA1A1A), // Crimson
-            Color(0xFF6B4EA2), // Violet
-            Color(0xFF8B5000), // Sunset
-            Color(0xFF243B55), // Navy
-            Color(0xFF8C2D19), // Sienna
-            Color(0xFF002147), // Oxford
+            Color(0xFF0B57D0), // UniMol Royal
+            Color(0xFFE91E63), // Amaranto Vivo
+            Color(0xFF00897B), // Smeraldo Luminoso
+            Color(0xFFE53935), // Rosso Rubino
+            Color(0xFF8E24AA), // Viola Dottorato
+            Color(0xFFFB8C00), // Ambra Calda
+            Color(0xFF0288D1), // Cerulean Blue
+            Color(0xFF43A047), // Verde Campus
         )
     }
 
@@ -186,13 +188,13 @@ fun LiquidColorPicker(
         listOf(
             Color(0xFF009688), // Teal
             Color(0xFF3F51B5), // Indigo
-            Color(0xFF673AB7), // Deep Purple
+            Color(0xFF7E57C2), // Deep Purple Luminoso
             Color(0xFF8BC34A), // Light Green
             Color(0xFFFFB300), // Amber
             Color(0xFFFF5722), // Deep Orange
-            Color(0xFF607D8B), // Slate
+            Color(0xFF26C6DA), // Cyan Luminoso
             Color(0xFFFFFFFF), // White
-            Color(0xFF121212), // Dark
+            Color(0xFFAB47BC), // Bright Orchid
         )
     }
 
@@ -215,10 +217,10 @@ fun LiquidColorPicker(
                 role = LiquidGlassRole.Surface
             )
             .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // =========================================================
-        // 1. HEADER: MAGNIFIED LENS + DUAL SPLIT PREVIEW + HEX BADGE
+        // 1. HERO HEADER: ANTEPRIMA CROMATICA + HEX BADGE + VALORI
         // =========================================================
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -229,81 +231,33 @@ fun LiquidColorPicker(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Optical Glass Lens with Split Preview (Initial vs Current)
+                // Riquadro colore attivo con bordo e riflesso
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(CircleShape)
+                        .clip(RoundedRectangle(16.dp))
+                        .background(currentColor)
                         .border(
                             width = 2.dp,
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.White.copy(alpha = 0.85f),
-                                    currentColor.copy(alpha = 0.50f)
-                                )
-                            ),
-                            shape = CircleShape
+                            color = Color.White.copy(alpha = 0.40f),
+                            shape = RoundedRectangle(16.dp)
                         )
-                        .clickable {
-                            // Quick revert to initial on tap
-                            onColorSelected(initialColor)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Left half: initial color, Right half: new current color
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxSize()
-                                .background(initialColor)
-                        )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxSize()
-                                .background(currentColor)
-                        )
-                    }
+                )
 
-                    // Specular reflection gloss sheen
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = 0.40f),
-                                        Color.Transparent
-                                    ),
-                                    radius = 45f
-                                ),
-                                shape = CircleShape
-                            )
-                    )
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = "Colore Selezionato",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = glassColors.secondaryContent,
-                        fontSize = 11.5.sp
-                    )
-
-                    // Clickable Hex Badge (copies to clipboard)
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    // Badge HEX cliccabile per copiare
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier
                             .clip(Capsule())
-                            .background(currentColor.copy(alpha = 0.16f))
-                            .border(1.dp, currentColor.copy(alpha = 0.50f), Capsule())
+                            .background(colorScheme.onSurface.copy(alpha = 0.08f))
+                            .border(1.dp, colorScheme.outlineVariant.copy(alpha = 0.3f), Capsule())
                             .clickable {
                                 clipboardManager.setText(AnnotatedString(hexString))
                                 copiedFeedback = true
                                 coroutineScope.launch {
-                                    delay(1500)
+                                    delay(1400)
                                     copiedFeedback = false
                                 }
                             }
@@ -314,7 +268,7 @@ fun LiquidColorPicker(
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,
-                                fontSize = 14.5.sp
+                                fontSize = 15.sp
                             ),
                             color = colorScheme.onSurface
                         )
@@ -326,53 +280,68 @@ fun LiquidColorPicker(
                             modifier = Modifier.size(14.dp)
                         )
                     }
+
+                    Text(
+                        text = "RGB: $rInt, $gInt, $bInt",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = glassColors.secondaryContent,
+                        fontSize = 11.sp
+                    )
                 }
             }
 
-            // RGB / HSL summary tag
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = "RGB: $rInt, $gInt, $bInt",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.5.sp
-                )
-                Text(
-                    text = "H: ${hue.toInt()}°  S: ${(saturation * 100).toInt()}%  V: ${(value * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = glassColors.secondaryContent,
-                    fontSize = 10.5.sp
-                )
-                if (showAlpha) {
-                    Text(
-                        text = "Alpha: ${(alpha * 100).toInt()}%",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = glassColors.secondaryContent,
-                        fontSize = 10.5.sp
-                    )
+            // Pulsante Ripristina al colore originario (se modificato)
+            if (currentColor.toArgb() != initialColor.toArgb()) {
+                Box(
+                    modifier = Modifier
+                        .clip(Capsule())
+                        .background(colorScheme.primary.copy(alpha = 0.12f))
+                        .border(1.dp, colorScheme.primary.copy(alpha = 0.3f), Capsule())
+                        .clickable {
+                            val (h, s, v) = colorToHsv(initialColor)
+                            hue = h
+                            saturation = s
+                            value = v
+                            alpha = initialColor.alpha
+                            onColorSelected(initialColor)
+                        }
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = LiquidIcons.Refresh,
+                            contentDescription = "Ripristina",
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Text(
+                            text = "Ripristina",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = colorScheme.primary
+                        )
+                    }
                 }
             }
         }
 
         // =========================================================
-        // 2. MODE SELECTOR SEGMENT (Tavolozze / Spettro 2D / Cursori)
+        // 2. SELETTORE MODALITÀ (Palette / Spettro / Slider)
         // =========================================================
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedRectangle(14.dp))
-                .background(colorScheme.onSurface.copy(alpha = 0.05f))
+                .background(colorScheme.onSurface.copy(alpha = 0.06f))
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val modes = listOf(
-                Triple("Tavolozze", LiquidIcons.Palette, 0),
-                Triple("Spettro 2D", LiquidIcons.Star, 1),
-                Triple("Cursori", LiquidIcons.Settings, 2)
+                Triple("Palette", LiquidIcons.Palette, 0),
+                Triple("Spettro", LiquidIcons.Star, 1),
+                Triple("Slider", LiquidIcons.Settings, 2)
             )
 
             modes.forEach { (label, icon, index) ->
@@ -382,13 +351,17 @@ fun LiquidColorPicker(
                         .weight(1f)
                         .clip(RoundedRectangle(11.dp))
                         .background(
-                            if (isSelected) colorScheme.primary.copy(alpha = 0.16f)
+                            if (isSelected) colorScheme.surface
                             else Color.Transparent
                         )
-                        .border(
-                            width = if (isSelected) 1.dp else 0.dp,
-                            color = if (isSelected) colorScheme.primary.copy(alpha = 0.35f) else Color.Transparent,
-                            shape = RoundedRectangle(11.dp)
+                        .then(
+                            if (isSelected) {
+                                Modifier.border(
+                                    width = 1.dp,
+                                    color = colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                    shape = RoundedRectangle(11.dp)
+                                )
+                            } else Modifier
                         )
                         .clickable { selectedMode = index }
                         .padding(vertical = 8.dp),
@@ -406,10 +379,11 @@ fun LiquidColorPicker(
                         )
                         Text(
                             text = label,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            ),
                             color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant,
-                            fontSize = 12.sp
+                            fontSize = 12.5.sp
                         )
                     }
                 }
@@ -417,18 +391,20 @@ fun LiquidColorPicker(
         }
 
         // =========================================================
-        // 3. TAB CONTENT
+        // 3. CONTENUTO SPECIFICO DELLA MODALITÀ
         // =========================================================
         when (selectedMode) {
             // -----------------------------------------------------
-            // MODE 0: TAVOLOZZE (THEMATIC CURATED PALETTES)
+            // MODALITÀ 0: PALETTE TEMATICHE
             // -----------------------------------------------------
             0 -> {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Category Filter Pills
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    // Pillole categoria con scorrimento orizzontale
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         val categories = listOf("Tutti", "Accademici", "Vibranti", "Pastello", "Material")
                         categories.forEachIndexed { catIndex, catName ->
@@ -437,35 +413,36 @@ fun LiquidColorPicker(
                                 modifier = Modifier
                                     .clip(Capsule())
                                     .background(
-                                        if (isCatSelected) colorScheme.primary.copy(alpha = 0.2f)
-                                        else colorScheme.onSurface.copy(alpha = 0.04f)
+                                        if (isCatSelected) colorScheme.primary.copy(alpha = 0.16f)
+                                        else Color.Transparent
                                     )
                                     .border(
-                                        width = if (isCatSelected) 1.dp else 0.5.dp,
-                                        color = if (isCatSelected) colorScheme.primary else colorScheme.outline.copy(alpha = 0.15f),
+                                        width = if (isCatSelected) 1.5.dp else 1.dp,
+                                        color = if (isCatSelected) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.3f),
                                         shape = Capsule()
                                     )
                                     .clickable { selectedCategoryIndex = catIndex }
-                                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = catName,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Medium
+                                    ),
                                     color = if (isCatSelected) colorScheme.primary else colorScheme.onSurfaceVariant,
-                                    fontSize = 11.sp
+                                    fontSize = 12.sp
                                 )
                             }
                         }
                     }
 
-                    // Palette Droplets Grid
+                    // Griglia dei campioni cromatici
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                        maxItemsInEachRow = 8
+                        maxItemsInEachRow = 7
                     ) {
                         currentPalette.forEach { preset ->
                             val isPresetSelected = (selectedColor.toArgb() == preset.toArgb()) ||
@@ -473,7 +450,7 @@ fun LiquidColorPicker(
                             val isLightPreset = preset == Color.White
 
                             val dropletScale by animateFloatAsState(
-                                targetValue = if (isPresetSelected) 1.15f else 1.0f,
+                                targetValue = if (isPresetSelected) 1.12f else 1.0f,
                                 animationSpec = LiquidMotion.fluidSpring(performance),
                                 label = "dropletScale"
                             )
@@ -482,7 +459,7 @@ fun LiquidColorPicker(
 
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(38.dp)
                                     .graphicsLayer {
                                         scaleX = dropletScale
                                         scaleY = dropletScale
@@ -491,7 +468,7 @@ fun LiquidColorPicker(
                                     .background(if (isLightPreset) Color.White else preset)
                                     .border(
                                         width = if (isPresetSelected) 2.5.dp else 1.dp,
-                                        color = if (isPresetSelected) colorScheme.primary else glassColors.outline.copy(alpha = 0.4f),
+                                        color = if (isPresetSelected) colorScheme.onSurface else glassColors.outline.copy(alpha = 0.35f),
                                         shape = CircleShape
                                     )
                                     .clickable(
@@ -519,7 +496,7 @@ fun LiquidColorPicker(
                         }
                     }
 
-                    // Recent Colors Strip
+                    // Fila colori recenti
                     if (recentColors.isNotEmpty()) {
                         LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
 
@@ -540,12 +517,12 @@ fun LiquidColorPicker(
                                     val isCurrent = currentColor.toArgb() == recentColor.toArgb()
                                     Box(
                                         modifier = Modifier
-                                            .size(24.dp)
+                                            .size(26.dp)
                                             .clip(CircleShape)
                                             .background(recentColor)
                                             .border(
                                                 width = if (isCurrent) 2.dp else 1.dp,
-                                                color = if (isCurrent) colorScheme.primary else glassColors.outline.copy(alpha = 0.4f),
+                                                color = if (isCurrent) colorScheme.primary else glassColors.outline.copy(alpha = 0.35f),
                                                 shape = CircleShape
                                             )
                                             .clickable {
@@ -565,17 +542,17 @@ fun LiquidColorPicker(
             }
 
             // -----------------------------------------------------
-            // MODE 1: SPETTRO 2D (2D SATURATION-VALUE CANVAS + HUE)
+            // MODALITÀ 1: SPETTRO 2D CONTINUO
             // -----------------------------------------------------
             1 -> {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // 2D Saturation / Value Canvas
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    // Canvas 2D Saturazione / Luminosità
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(170.dp)
+                            .height(180.dp)
                             .clip(RoundedRectangle(16.dp))
-                            .border(1.dp, glassColors.outline.copy(alpha = 0.4f), RoundedRectangle(16.dp))
+                            .border(1.dp, glassColors.outline.copy(alpha = 0.35f), RoundedRectangle(16.dp))
                     ) {
                         val pureHueColor = remember(hue) {
                             hsvToColor(hue, 1f, 1f, 1f)
@@ -606,42 +583,39 @@ fun LiquidColorPicker(
                                     }
                                 }
                         ) {
-                            // 1. Base pure hue fill
+                            // 1. Tonalità pura
                             drawRect(color = pureHueColor)
 
-                            // 2. Horizontal white gradient (Saturation: Left=White, Right=Transparent)
+                            // 2. Gradiente saturazione (bianco a trasparente)
                             drawRect(
                                 brush = Brush.horizontalGradient(
                                     listOf(Color.White, Color.Transparent)
                                 )
                             )
 
-                            // 3. Vertical black gradient (Value/Lightness: Top=Transparent, Bottom=Black)
+                            // 3. Gradiente luminosità (trasparente a nero)
                             drawRect(
                                 brush = Brush.verticalGradient(
                                     listOf(Color.Transparent, Color.Black)
                                 )
                             )
 
-                            // 4. Reticle / Crosshair Indicator
+                            // 4. Reticolo mirino
                             val reticleX = saturation * size.width
                             val reticleY = (1f - value) * size.height
 
-                            // Outer black shadow ring
                             drawCircle(
                                 color = Color.Black.copy(alpha = 0.6f),
                                 radius = 12.dp.toPx(),
                                 center = Offset(reticleX, reticleY),
                                 style = Stroke(width = 3.5.dp.toPx())
                             )
-                            // Inner white ring
                             drawCircle(
                                 color = Color.White,
                                 radius = 10.dp.toPx(),
                                 center = Offset(reticleX, reticleY),
                                 style = Stroke(width = 2.5.dp.toPx())
                             )
-                            // Core color dot
                             drawCircle(
                                 color = currentColor,
                                 radius = 7.5.dp.toPx(),
@@ -650,15 +624,15 @@ fun LiquidColorPicker(
                         }
                     }
 
-                    // Continuous Hue Bar
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // Slider continuo Tonalità (Hue)
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Tonalità (Spettro)",
+                                text = "Tonalità spettro",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = glassColors.secondaryContent,
                                 fontWeight = FontWeight.Medium
@@ -690,7 +664,7 @@ fun LiquidColorPicker(
                                 .height(12.dp)
                                 .clip(Capsule())
                                 .background(hueGradient)
-                                .border(1.dp, glassColors.outline, Capsule())
+                                .border(1.dp, glassColors.outline.copy(alpha = 0.3f), Capsule())
                         )
                         LiquidSlider(
                             value = hue,
@@ -707,12 +681,12 @@ fun LiquidColorPicker(
             }
 
             // -----------------------------------------------------
-            // MODE 2: CURSORI DI PRECISIONE (HSV & ALPHA SLIDERS)
+            // MODALITÀ 2: CURSORI DI PRECISIONE
             // -----------------------------------------------------
             2 -> {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    // 1. Hue Slider
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // 1. Tonalità
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -747,10 +721,10 @@ fun LiquidColorPicker(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(12.dp)
+                                .height(10.dp)
                                 .clip(Capsule())
                                 .background(hueGradient)
-                                .border(1.dp, glassColors.outline, Capsule())
+                                .border(1.dp, glassColors.outline.copy(alpha = 0.3f), Capsule())
                         )
                         LiquidSlider(
                             value = hue,
@@ -764,15 +738,15 @@ fun LiquidColorPicker(
                         )
                     }
 
-                    // 2. Saturation Slider
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // 2. Saturazione
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Saturazione Cromatica",
+                                text = "Saturazione",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = glassColors.secondaryContent,
                                 fontWeight = FontWeight.Medium
@@ -795,10 +769,10 @@ fun LiquidColorPicker(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(12.dp)
+                                .height(10.dp)
                                 .clip(Capsule())
                                 .background(satGradient)
-                                .border(1.dp, glassColors.outline, Capsule())
+                                .border(1.dp, glassColors.outline.copy(alpha = 0.3f), Capsule())
                         )
                         LiquidSlider(
                             value = saturation,
@@ -812,15 +786,15 @@ fun LiquidColorPicker(
                         )
                     }
 
-                    // 3. Value / Lightness Slider
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // 3. Luminosità
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Luminosità / Brillantezza",
+                                text = "Luminosità",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = glassColors.secondaryContent,
                                 fontWeight = FontWeight.Medium
@@ -843,10 +817,10 @@ fun LiquidColorPicker(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(12.dp)
+                                .height(10.dp)
                                 .clip(Capsule())
                                 .background(valGradient)
-                                .border(1.dp, glassColors.outline, Capsule())
+                                .border(1.dp, glassColors.outline.copy(alpha = 0.3f), Capsule())
                         )
                         LiquidSlider(
                             value = value,
@@ -860,16 +834,16 @@ fun LiquidColorPicker(
                         )
                     }
 
-                    // 4. Optional Alpha Slider
+                    // 4. Alpha opzionale
                     if (showAlpha) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Opacità (Trasparenza)",
+                                    text = "Opacità (Alpha)",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = glassColors.secondaryContent,
                                     fontWeight = FontWeight.Medium
@@ -892,10 +866,10 @@ fun LiquidColorPicker(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(12.dp)
+                                    .height(10.dp)
                                     .clip(Capsule())
                                     .background(alphaGradient)
-                                    .border(1.dp, glassColors.outline, Capsule())
+                                    .border(1.dp, glassColors.outline.copy(alpha = 0.3f), Capsule())
                             )
                             LiquidSlider(
                                 value = alpha,
@@ -914,157 +888,107 @@ fun LiquidColorPicker(
         }
 
         // =========================================================
-        // 4. QUICK HEX INPUT / PASTE ACCORDION
+        // 4. INSERIMENTO CODICE ESADECIMALE MANUALE / INCOLLA
         // =========================================================
         LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedRectangle(14.dp))
+                .background(colorScheme.onSurface.copy(alpha = 0.05f))
+                .border(1.dp, colorScheme.outlineVariant.copy(alpha = 0.25f), RoundedRectangle(14.dp))
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .clip(RoundedRectangle(10.dp))
-                    .clickable { showHexDialog = !showHexDialog }
-                    .padding(vertical = 4.dp, horizontal = 6.dp)
-            ) {
-                Icon(
-                    imageVector = LiquidIcons.Edit,
-                    contentDescription = null,
-                    tint = colorScheme.primary,
-                    modifier = Modifier.liquidIconContainer(
-                        containerSize = 28.dp,
-                        iconSize = 14.dp,
-                        containerColor = colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedRectangle(8.dp),
-                    ),
+            Text(
+                text = "#",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = colorScheme.primary
                 )
-                Text(
-                    text = "Inserimento Manuale Codice Esadecimale",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colorScheme.onSurface,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp
-                )
-            }
-
-            Icon(
-                imageVector = if (showHexDialog) LiquidIcons.KeyboardArrowUp else LiquidIcons.KeyboardArrowDown,
-                contentDescription = null,
-                tint = glassColors.secondaryContent,
-                modifier = Modifier
-                    .size(18.dp)
-                    .clickable { showHexDialog = !showHexDialog }
             )
-        }
 
-        AnimatedVisibility(
-            visible = showHexDialog,
-            enter = LiquidMotion.popEnter(performance),
-            exit = LiquidMotion.popExit(performance)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedRectangle(14.dp))
-                    .background(colorScheme.onSurface.copy(alpha = 0.05f))
-                    .border(1.dp, colorScheme.outline.copy(alpha = 0.2f), RoundedRectangle(14.dp))
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = "#",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = colorScheme.primary
-                    )
-                )
-
-                BasicTextField(
-                    value = hexInputText,
-                    onValueChange = { input ->
-                        val clean = input.filter { it.isLetterOrDigit() }.take(8).uppercase()
-                        hexInputText = clean
-                        val parsed = parseHexToColor(clean)
-                        if (parsed != null) {
-                            val (h, s, v) = colorToHsv(parsed)
-                            hue = h
-                            saturation = s
-                            value = v
-                            alpha = parsed.alpha
-                            onColorSelected(parsed)
-                        }
-                    },
-                    textStyle = TextStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = colorScheme.onSurface
-                    ),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Characters,
-                        imeAction = ImeAction.Done
-                    ),
-                    modifier = Modifier.weight(1f),
-                    cursorBrush = SolidColor(colorScheme.primary),
-                    decorationBox = { innerTextField ->
-                        if (hexInputText.isEmpty()) {
-                            Text(
-                                text = hexString.removePrefix("#"),
-                                style = TextStyle(
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 15.sp,
-                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                                )
-                            )
-                        }
-                        innerTextField()
+            BasicTextField(
+                value = hexInputText,
+                onValueChange = { input ->
+                    val clean = input.filter { it.isLetterOrDigit() }.take(8).uppercase()
+                    hexInputText = clean
+                    val parsed = parseHexToColor(clean)
+                    if (parsed != null) {
+                        val (h, s, v) = colorToHsv(parsed)
+                        hue = h
+                        saturation = s
+                        value = v
+                        alpha = parsed.alpha
+                        onColorSelected(parsed)
                     }
-                )
+                },
+                textStyle = TextStyle(
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = colorScheme.onSurface
+                ),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Characters,
+                    imeAction = ImeAction.Done
+                ),
+                modifier = Modifier.weight(1f),
+                cursorBrush = SolidColor(colorScheme.primary),
+                decorationBox = { innerTextField ->
+                    if (hexInputText.isEmpty()) {
+                        Text(
+                            text = hexString.removePrefix("#"),
+                            style = TextStyle(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 15.sp,
+                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                            )
+                        )
+                    }
+                    innerTextField()
+                }
+            )
 
-                // Incolla da Clipboard Button
-                Box(
-                    modifier = Modifier
-                        .clip(Capsule())
-                        .background(colorScheme.primary.copy(alpha = 0.12f))
-                        .clickable {
-                            val clipText = clipboardManager.getText()?.text?.trim().orEmpty()
-                            val clean = clipText.removePrefix("#").filter { it.isLetterOrDigit() }.take(8).uppercase()
-                            if (clean.isNotEmpty()) {
-                                hexInputText = clean
-                                val parsed = parseHexToColor(clean)
-                                if (parsed != null) {
-                                    val (h, s, v) = colorToHsv(parsed)
-                                    hue = h
-                                    saturation = s
-                                    value = v
-                                    alpha = parsed.alpha
-                                    onColorSelected(parsed)
-                                }
+            // Pulsante Incolla da appunti
+            Box(
+                modifier = Modifier
+                    .clip(Capsule())
+                    .background(colorScheme.primary.copy(alpha = 0.12f))
+                    .clickable {
+                        val clipText = clipboardManager.getText()?.text?.trim().orEmpty()
+                        val clean = clipText.removePrefix("#").filter { it.isLetterOrDigit() }.take(8).uppercase()
+                        if (clean.isNotEmpty()) {
+                            hexInputText = clean
+                            val parsed = parseHexToColor(clean)
+                            if (parsed != null) {
+                                val (h, s, v) = colorToHsv(parsed)
+                                hue = h
+                                saturation = s
+                                value = v
+                                alpha = parsed.alpha
+                                onColorSelected(parsed)
                             }
                         }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "Incolla",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary
-                    )
-                }
+                    }
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "Incolla",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = colorScheme.primary
+                )
             }
         }
     }
 }
 
 /**
- * Converts HSV values (h in 0..360, s in 0..1, v in 0..1) to Compose Color.
+ * Converte valori HSV (h 0..360, s 0..1, v 0..1) in Compose Color.
  */
 private fun hsvToColor(h: Float, s: Float, v: Float, alpha: Float = 1f): Color {
     val c = v * s
@@ -1090,7 +1014,7 @@ private fun hsvToColor(h: Float, s: Float, v: Float, alpha: Float = 1f): Color {
 }
 
 /**
- * Converts Compose Color to HSV (Hue 0..360, Saturation 0..1, Value 0..1).
+ * Converte Compose Color in HSV (Hue 0..360, Saturation 0..1, Value 0..1).
  */
 private fun colorToHsv(color: Color): Triple<Float, Float, Float> {
     val r = color.red
@@ -1113,7 +1037,7 @@ private fun colorToHsv(color: Color): Triple<Float, Float, Float> {
 }
 
 /**
- * Formats a Compose Color to #RRGGBB or #AARRGGBB hex string.
+ * Formatta Compose Color in formato stringa esadecimale #RRGGBB o #AARRGGBB.
  */
 private fun colorToHex(color: Color, includeAlpha: Boolean = false): String {
     val a = (color.alpha * 255).toInt().coerceIn(0, 255)
