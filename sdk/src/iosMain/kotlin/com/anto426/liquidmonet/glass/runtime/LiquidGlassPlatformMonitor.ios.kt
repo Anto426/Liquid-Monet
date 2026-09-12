@@ -38,6 +38,7 @@ internal actual fun rememberLiquidGlassPerformanceState(
                     NSProcessInfoThermalStateFair -> LiquidGlassThermalStatus.LIGHT
                     NSProcessInfoThermalStateSerious -> LiquidGlassThermalStatus.SEVERE
                     NSProcessInfoThermalStateCritical -> LiquidGlassThermalStatus.CRITICAL
+                    else -> LiquidGlassThermalStatus.NONE
                 },
                 isPowerSaveMode = process.lowPowerModeEnabled
             )
