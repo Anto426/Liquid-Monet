@@ -48,6 +48,7 @@ kotlin {
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
+            moduleName.set("liquidmonet-sdk")
         }
 
         optimization {
