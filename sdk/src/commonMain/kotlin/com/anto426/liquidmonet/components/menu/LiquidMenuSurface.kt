@@ -1,5 +1,11 @@
 package com.anto426.liquidmonet.components.menu
 
+import androidx.compose.foundation.border
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +43,7 @@ internal fun LiquidGlassMenuSurface(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdropState)
+    val isLightSurface = MaterialTheme.colorScheme.surface.luminance() > 0.5f
     val dragSelection = remember { LiquidMenuDragSelection() }
     val menuShape = remember { RoundedRectangle(22.dp) }
     val interactiveHighlight = rememberLiquidControlHighlight()
@@ -44,6 +51,19 @@ internal fun LiquidGlassMenuSurface(
         enabled = true,
         interactiveHighlight = interactiveHighlight
     )
+
+    val glassRimBrush = remember(isLightSurface) {
+        Brush.linearGradient(
+            colors = listOf(
+                Color.White.copy(alpha = if (isLightSurface) 0.38f else 0.20f),
+                Color.White.copy(alpha = if (isLightSurface) 0.10f else 0.05f),
+                Color.White.copy(alpha = if (isLightSurface) 0.24f else 0.12f),
+                Color.White.copy(alpha = if (isLightSurface) 0.06f else 0.03f)
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+        )
+    }
 
     Box(
         modifier = modifier
@@ -56,6 +76,11 @@ internal fun LiquidGlassMenuSurface(
                 shape = menuShape,
                 role = LiquidGlassRole.Menu,
                 layerBlock = menuLayerBlock
+            )
+            .border(
+                width = 1.dp,
+                brush = glassRimBrush,
+                shape = menuShape
             )
             .then(interactiveHighlight.modifier(clipShape = menuShape))
             .padding(vertical = 6.dp, horizontal = 4.dp)

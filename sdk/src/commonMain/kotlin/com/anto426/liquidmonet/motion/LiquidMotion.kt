@@ -361,14 +361,14 @@ object LiquidMotion {
         transformOrigin: TransformOrigin = TransformOrigin(0.92f, 0.04f),
         isAbove: Boolean = false
     ): EnterTransition {
-        val slideOffset = if (isAbove) 28 else -28
+        val slideOffset = if (isAbove) 16 else -16
         return scaleIn(
             animationSpec = menuBounceSpring(performance),
-            initialScale = 0.70f,
+            initialScale = 0.84f,
             transformOrigin = transformOrigin
         ) + slideInVertically(
             animationSpec = menuBounceSpring(performance),
-            initialOffsetY = { (slideOffset * (it / 100).coerceAtLeast(1)).coerceIn(-48, 48) }
+            initialOffsetY = { (slideOffset * (it / 100).coerceAtLeast(1)).coerceIn(-24, 24) }
         ) + fadeIn(
             animationSpec = transitionTween(performance, FastDurationMillis, EmphasizedDecelerate)
         )
