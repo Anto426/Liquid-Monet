@@ -1,6 +1,7 @@
 package com.anto426.liquidmonet.components.inputs
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +54,8 @@ import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.RoundedRectangle
+import kotlin.math.PI
+import kotlin.math.sin
 
 enum class LiquidTextFieldType {
     Text,
@@ -172,43 +177,45 @@ fun LiquidTextField(
 
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdropState)
 
-    BasicTextField(
-        value = value,
-        onValueChange = { input ->
-            val isValidNumber = type != LiquidTextFieldType.Number ||
-                input.isEmpty() ||
-                input.all { it.isDigit() || it == '.' || it == ',' }
-            val isWithinMaxLength = maxLength == null || input.length <= maxLength
+    val onValueChangeHandler: (String) -> Unit = { input ->
+        val isValidNumber = type != LiquidTextFieldType.Number ||
+            input.isEmpty() ||
+            input.all { it.isDigit() || it == '.' || it == ',' }
+        val isWithinMaxLength = maxLength == null || input.length <= maxLength
 
-            if (isValidNumber && isWithinMaxLength) {
-                onValueChange(input)
-            }
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = minHeight)
-            .liquidGlass(
-                backdrop = effectiveBackdrop,
-                shape = shape,
-                role = LiquidGlassRole.Control
-            )
-            .border(width = 1.dp, color = animatedBorderColor, shape = shape),
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = TextStyle(
-            color = contentColor,
-            fontSize = 15.5.sp,
-            fontWeight = if (isTextArea) FontWeight.Normal else FontWeight.Medium
-        ),
-        cursorBrush = SolidColor(primaryColor),
-        singleLine = effectiveSingleLine,
-        maxLines = effectiveMaxLines,
-        visualTransformation = effectiveVisualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        interactionSource = interactionSource,
-        decorationBox = { innerTextField ->
-            if (isTextArea) {
+        if (isValidNumber && isWithinMaxLength) {
+            onValueChange(input)
+        }
+    }
+
+    if (isTextArea) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChangeHandler,
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(min = minHeight)
+                .liquidGlass(
+                    backdrop = effectiveBackdrop,
+                    shape = shape,
+                    role = LiquidGlassRole.Control
+                )
+                .border(width = 1.dp, color = animatedBorderColor, shape = shape),
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = TextStyle(
+                color = contentColor,
+                fontSize = 15.5.sp,
+                fontWeight = FontWeight.Normal
+            ),
+            cursorBrush = SolidColor(primaryColor),
+            singleLine = false,
+            maxLines = effectiveMaxLines,
+            visualTransformation = effectiveVisualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            interactionSource = interactionSource,
+            decorationBox = { innerTextField ->
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -243,83 +250,131 @@ fun LiquidTextField(
                         )
                     }
                 }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    if (leadingIcon != null) {
-                        Icon(
-                            imageVector = leadingIcon,
-                            contentDescription = null,
-                            tint = if (isFocused) primaryColor else contentColor.copy(alpha = 0.65f),
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                    }
+            }
+        )
+    } else {
+        val dropletSeparating = value.isNotEmpty() && !readOnly && enabled
+        val recoilProgress by animateFloatAsState(
+            targetValue = if (dropletSeparating) 1f else 0f,
+            animationSpec = LiquidMotion.spring(
+                performance = performance,
+                dampingRatio = 0.56f,
+                stiffness = 320f
+            ),
+            label = "textFieldRecoil"
+        )
+        val recoilWave = sin(recoilProgress.coerceIn(0f, 1f) * PI).toFloat()
+        val mainBodySquashX = 1f - recoilWave * 0.018f
+        val mainBodyStretchY = 1f + recoilWave * 0.012f
 
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterStart
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChangeHandler,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = minHeight)
+                    .graphicsLayer {
+                        scaleX = mainBodySquashX
+                        scaleY = mainBodyStretchY
+                        transformOrigin = TransformOrigin(1f, 0.5f)
+                    }
+                    .liquidGlass(
+                        backdrop = effectiveBackdrop,
+                        shape = shape,
+                        role = LiquidGlassRole.Control
+                    )
+                    .border(width = 1.dp, color = animatedBorderColor, shape = shape),
+                enabled = enabled,
+                readOnly = readOnly,
+                textStyle = TextStyle(
+                    color = contentColor,
+                    fontSize = 15.5.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                cursorBrush = SolidColor(primaryColor),
+                singleLine = effectiveSingleLine,
+                maxLines = effectiveMaxLines,
+                visualTransformation = effectiveVisualTransformation,
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
+                interactionSource = interactionSource,
+                decorationBox = { innerTextField ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
                     ) {
-                        if (value.isEmpty()) {
-                            Text(
-                                text = placeholder,
-                                style = TextStyle(
-                                    color = placeholderColor,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Normal
-                                ),
-                                maxLines = effectiveMaxLines
+                        if (leadingIcon != null) {
+                            Icon(
+                                imageVector = leadingIcon,
+                                contentDescription = null,
+                                tint = if (isFocused) primaryColor else contentColor.copy(alpha = 0.65f),
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (value.isEmpty()) {
+                                Text(
+                                    text = placeholder,
+                                    style = TextStyle(
+                                        color = placeholderColor,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Normal
+                                    ),
+                                    maxLines = effectiveMaxLines
+                                )
+                            }
+                            innerTextField()
+                        }
+
+                        if (effectiveTrailingIcon != null) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = effectiveTrailingIcon,
+                                contentDescription = when {
+                                    !isPassword -> null
+                                    isPasswordVisible -> "Nascondi password"
+                                    else -> "Mostra password"
+                                },
+                                tint = if (isFocused) primaryColor else contentColor.copy(alpha = 0.60f),
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .let { iconModifier ->
+                                        if (effectiveTrailingIconClick != null) {
+                                            iconModifier.clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClick = effectiveTrailingIconClick
+                                            )
+                                        } else {
+                                            iconModifier
+                                        }
+                                    }
                             )
                         }
-                        innerTextField()
-                    }
-
-                    if (effectiveTrailingIcon != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = effectiveTrailingIcon,
-                            contentDescription = when {
-                                !isPassword -> null
-                                isPasswordVisible -> "Nascondi password"
-                                else -> "Mostra password"
-                            },
-                            tint = if (isFocused) primaryColor else contentColor.copy(alpha = 0.60f),
-                            modifier = Modifier
-                                .size(20.dp)
-                                .let { iconModifier ->
-                                    if (effectiveTrailingIconClick != null) {
-                                        iconModifier.clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null,
-                                            onClick = effectiveTrailingIconClick
-                                        )
-                                    } else {
-                                        iconModifier
-                                    }
-                                }
-                        )
-                    } else if (value.isNotEmpty() && !readOnly) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = LiquidIcons.Close,
-                            contentDescription = "Cancella",
-                            tint = contentColor.copy(alpha = 0.60f),
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = { onValueChange("") }
-                                )
-                        )
                     }
                 }
-            }
+            )
+
+            LiquidSplitClearButton(
+                visible = value.isNotEmpty() && !readOnly && enabled,
+                onClick = { onValueChange("") },
+                size = minHeight,
+                shape = shape,
+                backdropState = effectiveBackdrop,
+                enabled = enabled
+            )
         }
-    )
+    }
 }

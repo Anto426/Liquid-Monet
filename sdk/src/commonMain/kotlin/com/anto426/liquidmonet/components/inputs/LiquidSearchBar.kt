@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +31,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -46,6 +49,8 @@ import com.anto426.liquidmonet.theme.LiquidGlassTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.shapes.Capsule
+import kotlin.math.PI
+import kotlin.math.sin
 
 /**
  * LiquidSearchBar - Optical Liquid Glass Search Bar.
@@ -83,89 +88,100 @@ fun LiquidSearchBar(
         label = "searchBorderColor"
     )
 
+    // Fluid recoil on the main capsule as the water drop separates
+    val dropletSeparating = query.isNotEmpty()
+    val recoilProgress by animateFloatAsState(
+        targetValue = if (dropletSeparating) 1f else 0f,
+        animationSpec = LiquidMotion.spring(
+            performance = performance,
+            dampingRatio = 0.56f,
+            stiffness = 320f
+        ),
+        label = "searchBarRecoil"
+    )
+    val recoilWave = sin(recoilProgress.coerceIn(0f, 1f) * PI).toFloat()
+    val mainBodySquashX = 1f - recoilWave * 0.018f
+    val mainBodyStretchY = 1f + recoilWave * 0.012f
+
     val effectiveBackdrop = resolveLiquidGlassBackdrop(backdropState)
 
-    BasicTextField(
-        value = query,
-        onValueChange = onQueryChange,
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .liquidGlass(
-                backdrop = effectiveBackdrop,
-                shape = shape,
-                role = LiquidGlassRole.Control
-            )
-            .border(width = 1.dp, color = animatedBorderColor, shape = shape),
-        enabled = enabled,
-        singleLine = true,
-        textStyle = TextStyle(
-            color = contentColor,
-            fontSize = 15.5.sp,
-            fontWeight = FontWeight.Medium
-        ),
-        cursorBrush = SolidColor(primaryColor),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { onSearch?.invoke(query) }),
-        interactionSource = interactionSource,
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Icon(
-                    imageVector = LiquidIcons.Search,
-                    contentDescription = "Cerca",
-                    tint = if (isFocused) primaryColor else contentColor.copy(alpha = 0.70f),
-                    modifier = Modifier.size(22.dp)
+            .height(54.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier
+                .weight(1f)
+                .height(54.dp)
+                .graphicsLayer {
+                    scaleX = mainBodySquashX
+                    scaleY = mainBodyStretchY
+                    transformOrigin = TransformOrigin(1f, 0.5f) // Pinches slightly at right contact point as the drop detaches
+                }
+                .liquidGlass(
+                    backdrop = effectiveBackdrop,
+                    shape = shape,
+                    role = LiquidGlassRole.Control
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
+                .border(width = 1.dp, color = animatedBorderColor, shape = shape),
+            enabled = enabled,
+            singleLine = true,
+            textStyle = TextStyle(
+                color = contentColor,
+                fontSize = 15.5.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            cursorBrush = SolidColor(primaryColor),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearch?.invoke(query) }),
+            interactionSource = interactionSource,
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    if (query.isEmpty()) {
-                        Text(
-                            text = placeholderText,
-                            style = TextStyle(
-                                color = placeholderColor,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    innerTextField()
-                }
-                AnimatedVisibility(
-                    visible = query.isNotEmpty() || onClose != null,
-                    enter = fadeIn(LiquidMotion.tween(performance, 160)),
-                    exit = fadeOut(LiquidMotion.tween(performance, 140))
-                ) {
-                    IconButton(
-                        onClick = {
-                            if (query.isNotEmpty()) {
-                                onQueryChange("")
-                            } else {
-                                onClose?.invoke()
-                            }
-                        },
-                        modifier = Modifier.size(36.dp)
+                    Icon(
+                        imageVector = LiquidIcons.Search,
+                        contentDescription = "Cerca",
+                        tint = if (isFocused) primaryColor else contentColor.copy(alpha = 0.70f),
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        Icon(
-                            imageVector = LiquidIcons.Close,
-                            contentDescription = if (query.isNotEmpty()) "Cancella" else "Chiudi",
-                            tint = contentColor.copy(alpha = 0.70f),
-                            modifier = Modifier.size(18.dp)
-                        )
+                        if (query.isEmpty()) {
+                            Text(
+                                text = placeholderText,
+                                style = TextStyle(
+                                    color = placeholderColor,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Normal
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        innerTextField()
                     }
                 }
-
             }
-        }
-    )
+        )
+
+        LiquidSplitClearButton(
+            visible = query.isNotEmpty(),
+            onClick = { onQueryChange("") },
+            size = 54.dp,
+            backdropState = effectiveBackdrop,
+            enabled = enabled
+        )
+    }
 }
