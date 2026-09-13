@@ -50,8 +50,8 @@ object LiquidGlassDefaults {
             focusIndicator = colorScheme.primary.copy(alpha = if (isLight) 0.52f else 0.40f),
             outline = colorScheme.outlineVariant.copy(alpha = if (isLight) 0.82f else 0.72f),
             scrim = Color.Black.copy(alpha = if (isLight) 0.22f else 0.32f),
-            success = colorScheme.tertiary,
-            warning = colorScheme.secondary,
+            success = if (isLight) Color(0xFF1E824C) else Color(0xFF4EE49B),
+            warning = if (isLight) Color(0xFFD97706) else Color(0xFFFFB039),
             error = colorScheme.error
         )
     }
