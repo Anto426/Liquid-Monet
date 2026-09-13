@@ -100,3 +100,21 @@ new calibrations, including Apple A/M chips on iOS. Native iOS probes use Skia o
 completion; unavailable probes retain an explicitly labeled hardware estimate. `LiquidCard` uses
 a modestly lighter material; other surfaces retain their styles.
 Run `python scripts/check_sdk_structure.py` to check the complete source layout.
+
+## Build indipendente e consumo dei binari
+
+Questo repository compila e pubblica lo SDK autonomamente; UniApp non include i suoi sorgenti.
+La toolchain richiede JDK 21, Gradle 9.7.1, Kotlin 2.4.20 e AGP 9.4.0 (Android API 37).
+La versione Maven della pubblicazione è `1.0.<github.run_number>`, oppure il valore esplicito
+passato con `-PsdkVersion=<versione>`. Una Release già pubblicata non viene sovrascritta.
+
+Verifica locale e pubblicazione nel solo repository Maven di staging:
+
+```sh
+./gradlew -PsdkVersion=1.0.0-local :sdk:testAndroidHostTest :sdk:publishAllPublicationsToStagingRepository
+```
+
+Il pacchetto contiene Android AAR, metadati Maven/KMP e KLIB per iOS arm64 e simulator arm64.
+Il collegamento del framework e i test sul simulatore richiedono macOS/Xcode.
+Dopo la pubblicazione di una nuova Release, il progetto consumatore deve aggiornare esplicitamente
+la versione della dipendenza; le modifiche ai sorgenti locali non cambiano i binari già pubblicati.
