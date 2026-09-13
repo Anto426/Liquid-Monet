@@ -12,10 +12,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.anto426.liquidmonet.components.internal.LiquidHapticCue
+import com.anto426.liquidmonet.components.internal.performLiquidHaptic
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
@@ -81,8 +88,10 @@ fun LiquidSwipeToDismissBox(
     val resolvedRightActionColor = if (rightActionColor.isSpecified) rightActionColor else LiquidGlassTheme.colors.error
 
     val density = LocalDensity.current
+    val hapticFeedback = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val offsetAnim = remember { Animatable(0f) }
+    var hasTriggeredHaptic by remember { mutableStateOf(false) }
 
     val thresholdPx = with(density) { threshold.toPx() }
     val maxDragPx = with(density) { maxDrag.toPx() }
@@ -90,6 +99,15 @@ fun LiquidSwipeToDismissBox(
     val currentOffset = offsetAnim.value
     val dragFraction = if (thresholdPx > 0) (abs(currentOffset) / thresholdPx).fastCoerceIn(0f, 1.6f) else 0f
     val isPastThreshold = abs(currentOffset) >= thresholdPx
+
+    LaunchedEffect(isPastThreshold) {
+        if (isPastThreshold && !hasTriggeredHaptic) {
+            hapticFeedback.performLiquidHaptic(LiquidHapticCue.Threshold)
+            hasTriggeredHaptic = true
+        } else if (!isPastThreshold) {
+            hasTriggeredHaptic = false
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -232,15 +250,13 @@ fun LiquidSwipeToDismissBox(
                         )
                         drawPath(
                             path = specularPath,
-                            color = contentColorFor(actionColor).copy(
+                            color = Color.White.copy(
                                 alpha = if (isPastThreshold) 0.85f
                                 else 0.45f * dragFraction.coerceAtMost(1f)
                             ),
                             style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.6.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                         )
                     }
-                    .padding(horizontal = 20.dp),
-                contentAlignment = if (isSwipingRight) Alignment.CenterStart else Alignment.CenterEnd
             ) {
                 // Free Floating Optical Liquid Glass Sphere with Snell Refraction
                 val basePodScale = lerp(0.65f, if (isPastThreshold) 1.28f else 1.08f, dragFraction.fastCoerceIn(0f, 1f))
@@ -249,7 +265,15 @@ fun LiquidSwipeToDismissBox(
                 Box(
                     modifier = Modifier
                         .size(52.dp)
+                        .align(Alignment.CenterStart)
                         .graphicsLayer {
+                            val podRadiusPx = 26.dp.toPx()
+                            val targetCenterX = if (isSwipingRight) {
+                                (32.dp.toPx() + (abs(currentOffset) * 0.42f)).coerceAtMost(size.width * 0.45f)
+                            } else {
+                                (size.width - 32.dp.toPx() - (abs(currentOffset) * 0.42f)).coerceAtLeast(size.width * 0.55f)
+                            }
+                            translationX = targetCenterX - podRadiusPx
                             scaleX = basePodScale
                             scaleY = basePodScale
                             alpha = podAlpha
@@ -258,14 +282,14 @@ fun LiquidSwipeToDismissBox(
                             backdrop = effectiveBackdrop,
                             shape = Capsule(),
                             role = LiquidGlassRole.Control,
-                            containerColor = if (isPastThreshold) actionColor.copy(alpha = 0.92f) else actionColor.copy(alpha = 0.30f)
+                            containerColor = if (isPastThreshold) actionColor.copy(alpha = 0.92f) else actionColor.copy(alpha = 0.35f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = actionIcon,
                         contentDescription = null,
-                        tint = contentColorFor(actionColor),
+                        tint = Color.White,
                         modifier = Modifier
                             .size(26.dp)
                             .graphicsLayer {
@@ -298,13 +322,19 @@ fun LiquidSwipeToDismissBox(
                     shape = shape,
                     role = LiquidGlassRole.Surface
                 )
-                .pointerInput(onDismissLeft, onDismissRight, thresholdPx, maxDragPx) {
+                .pointerInput(thresholdPx, maxDragPx, onDismissLeft, onDismissRight) {
                     detectHorizontalDragGestures(
+                        onDragStart = {
+                            hasTriggeredHaptic = false
+                        },
                         onDragEnd = {
+                            val finalOffset = offsetAnim.value
                             coroutineScope.launch {
-                                if (currentOffset < -thresholdPx && onDismissLeft != null) {
+                                if (finalOffset < -thresholdPx && onDismissLeft != null) {
+                                    hapticFeedback.performLiquidHaptic(LiquidHapticCue.Action)
                                     onDismissLeft()
-                                } else if (currentOffset > thresholdPx && onDismissRight != null) {
+                                } else if (finalOffset > thresholdPx && onDismissRight != null) {
+                                    hapticFeedback.performLiquidHaptic(LiquidHapticCue.Action)
                                     onDismissRight()
                                 }
                                 offsetAnim.animateTo(
@@ -323,21 +353,22 @@ fun LiquidSwipeToDismissBox(
                         },
                         onHorizontalDrag = { change, dragAmount ->
                             change.consume()
+                            val current = offsetAnim.value
+                            val allowedAmount = when {
+                                dragAmount > 0 && onDismissRight == null && current >= 0 -> dragAmount * 0.10f
+                                dragAmount < 0 && onDismissLeft == null && current <= 0 -> dragAmount * 0.10f
+                                else -> dragAmount
+                            }
+                            val newRaw = current + allowedAmount
+                            // Continuous asymptotic viscous rubber-banding resistance
+                            val clamped = if (abs(newRaw) > thresholdPx) {
+                                val excess = abs(newRaw) - thresholdPx
+                                val damped = (maxDragPx - thresholdPx) * (1f - exp(-excess / (maxDragPx * 0.75f)))
+                                newRaw.sign * (thresholdPx + damped)
+                            } else {
+                                newRaw
+                            }
                             coroutineScope.launch {
-                                val allowedAmount = when {
-                                    dragAmount > 0 && onDismissRight == null && offsetAnim.value >= 0 -> dragAmount * 0.10f
-                                    dragAmount < 0 && onDismissLeft == null && offsetAnim.value <= 0 -> dragAmount * 0.10f
-                                    else -> dragAmount
-                                }
-                                val newRaw = offsetAnim.value + allowedAmount
-                                // Continuous asymptotic viscous rubber-banding resistance
-                                val clamped = if (abs(newRaw) > thresholdPx) {
-                                    val excess = abs(newRaw) - thresholdPx
-                                    val damped = (maxDragPx - thresholdPx) * (1f - exp(-excess / (maxDragPx * 0.75f)))
-                                    newRaw.sign * (thresholdPx + damped)
-                                } else {
-                                    newRaw
-                                }
                                 offsetAnim.snapTo(clamped)
                             }
                         }
