@@ -63,7 +63,7 @@ fun LiquidLazyRow(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,
     horizontalArrangement: Arrangement.Horizontal? = null,
-    verticalAlignment: Alignment.Vertical = Alignment.Top,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     userScrollEnabled: Boolean = true,
     overflowPadding: Dp = LiquidLazyDefaults.OverflowPadding,
     content: LazyListScope.() -> Unit
