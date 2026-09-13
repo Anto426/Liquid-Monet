@@ -10,6 +10,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.ui.graphics.TransformOrigin
+import kotlin.math.PI
 import kotlin.math.sin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -103,7 +104,7 @@ fun LiquidAccordionItem(
     )
 
     // Fluid volume conservation: dynamic squash & stretch like the navbar droplet
-    val bubbleDeformation = sin(expansionProgress.coerceIn(0f, 1f) * Math.PI.toFloat())
+    val bubbleDeformation = sin(expansionProgress.coerceIn(0f, 1f) * PI.toFloat())
     val bubbleSquashX = 1f - (bubbleDeformation * 0.016f)
     val bubbleStretchY = 1f + (bubbleDeformation * 0.022f)
     val podPulseScale = 1f + (bubbleDeformation * 0.08f)
