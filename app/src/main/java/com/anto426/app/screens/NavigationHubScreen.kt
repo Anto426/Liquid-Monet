@@ -1,18 +1,24 @@
 package com.anto426.app.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.anto426.liquidmonet.theme.LiquidGlassTheme
+import com.kyant.shapes.RoundedRectangle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -382,18 +388,59 @@ fun NavigationHubScreen(
                         LiquidLazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(220.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                .height(240.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             items(
                                 count = 5,
                                 key = { index -> "vertical-footer-demo-$index" }
                             ) { index ->
                                 LiquidCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(68.dp),
                                     backdropState = backdropState,
                                     contentPadding = 12.dp
                                 ) {
-                                    Text(text = "Elemento verticale ${index + 1}")
+                                    Row(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                                                    shape = RoundedRectangle(12.dp)
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = when (index % 4) {
+                                                    0 -> LiquidIcons.Star
+                                                    1 -> LiquidIcons.Settings
+                                                    2 -> LiquidIcons.Check
+                                                    else -> LiquidIcons.Info
+                                                },
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "Elemento verticale ${index + 1}",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Text(
+                                                text = "Modulo liquido con fisica elastica",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = LiquidGlassTheme.colors.secondaryContent
+                                            )
+                                        }
+                                    }
                                 }
                             }
                             item(key = "vertical-liquid-footer") {
@@ -404,7 +451,11 @@ fun NavigationHubScreen(
                                     endLabel = "Hai raggiunto la fine",
                                     errorLabel = "Caricamento non riuscito",
                                     retryLabel = "Riprova",
-                                    onRetry = { footerState = LiquidLazyFooterState.Loading }
+                                    onRetry = { footerState = LiquidLazyFooterState.Loading },
+                                    backdrop = backdropState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(68.dp)
                                 )
                             }
                         }
@@ -416,19 +467,58 @@ fun NavigationHubScreen(
                         LiquidLazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(112.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                .height(124.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             items(
                                 count = 4,
                                 key = { index -> "horizontal-footer-demo-$index" }
                             ) { index ->
                                 LiquidCard(
-                                    modifier = Modifier.width(164.dp),
+                                    modifier = Modifier
+                                        .width(164.dp)
+                                        .height(112.dp),
                                     backdropState = backdropState,
-                                    contentPadding = 12.dp
+                                    contentPadding = 14.dp
                                 ) {
-                                    Text(text = "Elemento orizzontale ${index + 1}")
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(34.dp)
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                                                    shape = RoundedRectangle(10.dp)
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = when (index % 4) {
+                                                    0 -> LiquidIcons.Palette
+                                                    1 -> LiquidIcons.Star
+                                                    2 -> LiquidIcons.Analytics
+                                                    else -> LiquidIcons.Settings
+                                                },
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                        Column {
+                                            Text(
+                                                text = "Elemento ${index + 1}",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Text(
+                                                text = "Card fluida Monet",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = LiquidGlassTheme.colors.secondaryContent
+                                            )
+                                        }
+                                    }
                                 }
                             }
                             item(key = "horizontal-liquid-footer") {
@@ -440,7 +530,10 @@ fun NavigationHubScreen(
                                     errorLabel = "Errore",
                                     retryLabel = "Riprova",
                                     onRetry = { footerState = LiquidLazyFooterState.Loading },
-                                    modifier = Modifier.height(112.dp)
+                                    backdrop = backdropState,
+                                    modifier = Modifier
+                                        .width(164.dp)
+                                        .height(112.dp)
                                 )
                             }
                         }

@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.selection.LiquidCheckbox
@@ -58,7 +57,7 @@ fun InputsScreen(
 
     var stepperVal by remember { mutableIntStateOf(4) }
     var otpCode by remember { mutableStateOf("4268") }
-    var selectedDropdownOption by remember { mutableStateOf("Opzione Zaffiro") }
+    var selectedDropdownOption by remember { mutableStateOf("Opzione Standard") }
 
     // Date & Time pickers
     var isDatePickerOpen by remember { mutableStateOf(false) }
@@ -73,7 +72,8 @@ fun InputsScreen(
     var radioVal by remember { mutableIntStateOf(0) }
     var sliderVal by remember { mutableFloatStateOf(0.60f) }
     var rangeSliderVal by remember { mutableStateOf(0.20f..0.80f) }
-    var colorPickerVal by remember { mutableStateOf(Color(0xFF2979FF)) }
+    val themePrimary = MaterialTheme.colorScheme.primary
+    var colorPickerVal by remember(themePrimary) { mutableStateOf(themePrimary) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -163,10 +163,10 @@ fun InputsScreen(
                 )
 
                 LiquidSelect(
-                    items = listOf("Opzione Zaffiro", "Opzione Smeraldo", "Opzione Tramonto", "Opzione Violetto"),
+                    items = listOf("Opzione Standard", "Opzione Avanzata", "Opzione Minimal", "Opzione Pro"),
                     selectedItem = selectedDropdownOption,
                     onItemSelected = { selectedDropdownOption = it },
-                    label = "Tema di Sistema",
+                    label = "Selettore Opzioni",
                     leadingIcon = LiquidIcons.Star,
                     backdropState = backdropState
                 )

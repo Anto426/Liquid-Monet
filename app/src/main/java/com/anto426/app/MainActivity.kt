@@ -51,8 +51,6 @@ import com.anto426.liquidmonet.glass.LiquidGlassScene
 import com.anto426.liquidmonet.glass.LiquidBackground
 import com.anto426.liquidmonet.icons.LiquidIcons
 import com.anto426.liquidmonet.theme.LiquidMonetTheme
-import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
-import com.anto426.liquidmonet.theme.monet.LiquidMonetSeed
 import com.anto426.app.screens.ControlsInputHubScreen
 import com.anto426.app.screens.ModalsFeedbackHubScreen
 import com.anto426.app.screens.NavigationHubScreen
@@ -64,25 +62,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            var selectedPresetIndex by remember { mutableIntStateOf(0) }
             var sliderVal by remember { mutableFloatStateOf(0.65f) }
             val systemDark = isSystemInDarkTheme()
             var isDarkTheme by remember { mutableStateOf<Boolean?>(null) }
             val isDark = isDarkTheme ?: systemDark
             var backgroundSpeed by remember { mutableFloatStateOf(1.0f) }
             var backgroundIntensity by remember { mutableFloatStateOf(1.0f) }
-
-            val currentSeed: LiquidMonetSeed = when (selectedPresetIndex) {
-                0 -> LiquidMonetPresets.Sapphire
-                1 -> LiquidMonetPresets.Emerald
-                2 -> LiquidMonetPresets.Sunset
-                else -> LiquidMonetPresets.Violet
-            }
+            var useSystemDynamicColor by remember { mutableStateOf(true) }
 
             LiquidMonetTheme(
                 darkTheme = isDark,
-                useMonetEngine = true,
-                customMonetSeed = currentSeed,
+                useMonetEngine = useSystemDynamicColor,
                 liquidIntensity = sliderVal,
                 maximumGlassQuality = LiquidGlassQualityTier.ULTRA
             ) {
@@ -133,7 +123,6 @@ class MainActivity : ComponentActivity() {
                         LiquidBackground(
                             effect = backgroundEffects[selectedEffectIndex],
                             isDark = isDark,
-                            monetSeed = currentSeed,
                             speedFactor = backgroundSpeed,
                             intensity = backgroundIntensity
                         )
@@ -274,8 +263,6 @@ class MainActivity : ComponentActivity() {
 
                                     when (currentTab) {
                                             0 -> StudioHubScreen(
-                                                selectedPresetIndex = selectedPresetIndex,
-                                                onSelectPreset = { selectedPresetIndex = it },
                                                 sliderVal = sliderVal,
                                                 onSliderChange = { sliderVal = it },
                                                 selectedEffect = backgroundEffects[selectedEffectIndex],
@@ -286,7 +273,9 @@ class MainActivity : ComponentActivity() {
                                                 backgroundSpeed = backgroundSpeed,
                                                 onSpeedChange = { backgroundSpeed = it },
                                                 backgroundIntensity = backgroundIntensity,
-                                                onIntensityChange = { backgroundIntensity = it }
+                                                onIntensityChange = { backgroundIntensity = it },
+                                                useDynamicColor = useSystemDynamicColor,
+                                                onToggleDynamicColor = { useSystemDynamicColor = it }
                                             )
                                             1 -> ControlsInputHubScreen(
                                                 backdropState = backdropState

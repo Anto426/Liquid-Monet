@@ -25,13 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anto426.liquidmonet.components.cards.LiquidCard
 import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
+import com.anto426.liquidmonet.components.cards.LiquidControlCenterCompactTile
+import com.anto426.liquidmonet.components.cards.LiquidControlCenterSlider
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
 import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.navigation.LiquidNavigationItem
 import com.anto426.liquidmonet.components.navigation.LiquidTabBar
 import com.anto426.liquidmonet.components.cards.LiquidMediaController
-import com.anto426.liquidmonet.components.pickers.LiquidPaletteOption
-import com.anto426.liquidmonet.components.pickers.LiquidPaletteSelector
 import com.anto426.liquidmonet.components.selection.LiquidBackgroundSelector
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.selection.LiquidSwitch
@@ -39,15 +39,12 @@ import com.anto426.liquidmonet.components.cards.LiquidStatusCard
 import com.anto426.liquidmonet.components.cards.LiquidStatusType
 import com.anto426.liquidmonet.glass.LiquidBackgroundEffect
 import com.anto426.liquidmonet.icons.LiquidIcons
-import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.kyant.backdrop.Backdrop
 import java.util.Locale
 import kotlinx.coroutines.delay
 
 @Composable
 fun StudioHubScreen(
-    selectedPresetIndex: Int,
-    onSelectPreset: (Int) -> Unit,
     sliderVal: Float,
     onSliderChange: (Float) -> Unit,
     backdropState: Backdrop,
@@ -59,7 +56,9 @@ fun StudioHubScreen(
     backgroundSpeed: Float = 1.0f,
     onSpeedChange: (Float) -> Unit = {},
     backgroundIntensity: Float = 1.0f,
-    onIntensityChange: (Float) -> Unit = {}
+    onIntensityChange: (Float) -> Unit = {},
+    useDynamicColor: Boolean = true,
+    onToggleDynamicColor: (Boolean) -> Unit = {}
 ) {
     var currentSubTab by remember { mutableIntStateOf(0) }
     val subTabs = listOf(
@@ -72,6 +71,10 @@ fun StudioHubScreen(
     var bluetoothActive by remember { mutableStateOf(false) }
     var airplaneActive by remember { mutableStateOf(false) }
     var torchActive by remember { mutableStateOf(false) }
+    var hotspotActive by remember { mutableStateOf(false) }
+    var dndActive by remember { mutableStateOf(false) }
+    var brightnessLevel by remember { mutableFloatStateOf(0.75f) }
+    var volumeLevel by remember { mutableFloatStateOf(0.60f) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -91,25 +94,29 @@ fun StudioHubScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         LiquidSectionHeader(
                             title = "Personalizzazione Cromatica Monet",
-                            subtitle = "Scegli palette dinamica, sfondo e intensità dell'ottica di vetro."
+                            subtitle = "Colori dinamici di sistema, sfondo e intensità dell'ottica di vetro."
                         )
                         LiquidCard(backdropState = backdropState) {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                Text(
-                                    text = "Armonie Cromatiche di Sistema",
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                )
-                                LiquidPaletteSelector(
-                                    options = listOf(
-                                        LiquidPaletteOption("Sapphire", LiquidMonetPresets.Sapphire.lightPrimary),
-                                        LiquidPaletteOption("Emerald", LiquidMonetPresets.Emerald.lightPrimary),
-                                        LiquidPaletteOption("Sunset", LiquidMonetPresets.Sunset.lightPrimary),
-                                        LiquidPaletteOption("Violet", LiquidMonetPresets.Violet.lightPrimary)
-                                    ),
-                                    selectedIndex = selectedPresetIndex,
-                                    onSelectIndex = onSelectPreset,
-                                    backdropState = backdropState
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text("Colori Dinamici da Wallpaper", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                                        Text(
+                                            if (useDynamicColor) "Armonizzazione attiva con lo sfondo del dispositivo Android" else "Colori dinamici disattivati (modalità neutra)",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    LiquidSwitch(
+                                        checked = useDynamicColor,
+                                        onCheckedChange = onToggleDynamicColor,
+                                        backdropState = backdropState
+                                    )
+                                }
 
                                 LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
@@ -225,40 +232,93 @@ fun StudioHubScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         LiquidSectionHeader(
                             title = "Control Center Rapido",
-                            subtitle = "Attiva le funzioni principali con controlli compatti e risposta immediata."
+                            subtitle = "Connettività a 2 colonne, griglia azioni rapide a bolla e cursori ottici in vetro liquido."
                         )
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
+                        // 1. Gruppo Connettività Principale (2 colonne affiancate)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             LiquidControlCenterTile(
                                 title = "Rete Wi-Fi",
-                                subtitle = if (wifiActive) "Connesso • Liquid-5G" else "Disattivato",
+                                subtitle = if (wifiActive) "Liquid-5G" else "Spento",
                                 icon = LiquidIcons.Phone,
                                 active = wifiActive,
                                 onClick = { wifiActive = !wifiActive },
-                                backdropState = backdropState
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
                             )
                             LiquidControlCenterTile(
                                 title = "Bluetooth",
-                                subtitle = if (bluetoothActive) "Dispositivi accoppiati" else "Non attivo",
+                                subtitle = if (bluetoothActive) "Dispositivi" else "Non attivo",
                                 icon = LiquidIcons.Settings,
                                 active = bluetoothActive,
                                 onClick = { bluetoothActive = !bluetoothActive },
-                                backdropState = backdropState
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
                             )
-                            LiquidControlCenterTile(
-                                title = "Modalità Aereo",
-                                subtitle = if (airplaneActive) "Tutte le radio disattivate" else "Connessioni attive",
-                                icon = LiquidIcons.Info,
-                                active = airplaneActive,
-                                onClick = { airplaneActive = !airplaneActive },
-                                backdropState = backdropState
-                            )
-                            LiquidControlCenterTile(
-                                title = "Torcia Prismatica",
-                                subtitle = if (torchActive) "Luce attiva al 100%" else "Spenta",
+                        }
+
+                        // 2. Griglia Azioni Rapide (4 Tessere Compatte a Bolla)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            LiquidControlCenterCompactTile(
+                                title = "Torcia",
                                 icon = LiquidIcons.Star,
                                 active = torchActive,
                                 onClick = { torchActive = !torchActive },
-                                backdropState = backdropState
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
+                            )
+                            LiquidControlCenterCompactTile(
+                                title = "Aereo",
+                                icon = LiquidIcons.Info,
+                                active = airplaneActive,
+                                onClick = { airplaneActive = !airplaneActive },
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
+                            )
+                            LiquidControlCenterCompactTile(
+                                title = "Hotspot",
+                                icon = LiquidIcons.Share,
+                                active = hotspotActive,
+                                onClick = { hotspotActive = !hotspotActive },
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
+                            )
+                            LiquidControlCenterCompactTile(
+                                title = "Non Disturbare",
+                                icon = LiquidIcons.Notifications,
+                                active = dndActive,
+                                onClick = { dndActive = !dndActive },
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        // 3. Cursori Capsulari Ottici (Luminosità & Volume)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            LiquidControlCenterSlider(
+                                value = brightnessLevel,
+                                onValueChange = { brightnessLevel = it },
+                                icon = LiquidIcons.Star,
+                                title = "Luminosità",
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
+                            )
+                            LiquidControlCenterSlider(
+                                value = volumeLevel,
+                                onValueChange = { volumeLevel = it },
+                                icon = LiquidIcons.PlayArrow,
+                                title = "Volume",
+                                backdropState = backdropState,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }

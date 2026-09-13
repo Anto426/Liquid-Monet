@@ -73,7 +73,7 @@ fun ControlsInputHubScreen(
     var phoneVal by remember { mutableStateOf("+39 345 123 4567") }
     var numberVal by remember { mutableStateOf("42.50") }
     var notesVal by remember { mutableStateOf("Interfaccia realizzata con ottica rifrattiva Snell AGSL e design system unificato.") }
-    var selectedDropdownOption by remember { mutableStateOf("Opzione Zaffiro") }
+    var selectedDropdownOption by remember { mutableStateOf("Opzione Standard") }
 
     // Stepper & OTP
     var stepperVal by remember { mutableIntStateOf(4) }
@@ -93,7 +93,8 @@ fun ControlsInputHubScreen(
     var radioVal by remember { mutableIntStateOf(0) }
     var sliderVal by remember { mutableFloatStateOf(0.60f) }
     var rangeSliderVal by remember { mutableStateOf(0.20f..0.80f) }
-    var colorPickerVal by remember { mutableStateOf(Color(0xFF2979FF)) }
+    val themePrimary = MaterialTheme.colorScheme.primary
+    var colorPickerVal by remember(themePrimary) { mutableStateOf(themePrimary) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -228,10 +229,10 @@ fun ControlsInputHubScreen(
                                     LiquidTimePickerField(selectedHour = selectedHour, selectedMinute = selectedMinute, onClick = { isTimePickerOpen = true }, backdropState = backdropState, modifier = Modifier.weight(1f))
                                 }
                                 LiquidSelect(
-                                    items = listOf("Opzione Zaffiro", "Opzione Smeraldo", "Opzione Tramonto", "Opzione Violetto"),
+                                    items = listOf("Opzione Standard", "Opzione Avanzata", "Opzione Minimal", "Opzione Pro"),
                                     selectedItem = selectedDropdownOption,
                                     onItemSelected = { selectedDropdownOption = it },
-                                    label = "Tema Dropdown",
+                                    label = "Selettore Opzioni",
                                     leadingIcon = LiquidIcons.Star,
                                     backdropState = backdropState
                                 )

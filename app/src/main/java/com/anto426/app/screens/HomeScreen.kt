@@ -23,20 +23,15 @@ import com.anto426.liquidmonet.components.cards.LiquidControlCenterTile
 import com.anto426.liquidmonet.components.display.LiquidHorizontalDivider
 import com.anto426.liquidmonet.components.display.LiquidSectionHeader
 import com.anto426.liquidmonet.components.cards.LiquidMediaController
-import com.anto426.liquidmonet.components.pickers.LiquidPaletteOption
-import com.anto426.liquidmonet.components.pickers.LiquidPaletteSelector
 import com.anto426.liquidmonet.components.selection.LiquidSlider
 import com.anto426.liquidmonet.components.cards.LiquidStatusCard
 import com.anto426.liquidmonet.components.cards.LiquidStatusType
 import com.anto426.liquidmonet.icons.LiquidIcons
-import com.anto426.liquidmonet.theme.monet.LiquidMonetPresets
 import com.kyant.backdrop.Backdrop
 import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
-    selectedPresetIndex: Int,
-    onSelectPreset: (Int) -> Unit,
     sliderVal: Float,
     onSliderChange: (Float) -> Unit,
     backdropState: Backdrop,
@@ -63,28 +58,10 @@ fun HomeScreen(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        // Monet Palette & Glass Intensity
-        LiquidSectionHeader("Personalizzazione & Ottica Vetro")
+        // Glass Intensity
+        LiquidSectionHeader("Ottica Vetro Dinamica")
         LiquidCard(backdropState = backdropState) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text(
-                    text = "Armonie Cromatiche Monet",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                )
-                LiquidPaletteSelector(
-                    options = listOf(
-                        LiquidPaletteOption("Sapphire", LiquidMonetPresets.Sapphire.lightPrimary),
-                        LiquidPaletteOption("Emerald", LiquidMonetPresets.Emerald.lightPrimary),
-                        LiquidPaletteOption("Sunset", LiquidMonetPresets.Sunset.lightPrimary),
-                        LiquidPaletteOption("Violet", LiquidMonetPresets.Violet.lightPrimary)
-                    ),
-                    selectedIndex = selectedPresetIndex,
-                    onSelectIndex = onSelectPreset,
-                    backdropState = backdropState
-                )
-
-                LiquidHorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -119,22 +96,27 @@ fun HomeScreen(
 
         // Control Center
         LiquidSectionHeader("Control Center Rapido")
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
             LiquidControlCenterTile(
                 title = "Rete Wi-Fi",
-                subtitle = if (wifiActive) "Connesso • 5 GHz" else "Disattivato",
+                subtitle = if (wifiActive) "5 GHz" else "Spento",
                 icon = LiquidIcons.Phone,
                 active = wifiActive,
                 onClick = { wifiActive = !wifiActive },
-                backdropState = backdropState
+                backdropState = backdropState,
+                modifier = Modifier.weight(1f)
             )
             LiquidControlCenterTile(
                 title = "Bluetooth",
-                subtitle = if (bluetoothActive) "Dispositivi connessi" else "Non attivo",
+                subtitle = if (bluetoothActive) "Connesso" else "Spento",
                 icon = LiquidIcons.Settings,
                 active = bluetoothActive,
                 onClick = { bluetoothActive = !bluetoothActive },
-                backdropState = backdropState
+                backdropState = backdropState,
+                modifier = Modifier.weight(1f)
             )
         }
 
